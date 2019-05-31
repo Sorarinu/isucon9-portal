@@ -32,7 +32,5 @@ class Server(LogicalDeleteMixin, models.Model):
     private_ip = models.CharField("プライベートIPアドレス", max_length=100)
     private_network = models.CharField("プライベートネットワークアドレス", max_length=100)
 
-    benchmarker = models.ForeignKey(Benchmarker, verbose_name="ベンチマーカー", on_delete=models.PROTECT)
-
     def __str__(self):
         return self.hostname
