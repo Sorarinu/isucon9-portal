@@ -10,7 +10,7 @@ admin.site.register(User, UserAdmin)
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "owner", "is_active"]
+    list_display = ["id", "name", "owner", "is_active", "benchmarker"]
     list_filter = ["is_active"]
 
 admin.site.register(Team, TeamAdmin)
