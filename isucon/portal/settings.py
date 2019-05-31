@@ -39,8 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'isucon.portal',
     'isucon.portal.authentication',
-    'isucon.portal.resources',
-    'isucon.portal.history',
+    'isucon.portal.contest',
 ]
 
 MIDDLEWARE = [

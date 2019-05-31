@@ -1,8 +1,7 @@
 from django.test import TestCase
 
 from isucon.portal.authentication.models import User, Team
-from isucon.portal.resources.models import Benchmarker
-from isucon.portal.history.models import ScoreHistory
+from isucon.portal.contest.models import Benchmarker, ScoreHistory
 
 
 class ScoreHistoryTest(TestCase):
