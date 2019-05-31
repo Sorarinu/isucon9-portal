@@ -12,12 +12,12 @@ class ScoreHistoryManager(models.Manager):
 
     def get_best_score(self, team):
         """指定チームのベストスコアを取得"""
-        return self.get_queryset_by_team(team).annotate(best_score=Max('score'))
+        return self.get_queryset_by_team(team).annotate(best_score=Max('score'))[0]
 
     def get_latest_score(self, team):
         """指定チームの最新スコアを取得"""
         # NOTE: orderingにより最新順に並んでいるので、LIMITで取れば良い
-        return self.get_queryset_by_team(team).limit(1)
+        return self.get_queryset_by_team(team).all()[0]
 
 
 class ScoreHistory(models.Model):
