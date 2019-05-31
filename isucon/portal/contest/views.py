@@ -6,3 +6,6 @@ def index(request):
 
 def dashboard(request):
     return render(request, "dashboard.html")
+
+def jobs(request):
+    return render(request, "jobs.html")
