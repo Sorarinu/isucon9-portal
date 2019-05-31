@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.resources',
+    'isucon.portal.history',
 ]
 
 MIDDLEWARE = [
