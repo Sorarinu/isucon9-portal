@@ -9,3 +9,6 @@ def dashboard(request):
 
 def jobs(request):
     return render(request, "jobs.html")
+
+def scores(request):
+    return render(request, "scores.html")
