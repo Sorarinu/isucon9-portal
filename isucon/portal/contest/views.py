@@ -12,3 +12,6 @@ def jobs(request):
 
 def scores(request):
     return render(request, "scores.html")
+
+def servers(request):
+    return render(request, "servers.html")
