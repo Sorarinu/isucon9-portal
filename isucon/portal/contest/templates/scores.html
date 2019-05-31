@@ -1,0 +1,65 @@
+{% extends "include/layout.html" %}
+
+{% block content %}
+<div class="column is-9">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/">ISUCON8</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Show All Scores</a></li>
+        </ul>
+    </nav>
+
+    {% include "include/team_header.html" %}
+
+    <section class="table-list">
+        <div class="card events-card">
+            <header class="card-header is-danger">
+                <p class="card-header-title">
+                    <span class="icon">
+                        <i class="fas fa-chart-area"></i>
+                    </span>
+                    <span>All Team Scores</span>
+                </p>
+            </header>
+            {% if is_last_spurt %}
+                <article class="message is-danger">
+                    <div class="message-body">
+                        <strong>残り1時間切ったのでみせられませぬぞ〜</strong>
+                    </div>
+                </article>
+            {% else %}
+            <div class="card-table">
+                <div class="content">
+                    <table class="table is-fullwidth is-striped">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Id</th>
+                                <th>Name</th>
+                                <th>Members</th>
+                                <th>LatestScore</th>
+                                <th>BestScore</th>
+                                <th>FinishTime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr {% if team.id == user.team.id %}class="is-selected"{% endif %}>
+                                <td class="has-text-right">{{ forloop.counter }}</td>
+                                <td class="has-text-right">{{ team.id }}</td>
+                                <td><: ellipsis($row.name, 30) :></td>
+                                <td class="has-text-right">{{ team.get_category_display %}</td>
+                                <td class="has-text-right">{{ team.score.latest_score|inctomma %}</td>
+                                <td class="has-text-right">{{ team.score.best_score|inctomma %}</td>
+                                <td>{{ team.score.updated_at|date:"H:i:s" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

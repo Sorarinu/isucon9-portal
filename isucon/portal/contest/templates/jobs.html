@@ -1,0 +1,56 @@
+{% extends "include/layout.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="column is-9">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/">ISUCON8</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Show All Jobs</a></li>
+        </ul>
+    </nav>
+
+    {% include "include/team_header.html" %}
+
+    <section class="table-list">
+        <div class="card events-card">
+            <header class="card-header is-dark">
+                <p class="card-header-title">
+                    <span class="icon">
+                        <i class="fas fa-list-alt"></i>
+                    </span>
+                    <span>Jobs</span>
+                </p>
+            </header>
+            <div class="card-table">
+                <div class="content">
+                    <table class="table is-fullwidth is-striped">
+                        <thead>
+                            <tr>
+                                <th>JobId</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>State</th>
+                                <th>UpdatedAt</th>
+                                <th>Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td class="has-text-right">{{ job.id }}</td>
+                                    <td class="has-text-right">{{ job.result_score|intcomma }}</td>
+                                    <td>{{ job.result_status }}</td>
+                                    <td>{{ job.state }}</td>
+                                    <td>{{ job.updated_at|date:"H:i:s" }}</td>
+                                    <td><a class="button is-small is-link" href="/jobs/{{ job.id }}">show</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
