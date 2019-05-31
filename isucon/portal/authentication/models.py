@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -20,3 +22,13 @@ class Team(LogicalDeleteMixin, models.Model):
 
     def __name__(self):
         return self.name
+
+    @property
+    def score(self):
+        # FIXME: this is a dummy
+        return {
+            "latest_score": 100,
+            "best_score": 2000,
+            "latest_status": "Dummy",
+            "updated_at": datetime.datetime.now()
+        }
