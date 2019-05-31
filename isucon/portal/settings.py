@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'isucon.portal',
     'isucon.portal.authentication',
+    'isucon.portal.contest',
     'isucon.portal.resources',
 ]
 
