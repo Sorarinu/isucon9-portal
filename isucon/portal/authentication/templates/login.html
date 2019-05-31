@@ -1,0 +1,53 @@
+{% extends "include/layout_simple.html" %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container has-text-centered">
+  <figure class="logo">
+    <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
+  </figure>
+  <div class="column is-4 is-offset-4">
+    {% if form.errors %}
+      <article class="message is-danger">
+        <div class="message-header">
+          <p>Oops!</p>
+        </div>
+        <div class="message-body">
+           <strong>Login FAILED!!</strong><br>
+        </div>
+      </article>
+    {% endif %}
+    <h3 class="title has-text-grey">Login</h3>
+    <p class="subtitle has-text-grey">Please login to proceed.</p>
+    <div class="box">
+      <form method="post">
+        {% csrf_token %}
+        <div class="field">
+          <p class="control has-icons-left has-icons-right">
+            <input class="input" type="text" name="username" placeholder="Username">
+            <span class="icon is-small is-left">
+              <i class="fas fa-id-card-alt"></i>
+            </span>
+          </p>
+        </div>
+
+        <div class="field">
+          <p class="control has-icons-left">
+            <input class="input" type="password" name="password" placeholder="Password">
+            <span class="icon is-small is-left">
+              <i class="fas fa-lock"></i>
+            </span>
+          </p>
+        </div>
+        <button class="button is-block is-info is-large is-fullwidth">Start Challenge!!</button>
+      </form>
+    </div>
+    <p class="has-text-grey">
+      <a href="#">Need Help?</a>
+    </p>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% load static %}<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title|default:"ISUCON8 Portal" }}</title>
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta http-equiv="Content-Script-Type" content="text/javascript">
+  <link rel="icon" type="image/png" href="{% static "img/isucon_icon.png" %}">
+  <link href="{% static "css/bulma.min.css" %}" rel="stylesheet" type="text/css">
+  <link href="{% static "css/fontawesome.css" %}" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+  <script src="{% static "js/jquery.min.js" %}"></script>
+  <script src="{% static "js/xsrf-token.js" %}"></script>
+  <link href="{% static "css/main.css" %}" rel="stylesheet" type="text/css" media="screen">
+  <script src="{% static "js/main.js" %}"></script>
+</head>
+<body class="is-simple-layout {% if is_admin %}is-admin{% endif %}">
+    <section class="hero is-fullheight">
+    <div class="hero-body">
+      {% block content %}{% endblock %}
+    </div>
+  </section>
+</body>
+</html>
