@@ -1,4 +1,5 @@
 {% extends "include/layout.html" %}
+{% load humanize %}
 
 {% block content %}
 <div class="column is-9">
@@ -35,16 +36,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            : for $jobs -> $row {
+                            {% for job in jobs %}
                                 <tr>
-                                    <td class="has-text-right"><: $row.id :></td>
-                                    <td class="has-text-right"><: $row.result_score | commify :></td>
-                                    <td><: $row.result_status :></td>
-                                    <td><: $row.state :></td>
-                                    <td><: $row.updated_at | unixtime2time :></td>
-                                    <td><a class="button is-small is-link" href="/jobs/<: $row.id :>">show</a></td>
+                                    <td class="has-text-right">{{ job.id }}</td>
+                                    <td class="has-text-right">{{ job.result_score|intcomma }}</td>
+                                    <td>{{ job.result_status }}</td>
+                                    <td>{{ job.state }}</td>
+                                    <td>{{ job.updated_at|date:"H:i:s" }}</td>
+                                    <td><a class="button is-small is-link" href="/jobs/{{ job.id }}">show</a></td>
                                 </tr>
-                            : }
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>

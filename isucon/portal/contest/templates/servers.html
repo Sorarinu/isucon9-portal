@@ -35,21 +35,21 @@
                         </thead>
                         <tbody>
                             <div class="control">
-                                : for $servers -> $row {
-                                : next if $row.is_bench_host
+                                {% for server in servers %}
                                 <tr>
                                     <td>
                                         <label class="radio">
-                                            <input type="radio" name="target" value="<: $row.global_ip :>" <: $row.is_target_host ? 'checked' : '' :>>
-                                            <: $row.hostname :>
+                                            <input type="radio" name="target" value="{{ server.id }}" />
+                                            {{ server.hostname }}
                                         </label>
                                     </td>
-                                    <td><: $row.password :></td>
-                                    <td><: $row.global_ip :></td>
-                                    <td><: $row.private_ip :></td>
-                                    <td><: $row.bench_ip :></td>
+                                    <td>
+                                    <td>{{ server.password }}</td>
+                                    <td>{{ server.global_ip }}</td>
+                                    <td>{{ server.private_ip }}</td>
+                                    <td>{{ server.bench_ip }}</td>
                                 </tr>
-                                : }
+                                {% endfor %}
                             </div>
                         </tbody>
                     </table>
