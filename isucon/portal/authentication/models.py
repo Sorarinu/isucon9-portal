@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 from isucon.portal.models import LogicalDeleteMixin
-from isucon.portal.resources.models import Benchmarker
 
 class User(AbstractUser):
     team = models.ForeignKey("Team", blank=True, null=True, on_delete=models.PROTECT)
@@ -18,7 +17,7 @@ class Team(LogicalDeleteMixin, models.Model):
     name = models.CharField("名前", max_length=100, unique=True)
     password = models.CharField("パスワード", max_length=100, unique=True)
 
-    benchmarker = models.ForeignKey(Benchmarker, verbose_name="ベンチマーカー", blank=True, null=True, on_delete=models.SET_NULL)
+    benchmarker = models.ForeignKey('contest.Benchmarker', verbose_name="ベンチマーカー", on_delete=models.PROTECT, null=True)
 
     def __name__(self):
         return self.name
