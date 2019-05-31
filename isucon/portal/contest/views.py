@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from isucon.portal.authentication.decorators import team_is_authenticated
 
@@ -41,6 +41,26 @@ def jobs(request):
         "jobs": jobs,
     })
     return render(request, "jobs.html", context)
+
+@team_is_authenticated
+def job_detail(request, pk):
+
+    # FIXME: Query
+    # job = get_object_or_404(Job.objcets.filter(team=user.team), pk=pk)
+    job = {
+        "id": pk,
+        "state": "dummy",
+    } # Dummy
+
+    context = get_base_context(request.user)
+
+    context.update({
+        "job": job,
+    })
+    return render(request, "job_detail.html", context)
+
+
+
 
 @team_is_authenticated
 def scores(request):
