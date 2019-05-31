@@ -8,11 +8,13 @@ from isucon.portal.authentication.models import Team
 class ScoreHistoryManager(models.Manager):
 
     def get_queryset_by_team(self, team):
-        return self.get_queryset().filter(team=team)
+        return self.get_queryset()\
+                   .filter(team=team, is_passed=True)
 
     def get_best_score(self, team):
         """指定チームのベストスコアを取得"""
-        return self.get_queryset_by_team(team).annotate(best_score=Max('score'))[0]
+        return self.get_queryset_by_team(team)\
+                   .annotate(best_score=Max('score'))[0]
 
     def get_latest_score(self, team):
         """指定チームの最新スコアを取得"""
