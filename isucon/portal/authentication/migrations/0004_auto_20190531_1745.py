@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='benchmarker',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='resources.Benchmarker', verbose_name='ベンチマーカー'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='contest.Benchmarker', verbose_name='ベンチマーカー'),
         ),
     ]
