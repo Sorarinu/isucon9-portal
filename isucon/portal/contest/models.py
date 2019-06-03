@@ -79,10 +79,17 @@ class BenchQueueManager(models.Manager):
     def dequeue(self):
         pass
 
+    def done(self):
+        pass
+
     def cancel(self):
         pass
 
     def abort(self):
+        pass
+
+    def is_duplicated(self, team):
+        """重複enqueue防止"""
         pass
 
 
@@ -106,6 +113,7 @@ class BenchQueue(models.Model):
         ('fail', 'fail'), # 失敗
     )
 
+    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
     node = models.CharField("ノード", max_length=100)
 
     # ターゲット情報
