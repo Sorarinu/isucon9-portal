@@ -29,6 +29,7 @@ class Server(LogicalDeleteMixin, models.Model):
     # 検討必要そうなのでまだ定義してない
     # FIXME: パスワード、鍵認証とかにすればいい気がしたのでまだ追加してない
 
+    team = models.Foreignkey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
     hostname = models.CharField("ホスト名", max_length=100, unique=True)
 
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
