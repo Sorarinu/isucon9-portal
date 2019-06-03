@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 from django.db.models import Max
 
@@ -60,6 +62,7 @@ class ScoreHistory(models.Model):
         ordering = ('-created_at',)
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, null=True)
+    bench_queue = models.ForeignKey('contest.BenchQueue', verbose_name="ベンチキュー", on_delete=models.PROTECT, null=True)
     score = models.IntegerField("得点")
     is_passed = models.BooleanField("正答フラグ", default=False)
 
@@ -67,3 +70,65 @@ class ScoreHistory(models.Model):
     updated_at = models.DateTimeField("最終更新日時", auto_now=True)
 
     objects = ScoreHistoryManager()
+
+class BenchQueueManager(models.Manager):
+
+    def enqueue(self):
+        pass
+
+    def dequeue(self):
+        pass
+
+    def cancel(self):
+        pass
+
+    def abort(self):
+        pass
+
+
+class BenchQueue(models.Model):
+    class Meta:
+        verbose_name = verbose_name_plural = "ベンチキュー"
+
+    # 進捗の選択肢
+    PROGRESS_CHOICES = (
+        ('waiting', 'waiting'), # 処理待ち
+        ('running', 'running'), # 処理中
+        ('done', 'done'), # 処理完了
+        ('aborted', 'aborted'), # 異常終了
+        ('canceled', 'canceled'), # 意図的なキャンセル
+    )
+
+    # 結果の選択肢
+    RESULT_CHOICES = (
+        ('unknown', 'unknown'), # 不明
+        ('success', 'success'), # 成功
+        ('fail', 'fail'), # 失敗
+    )
+
+    node = models.CharField("ノード", max_length=100)
+
+    # ターゲット情報
+    target_hostname = models.CharField("対象ホスト名", max_length=100)
+    target_ip = models.CharField("対象IPアドレス", max_length=100)
+
+    # Choice系
+    progress = models.IntegerField("進捗", choices=PROGRESS_CHOICES, default=1)
+    result = models.IntegerField("結果", choices=RESULT_CHOICES, default=1)
+
+    score = models.IntegerField("獲得スコア", default=0, null=False)
+
+    # ベタテキスト
+    result_raw = models.TextField("結果JSON")
+    log_raw = models.TextField("ログ文字列")
+
+    objects = BenchQueueManager()
+
+    @property
+    def is_finished(self):
+        return self.result in ['done', 'aborted', 'canceled']
+
+    @property
+    def result_json(self):
+        return json.loads(self.result_raw)
+
