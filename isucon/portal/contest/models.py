@@ -74,44 +74,96 @@ class ScoreHistory(models.Model):
 
 class BenchQueueManager(models.Manager):
 
-    def enqueue(self):
-        pass
+    def enqueue(self, team):
+        # 重複チェック
+        if self.is_duplicated(team):
+            return
 
-    def dequeue(self):
-        pass
+        # チームからサーバ一覧を得る
+        server = team.server
 
-    def done(self):
-        pass
+        # 追加
+        job = self.model(
+            team=team,
+            target_hostname=server.hostname,
+            target_ip=server.global_ip,
+        )
+        job.save(using=self._db)
 
-    def cancel(self):
-        pass
+    def dequeue(self, hostname):
+        job = self.get_queryset().filter(target_hostname=hostname, progress="waiting")[0]
 
-    def abort(self):
-        pass
+        # FIXME: ホストの負荷を考慮
+
+        # 状態を処理中にする
+        job.progress = "running"
+        job.save(using=self._db)
+
+        return job
+
+    def done(self, job_id, result_raw, log_raw):
+        # FIXME: team_id を取ってきて、存在チェック
+
+        # ベンチの更新
+        job = self.get_queryset().get(pk=job_id)
+        job.progress = BenchQueue.DONE
+        job.result_raw = result_raw
+        job.log_raw = log_raw
+
+        result_json = job.result_json
+        job.score = result_json['score']
+        if result_json['pass']:
+            job.result = BenchQueue.SUCCESS
+        else:
+            job.result = BenchQueue.FAIL
+
+        job.save(using=self._db)
+
+        # FIXME: スコア履歴更新
+
+    def abort(self, job_id, result_raw, log_raw):
+        job = self.get_queryset().get(pk=job_id)
+        job.progress = BenchQueue.ABORTED
+        job.result_raw = result_raw
+        job.log_raw = log_raw
+        job.save(using=self._db)
 
     def is_duplicated(self, team):
         """重複enqueue防止"""
-        pass
+        jobs = self.get_queryset().filter(team=team, progress__in=[
+            BenchQueue.WAITING,
+            BenchQueue.RUNNING,
+        ])
+        return len(jobs) > 0
 
 
 class BenchQueue(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "ベンチキュー"
+        ordering=('-created_at',)
 
     # 進捗の選択肢
+    WAITING = 'waiting'
+    RUNNING = 'running'
+    DONE = 'done'
+    ABORTED = 'aborted'
+    CANCELED = 'canceled'
     PROGRESS_CHOICES = (
-        ('waiting', 'waiting'), # 処理待ち
-        ('running', 'running'), # 処理中
-        ('done', 'done'), # 処理完了
-        ('aborted', 'aborted'), # 異常終了
-        ('canceled', 'canceled'), # 意図的なキャンセル
+        (WAITING, WAITING), # 処理待ち
+        (RUNNING, RUNNING), # 処理中
+        (DONE, DONE), # 処理完了
+        (ABORTED, ABORTED), # 異常終了
+        (CANCELED, CANCELED), # 意図的なキャンセル
     )
 
     # 結果の選択肢
+    UNKNOWN = 'unknown'
+    SUCCESS = 'success'
+    FAIL = 'fail'
     RESULT_CHOICES = (
-        ('unknown', 'unknown'), # 不明
-        ('success', 'success'), # 成功
-        ('fail', 'fail'), # 失敗
+        (UNKNOWN, UNKNOWN), # 不明
+        (SUCCESS, SUCCESS), # 成功
+        (FAIL, FAIL), # 失敗
     )
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
@@ -131,13 +183,25 @@ class BenchQueue(models.Model):
     result_raw = models.TextField("結果JSON")
     log_raw = models.TextField("ログ文字列")
 
+    # 日時
+    created_at = models.DateTimeField("作成日時", auto_now_add=True)
+    updated_at = models.DateTimeField("最終更新日時", auto_now=True)
+
     objects = BenchQueueManager()
 
     @property
     def is_finished(self):
-        return self.result in ['done', 'aborted', 'canceled']
+        return self.result in [
+            self.DONE,
+            self.ABORTED,
+            self.CANCELED,
+        ]
 
     @property
     def result_json(self):
         return json.loads(self.result_raw)
+
+    def append_log(self, log):
+        self.log_raw += log
+        self.save(update_fields=["log_raw"])
 
