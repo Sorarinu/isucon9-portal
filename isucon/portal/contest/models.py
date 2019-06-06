@@ -29,7 +29,7 @@ class Server(LogicalDeleteMixin, models.Model):
     # 検討必要そうなのでまだ定義してない
     # FIXME: パスワード、鍵認証とかにすればいい気がしたのでまだ追加してない
 
-    team = models.Foreignkey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
+    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
     hostname = models.CharField("ホスト名", max_length=100, unique=True)
 
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
@@ -79,16 +79,24 @@ class BenchQueueManager(models.Manager):
         if self.is_duplicated(team):
             return
 
-        # チームからサーバ一覧を得る
-        server = team.server
+        # チームからサーバやベンチマーカを得る
+        try:
+            # FIXME: 実際に何台になるかまだわからんけど、１台を仮定
+            server = Server.objects.get(team=team)
+        except Server.DoesNotExist:
+            return
+        benchmarker = team.benchmarker
 
         # 追加
         job = self.model(
             team=team,
             target_hostname=server.hostname,
-            target_ip=server.global_ip,
+            target_ip=server.global_ip, # FIXME: あってるか確認
+            node=benchmarker.node,
         )
         job.save(using=self._db)
+
+        return job.id
 
     def dequeue(self, hostname):
         job = self.get_queryset().filter(target_hostname=hostname, progress="waiting")[0]
@@ -105,7 +113,10 @@ class BenchQueueManager(models.Manager):
         # FIXME: team_id を取ってきて、存在チェック
 
         # ベンチの更新
-        job = self.get_queryset().get(pk=job_id)
+        try:
+            job = self.get_queryset().get(pk=job_id)
+        except BenchQueue.DoesNotExist:
+            return
         job.progress = BenchQueue.DONE
         job.result_raw = result_raw
         job.log_raw = log_raw
@@ -127,6 +138,10 @@ class BenchQueueManager(models.Manager):
         job.result_raw = result_raw
         job.log_raw = log_raw
         job.save(using=self._db)
+
+    def abort_timeout(self):
+        # TODO: 実装
+        pass
 
     def is_duplicated(self, team):
         """重複enqueue防止"""
@@ -166,7 +181,8 @@ class BenchQueue(models.Model):
         (FAIL, FAIL), # 失敗
     )
 
-    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
+    # FIXME: SET_NULLされたレコードを、ジョブ取得時に考慮
+    team = models.ForeignKey('authentication.Team', verbose_name="チーム", null=True, on_delete=models.SET_NULL)
     node = models.CharField("ノード", max_length=100)
 
     # ターゲット情報
@@ -174,8 +190,8 @@ class BenchQueue(models.Model):
     target_ip = models.CharField("対象IPアドレス", max_length=100)
 
     # Choice系
-    progress = models.IntegerField("進捗", choices=PROGRESS_CHOICES, default=1)
-    result = models.IntegerField("結果", choices=RESULT_CHOICES, default=1)
+    progress = models.CharField("進捗", max_length=100, choices=PROGRESS_CHOICES, default=WAITING)
+    result = models.CharField("結果", max_length=100, choices=RESULT_CHOICES, default=1)
 
     score = models.IntegerField("獲得スコア", default=0, null=False)
 
