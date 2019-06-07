@@ -130,10 +130,6 @@ class BenchQueueTest(TestCase):
         aborted_job = BenchQueue.objects.get(pk=target_job_id)
         self.assertEqual(BenchQueue.ABORTED, aborted_job.status)
 
-    def test_invalid_order_operation(self):
-        """想定されたのと異なる順序でキューへの操作が試みられた場合"""
-        pass
-
     def test_concurrency(self):
         """並列度チェック"""
         user2 = User.objects.create(username="user2")
@@ -143,12 +139,13 @@ class BenchQueueTest(TestCase):
             name="team2",
             password="hogehoge",
         )
-        Server.objects.create(team=team2, hostname="hoge", global_ip="xxx.xxx.xxx.xxy", private_ip="yyy.yyy.yyy.yyy", private_network="zzz.zzz.zzz.zzz")
+        Server.objects.create(team=team2, hostname="fuga", private_ip="xxx.xxx.xxx.xx2", global_ip="yyy.yyy.yyy.yy2", private_network="zzz.zzz.zzz.zz2")
 
         # ２つジョブをenqueue
         job_id = BenchQueue.objects.enqueue(self.team)
         job = BenchQueue.objects.get(pk=job_id)
-        BenchQueue.objects.enqueue(team2)
+        job_id2 = BenchQueue.objects.enqueue(team2)
+        job2 = BenchQueue.objects.get(pk=job_id2)
 
         # １並列はおk
         BenchQueue.objects.dequeue(job.target_hostname, max_concurrency=1)
@@ -156,6 +153,6 @@ class BenchQueueTest(TestCase):
         # ２並列はダメ
         self.assertRaises(
             exceptions.JobCountReachesMaxConcurrencyError,
-            lambda: BenchQueue.objects.dequeue(job.target_hostname, max_concurrency=1),
+            lambda: BenchQueue.objects.dequeue(job2.target_hostname, max_concurrency=1),
         )
 

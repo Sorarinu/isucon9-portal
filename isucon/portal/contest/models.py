@@ -102,6 +102,7 @@ class BenchQueueManager(models.Manager):
         return job.id
 
     def dequeue(self, hostname, max_concurrency=settings.BENCHMARK_MAX_CONCURRENCY):
+        # FIXME: 共用ベンチマーカーを用意するならば、ここでtarget_hostnameを指定する必要はなくなる
         job = self.get_queryset().filter(target_hostname=hostname, status=BenchQueue.WAITING).first()
         if job is None:
             raise exceptions.JobDoesNotExistError
@@ -128,6 +129,7 @@ class BenchQueueManager(models.Manager):
         job.result_json = result_json
         job.log_text = log_text # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
 
+        # 結果のJSONからスコアや結果を参照し、ジョブに設定
         result_json_object = job.result_json_object
         job.score = result_json_object['score']
         if result_json_object['pass']:
@@ -155,7 +157,10 @@ class BenchQueueManager(models.Manager):
         job.save(using=self._db)
 
     def abort_timeout(self, timeout_sec=settings.BENCHMARK_ABORT_TIMEOUT_SEC):
+        # タイムアウトの締め切り
         deadline = datetime.datetime.now() - datetime.timedelta(seconds=timeout_sec)
+
+        # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
         jobs = BenchQueue.objects.filter(status=BenchQueue.RUNNING, updated_at__lt=deadline)
         for job in jobs:
             job.status = BenchQueue.ABORTED
