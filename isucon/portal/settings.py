@@ -126,3 +126,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 LOGIN_URL = "login"
+
+# アプリケーション固有設定
+
+BENCHMARK_MAX_CONCURRENCY = 3
+BENCHMARK_ABORT_TIMEOUT_SEC = 300
