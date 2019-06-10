@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('authentication', '0006_auto_20190610_1608'),
+        ('authentication', '0006_auto_20190603_1824'),
         ('contest', '0001_initial'),
     ]
 
