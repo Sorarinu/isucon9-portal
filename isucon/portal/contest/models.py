@@ -173,7 +173,7 @@ class BenchQueueManager(models.Manager):
             BenchQueue.WAITING,
             BenchQueue.RUNNING,
         ])
-        return len(jobs) > 0
+        return jobs.count() > 0
 
 
 class BenchQueue(models.Model):
