@@ -128,11 +128,11 @@ class BenchQueueManager(models.Manager):
 
     def is_duplicated(self, team):
         """重複enqueue防止"""
-        jobs = self.get_queryset().filter(team=team, status__in=[
+        cnt = self.get_queryset().filter(team=team, status__in=[
             BenchQueue.WAITING,
             BenchQueue.RUNNING,
-        ])
-        return jobs.count() > 0
+        ]).count()
+        return cnt > 0
 
 
 class BenchQueue(models.Model):
