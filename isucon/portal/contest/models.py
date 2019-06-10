@@ -118,44 +118,6 @@ class BenchQueueManager(models.Manager):
 
         return job
 
-    def done(self, job_id, result_json, log_text):
-        # ベンチの更新
-        try:
-            job = self.get_queryset().get(pk=job_id)
-        except BenchQueue.DoesNotExist:
-            raise exceptions.JobDoesNotExistError
-
-        job.status = BenchQueue.DONE
-        job.result_json = result_json
-        job.log_text = log_text # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
-
-        # 結果のJSONからスコアや結果を参照し、ジョブに設定
-        result_json_object = job.result_json_object
-        job.score = result_json_object['score']
-        if result_json_object['pass']:
-            job.is_passed = True
-
-        job.save(using=self._db)
-
-        # スコアを記録
-        ScoreHistory.objects.create(
-            team=job.team,
-            bench_queue=job,
-            score=job.score,
-            is_passed=job.is_passed,
-        )
-
-    def abort(self, job_id, result_json, log_text):
-        try:
-            job = self.get_queryset().get(pk=job_id)
-        except BenchQueue.DoesNotExist:
-            raise exceptions.JobDoesNotExistError
-
-        job.status = BenchQueue.ABORTED
-        job.result_json = result_json
-        job.log_text = log_text
-        job.save(using=self._db)
-
     def abort_timeout(self, timeout_sec=settings.BENCHMARK_ABORT_TIMEOUT_SEC):
         # タイムアウトの締め切り
         deadline = datetime.datetime.now() - datetime.timedelta(seconds=timeout_sec)
@@ -163,9 +125,7 @@ class BenchQueueManager(models.Manager):
         # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
         jobs = BenchQueue.objects.filter(status=BenchQueue.RUNNING, updated_at__lt=deadline)
         for job in jobs:
-            job.status = BenchQueue.ABORTED
-            job.result_json = '{"reason": "Benchmark timeout"}'
-            job.save(using=self._db)
+            job.abort(result_json='{"reason": "Benchmark timeout"}', log_text='')
 
     def is_duplicated(self, team):
         """重複enqueue防止"""
@@ -235,3 +195,28 @@ class BenchQueue(models.Model):
         self.log_text += log
         self.save(update_fields=["log_raw"])
 
+    def done(self, result_json, log_text):
+        self.status = BenchQueue.DONE
+        self.result_json = result_json
+        self.log_text = log_text # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
+
+        # 結果のJSONからスコアや結果を参照し、ジョブに設定
+        result_json_object = self.result_json_object
+        self.score = result_json_object['score']
+        if result_json_object['pass']:
+            self.is_passed = True
+        self.save()
+
+        # スコアを記録
+        ScoreHistory.objects.create(
+            team=self.team,
+            bench_queue=self,
+            score=self.score,
+            is_passed=self.is_passed,
+        )
+
+    def abort(self, result_json, log_text):
+        self.status = BenchQueue.ABORTED
+        self.result_json = result_json
+        self.log_text = log_text
+        self.save()

@@ -66,8 +66,9 @@ class BenchQueueTest(TestCase):
         self.assertEqual(BenchQueue.RUNNING, job2.status)
 
         # ベンチマーカーがジョブの完了を通知
-        BenchQueue.objects.done(job_id, '{"score": 100, "pass": true}', "blah\nblah\nblah")
         job3 = BenchQueue.objects.get(pk=job_id)
+        job3.done('{"score": 100, "pass": true}', "blah\nblah\nblah")
+        job3.refresh_from_db()
         self.assertEqual(BenchQueue.DONE, job3.status)
         self.assertEqual(100, job3.score)
         self.assertTrue(job3.is_passed)
@@ -82,9 +83,10 @@ class BenchQueueTest(TestCase):
 
         # ベンチマーカーが中断を通知
         # FIXME: resultのJSONになんか含めたほうがいい？
-        BenchQueue.objects.abort(job_id, '{}', "blah\nblah\nblah")
-        job3 = BenchQueue.objects.get(pk=job_id)
-        self.assertEqual(BenchQueue.ABORTED, job3.status)
+        job2 = BenchQueue.objects.get(pk=job_id)
+        job2.abort('{}', "blah\nblah\nblah")
+        job2.refresh_from_db()
+        self.assertEqual(BenchQueue.ABORTED, job2.status)
 
     def test_duplicate_enqueue(self):
         job_id = BenchQueue.objects.enqueue(self.team)
@@ -104,7 +106,7 @@ class BenchQueueTest(TestCase):
         self.assertRaises(exceptions.DuplicateJobError, lambda: BenchQueue.objects.enqueue(self.team))
 
         # 成功すれば、再度ジョブ登録が可能
-        BenchQueue.objects.done(job_id, '{"score": 100, "pass": true}', "")
+        job.done('{"score": 100, "pass": true}', "")
         job_id2 = BenchQueue.objects.enqueue(self.team)
 
         # enqueueしてから同じチームのジョブを連続で登録すると例外発生
@@ -113,7 +115,8 @@ class BenchQueueTest(TestCase):
         self.assertRaises(exceptions.DuplicateJobError, lambda: BenchQueue.objects.enqueue(self.team))
 
         # 失敗しても、再度のジョブ登録が可能になる
-        BenchQueue.objects.abort(job_id2, '{"score": 100, "pass": true}', "")
+        job2 = BenchQueue.objects.get(pk=job_id2)
+        job2.abort('{"score": 100, "pass": true}', "")
         BenchQueue.objects.enqueue(self.team)
 
     def test_abort_timeout(self):
