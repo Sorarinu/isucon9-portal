@@ -64,8 +64,7 @@ class ScoreHistory(models.Model):
         ordering = ('-created_at',)
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, null=True)
-    # FIXME: bench_queue -> job のほうがわかりやすいか
-    bench_queue = models.ForeignKey('contest.BenchQueue', verbose_name="ベンチキュー", on_delete=models.PROTECT, null=True)
+    job = models.ForeignKey('contest.BenchQueue', verbose_name="ベンチキュー", on_delete=models.PROTECT, null=True)
     score = models.IntegerField("得点")
     is_passed = models.BooleanField("正答フラグ", default=False)
 
@@ -210,7 +209,7 @@ class BenchQueue(models.Model):
         # スコアを記録
         ScoreHistory.objects.create(
             team=self.team,
-            bench_queue=self,
+            job=self,
             score=self.score,
             is_passed=self.is_passed,
         )
