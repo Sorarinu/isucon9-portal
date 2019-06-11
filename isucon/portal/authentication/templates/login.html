@@ -19,31 +19,22 @@
         </div>
       </article>
     {% endif %}
+    {% if user and not user.is_anonymous %}
+      <h3>Hello {{ user.get_full_name|default:user.username }}!</h3>
+      <a href="/auth/logout/">
+        <button class="button is-block is-info is-large is-fullwidth">logout</button>
+      </a>
+    {% else %}
+
     <h3 class="title has-text-grey">Login</h3>
     <p class="subtitle has-text-grey">Please login to proceed.</p>
     <div class="box">
-      <form method="post">
-        {% csrf_token %}
-        <div class="field">
-          <p class="control has-icons-left has-icons-right">
-            <input class="input" type="text" name="username" placeholder="Username">
-            <span class="icon is-small is-left">
-              <i class="fas fa-id-card-alt"></i>
-            </span>
-          </p>
-        </div>
-
-        <div class="field">
-          <p class="control has-icons-left">
-            <input class="input" type="password" name="password" placeholder="Password">
-            <span class="icon is-small is-left">
-              <i class="fas fa-lock"></i>
-            </span>
-          </p>
-        </div>
-        <button class="button is-block is-info is-large is-fullwidth">Start Challenge!!</button>
-      </form>
+        <a href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
+          <button class="button is-block is-info is-large is-fullwidth">Github de login suru</button>
+        </a>
     </div>
+    {% endif %}
+
     <p class="has-text-grey">
       <a href="#">Need Help?</a>
     </p>

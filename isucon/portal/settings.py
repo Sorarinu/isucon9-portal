@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
+    'social_django',
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',
@@ -52,6 +53,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# TODO: 入れ替える
+SOCIAL_AUTH_GITHUB_KEY = '8ad74d7452d59b6d5572'
+SOCIAL_AUTH_GITHUB_SECRET = '3682fb62f9623c93cfc5fa1c2c79cbe9e539e016'
 
 ROOT_URLCONF = 'isucon.portal.urls'
 
