@@ -1,17 +1,23 @@
 from django.shortcuts import render, get_object_or_404
 
 from isucon.portal.authentication.decorators import team_is_authenticated
+from isucon.portal.contest.models import Server, ScoreHistory, BenchQueue
 
 def index(request):
     return render(request, "index.html")
 
 
 def get_base_context(user):
-    # FIXME: Dummy
-    target_server = None
+    team = user.team
+
+    target_server = get_object_or_404(Server, team=team)
+    # FIXME: ラストスパート判定
+    # ラスト１時間であるかを判定すれば良いので、競技の開始、終了時刻をsettings.pyなどに突っ込んでおく
+    # https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON8/Portal/Web.pm#L92
     is_last_spurt = False
 
     return {
+        "team": team,
         "target_server": target_server,
         "is_last_spurt": is_last_spurt,
     }
@@ -20,9 +26,8 @@ def get_base_context(user):
 def dashboard(request):
     context = get_base_context(request.user)
 
-    # FIXME: Query
-    recent_jobs = []
-    top_teams = []
+    recent_jobs = BenchQueue.objects.get_recent_jobs(team=context['team'])
+    top_teams = ScoreHistory.objects.get_top_teams()
 
     context.update({
         "recent_jobs": recent_jobs,
@@ -34,8 +39,7 @@ def dashboard(request):
 def jobs(request):
     context = get_base_context(request.user)
 
-    # FIXME: Query
-    jobs = []
+    jobs = BenchQueue.objects.get_jobs(context['team'])
 
     context.update({
         "jobs": jobs,
@@ -44,9 +48,9 @@ def jobs(request):
 
 @team_is_authenticated
 def job_detail(request, pk):
+    context = get_base_context(request.user)
 
-    # FIXME: Query
-    # job = get_object_or_404(Job.objcets.filter(team=user.team), pk=pk)
+    job = get_object_or_404(BenchQueue.objects.filter(team=context["team"]), pk=pk)
     job = {
         "id": pk,
         "state": "dummy",

@@ -38,6 +38,10 @@ class ScoreHistoryTest(TestCase):
         got_entry = ScoreHistory.objects.get_latest_score(self.team.id)
         self.assertEqual(got_entry.created_at, want_entry.created_at)
 
+    def test_get_top_teams(self):
+        """トップ30チーム取得のテスト"""
+        pass
+
 
 class BenchQueueTest(TestCase):
 
