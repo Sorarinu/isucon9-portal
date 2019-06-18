@@ -1,8 +1,16 @@
+
+
 {% extends "include/layout_simple.html" %}
 {% load static %}
 
 
 {% block content %}
+
+{% if user and user.is_authenticated and user.team %}
+<script>
+  document.location = "/contest/dashboard/";
+</script>
+{% else %}
 
 <div class="container has-text-centered">
   <figure class="logo">
@@ -68,5 +76,6 @@
     </p>
   </div>
 </div>
+{% endif %}
 
 {% endblock %}
