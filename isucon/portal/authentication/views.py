@@ -2,12 +2,12 @@ import random
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.models import User
 
-from isucon.portal.authentication.models import Team
+from isucon.portal.authentication.models import Team, User
 
 PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
 PASSWORD_LENGTH = 20
+MAX_TEAM_MEMBER_NUM = 3
 
 @login_required
 def create_team(request):
@@ -42,8 +42,11 @@ def join_team(request):
     team = Team.objects.get(id=int(team_id), password=team_password)
 
     if team is None:
-        raise RuntimeError('team information is invalid')
+        raise RuntimeError('チーム番号かチームパスワードが間違っています')
     
+    if len(User.objects.filter(team=team)) >= MAX_TEAM_MEMBER_NUM:
+        raise RuntimeError('このチームにはこれ以上メンバーを追加できません')
+
     user.team = team
     user.save()
 
