@@ -1,5 +1,3 @@
-
-
 {% extends "include/layout_simple.html" %}
 {% load static %}
 
@@ -8,73 +6,69 @@
 
 {% if user and user.is_authenticated and user.team %}
 <script>
-  document.location = "/contest/dashboard/";
+    document.location = "{% url 'dashboard' %}";
 </script>
 {% else %}
 
 <div class="container has-text-centered">
-  <figure class="logo">
-    <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
-  </figure>
-  <div class="column is-4 is-offset-4">
-    {% if form.errors %}
-      <article class="message is-danger">
-        <div class="message-header">
-          <p>Oops!</p>
+    <figure class="logo">
+        <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
+    </figure>
+    <div class="column is-4 is-offset-4">
+        {% if form.errors %}
+        <article class="message is-danger">
+            <div class="message-header">
+                <p>Oops!</p>
+            </div>
+            <div class="message-body">
+                <strong>Login FAILED!!</strong><br>
+                {{ form.errors }}
+            </div>
+        </article>
+        {% endif %}
+        {% if user and user.is_authenticated %}
+        <h2>Hello {{ user.get_full_name|default:user.username }}!</h2>
+        {% if not user.team %}
+        <h2>新しくチームを作成するか、参加するチームの情報を入力してください</h2>
+
+        <div class="box">
+            <span>
+                <a href="{% url 'create_team' %}">
+                    <button class="button is-block is-info is-large is-fullwidth">新規チームを作成</button>
+                </a>
+            </span>
+            <br>
+            <span>
+                <a href="{% url 'join_team' %}">
+                    <button class="button is-block is-info is-large is-fullwidth">既存チームに参加</button>
+                </a>
+            </span>
         </div>
-        <div class="message-body">
-           <strong>Login FAILED!!</strong><br>
-        </div>
-      </article>
-    {% endif %}
-    {% if user and user.is_authenticated %}
-      <h2>Hello {{ user.get_full_name|default:user.username }}!</h2>
-      {% if not user.team %}
-      <h2>新しくチームを作成するか、参加するチームの情報を入力してください</h2>
 
-      <div class="box">
-        <h5>新規チームを作成</h5>
-        <form method="post" action="/auth/create_team/">
-          {% csrf_token %}
-          <input type="text" placeholder="チーム名" name="team_name"></input>
-          <input type="submit" name="チームに参加する" class="btn btn-default">
-        </form>
-      </div>
+        {% else %}
 
-      <div class="box">
-        <h5>既存チームに参加する</h5>
-        <form method="post" action="/auth/join_team/">
-          {% csrf_token %}
-          <input type="text" placeholder="チーム番号" name="team_id"></input>
-          <input type="text" placeholder="チームパスワード" name="team_password"></input>
-          <input type="submit" name="チームに参加する" class="btn btn-default">
-        </form>
-      </div>
-
-      {% else %}
-      
-      <a href="/contest/dashboard/">
-        <button class="button is-block is-info is-large is-fullwidth">Go to Dashboard</button>
-      </a>
-      <a href="{% url 'logout' %}">
-        <button class="button is-block is-info is-large is-fullwidth">logout</button>
-      </a>
-      {% endif %}
-    {% else %}
-
-    <h3 class="title has-text-grey">Login</h3>
-    <p class="subtitle has-text-grey">Please login to proceed.</p>
-    <div class="box">
-        <a href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
-          <button class="button is-block is-info is-large is-fullwidth">Github de login suru</button>
+        <a href="{% url 'dashboard' %}">
+            <button class="button is-block is-info is-large is-fullwidth">Go to Dashboard</button>
         </a>
-    </div>
-    {% endif %}
+        <a href="{% url 'logout' %}">
+            <button class="button is-block is-info is-large is-fullwidth">logout</button>
+        </a>
+        {% endif %}
+        {% else %}
 
-    <p class="has-text-grey">
-      <a href="#">Need Help?</a>
-    </p>
-  </div>
+        <h3 class="title has-text-grey">Login</h3>
+        <p class="subtitle has-text-grey">Please login to proceed.</p>
+        <div class="box">
+            <a href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
+                <button class="button is-block is-info is-large is-fullwidth">Github de login suru</button>
+            </a>
+        </div>
+        {% endif %}
+
+        <p class="has-text-grey">
+            <a href="#">Need Help?</a>
+        </p>
+    </div>
 </div>
 {% endif %}
 

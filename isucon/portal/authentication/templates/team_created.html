@@ -17,7 +17,7 @@
     <input type="text" readonly value="{{ team_id }}">
     <h3>チームパスワード: </h3>
     <input type="text" readonly value="{{ team_password }}">
-    <a href="/contest/dashboard/">
+    <a href="{% url 'dashboard' %}">
       <button class="button is-block is-info is-large is-fullwidth">Go to dashboard</button>
     </a>
 

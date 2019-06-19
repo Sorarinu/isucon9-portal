@@ -1,0 +1,83 @@
+{% extends "include/layout_simple.html" %}
+{% load static %}
+
+
+{% block content %}
+
+{% if user and user.is_authenticated and user.team %}
+<script>
+    document.location = "{% url 'dashboard' %}";
+</script>
+{% else %}
+
+<div class="container has-text-centered">
+    <figure class="logo">
+        <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
+    </figure>
+    <div class="column is-4 is-offset-4">
+        {% if form.errors %}
+        <article class="message is-danger">
+            <div class="message-header">
+                <p>Oops!</p>
+            </div>
+            <div class="message-body">
+                <strong>Login FAILED!!</strong><br>
+                {{ form.errors }}
+            </div>
+        </article>
+        {% endif %}
+        {% if user and user.is_authenticated %}
+        <h2>Hello {{ user.get_full_name|default:user.username }}!</h2>
+        {% if not user.team %}
+        <h2>新しくチームを作成する</h2>
+        <div class="notification is-info">
+            <h4><strong>注意</strong></h4>
+            <ul type="disc">
+                <li>現在ログインしているユーザーを代表者とするチームを作成します</li>
+                <li>チームを作成すると他のチームに参加することはできなくなります</li>
+                <li>ご登録いただいたチーム名と代表者名は ISUCON 公式サイト上で公開されます</li>
+                <li>チーム名・代表者名に公序良俗に反する名前は使わないでください</li>
+                <li>チーム名・代表者名に機種依存文字・絵文字・タグなどが入っていた場合、サイトへの表示時に表現を変えさせていただく場合があります</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h5>新規チームを作成</h5>
+            <form method="post" action="{% url 'create_team' %}">
+                {% csrf_token %}
+                <div class="field">
+                    <label class="label">{{ form.owner.label }}</label>
+                    <div class="control">
+                        {{ form.owner }}
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.name.label }}</label>
+                    <div class="control">
+                        {{ form.name }}
+                        </div>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.is_ok.label }}</label>
+                    <div class="control">
+                        {{ form.is_ok }}
+                    </div>
+                </div>
+                <div class="field is-grouped">
+                  <div class="control">
+                    <button class="button is-link">Submit</button>
+                  </div>
+                  <div class="control">
+                    <button class="button is-text">Cancel</button>
+                  </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

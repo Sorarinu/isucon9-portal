@@ -15,7 +15,7 @@
     <input type="text" readonly value="{{ team_name }}">
     <h3>チーム番号: </h3>
     <input type="text" readonly value="{{ team_id }}">
-    <a href="/contest/dashboard/">
+    <a href="{% url 'dashboard' %}">
       <button class="button is-block is-info is-large is-fullwidth">Go to dashboard</button>
     </a>
 
