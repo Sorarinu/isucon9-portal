@@ -11,7 +11,6 @@ def create_default_aggregated_score(sender, instance, created, **kwargs):
     if created:
         # 集計スコア作成
         aggregated_score = AggregatedScore.objects.create()
-        aggregated_score.save()
 
         # 集計スコアとチームを紐付け
         instance.aggregated_score = aggregated_score
