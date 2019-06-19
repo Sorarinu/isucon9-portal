@@ -71,7 +71,7 @@ class ScoreHistoryManager(models.Manager):
         histories = self.get_queryset().filter(team__is_active=True)\
                         .annotate(total_score=Sum('score'))\
                         .order_by('-total_score', '-created_at')[:limit]\
-                        .select_related('team')
+                        .select_related('team', 'aggregated_score')
 
         return [history.team for history in histories]
 
@@ -240,9 +240,11 @@ class BenchQueue(models.Model):
         )
 
         # チームに最新スコアや最新ステータスを設定
-        self.team.latest_score = self.score
-        self.team.latest_status = self.is_passed
-        self.team.save()
+        aggregated_score = self.team.aggregated_score
+        aggregated_score.best_score = max(aggregated_score.best_score, self.score)
+        aggregated_score.latest_score = self.score
+        aggregated_score.latest_status = self.is_passed
+        aggregated_score.save()
 
     def abort(self, result_json, log_text):
         self.status = BenchQueue.ABORTED
@@ -251,4 +253,19 @@ class BenchQueue(models.Model):
         self.save()
 
         # abortの時にスコアは変化しないので、チームにステータスだけ設定
-        self.team.latest_status = self.is_passed
+        aggregated_score = self.team.aggregated_score
+        aggregated_score.latest_status = self.is_passed
+        aggregated_score.save()
+
+
+# FIXME: ランキングを出す際、チームそれぞれのAggregatedScoreが取得されるので結局 N+1 ?
+# ベンチ結果次第で、Teamのフィールドとして入れることも考えたほうがいいかもしれない
+class AggregatedScore(models.Model):
+    class Meta:
+        verbose_name = verbose_name_plural = "集計スコア"
+
+    best_score = models.IntegerField('ベストスコア', default=0)
+    latest_score = models.IntegerField('最新獲得スコア', default=0)
+    # latest_status = is_passed (True | False)
+    # FIXME: is_passedではなく、BenchQueue.statusと勘違いしうるため、名前改善したほうが良さそう
+    latest_status = models.BooleanField('最新ベンチステータス', default=False)

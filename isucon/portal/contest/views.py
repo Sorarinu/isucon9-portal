@@ -63,9 +63,6 @@ def job_detail(request, pk):
     })
     return render(request, "job_detail.html", context)
 
-
-
-
 @team_is_authenticated
 def scores(request):
     context = get_base_context(request.user)

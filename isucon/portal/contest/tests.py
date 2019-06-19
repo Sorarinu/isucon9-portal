@@ -45,6 +45,19 @@ class ScoreHistoryTest(TestCase):
         # top３チーム取得して、結果のassertion
         pass
 
+    def test_dashboard_view(self):
+        # views.dashboard に対するテスト
+        # 10チーム程度生成
+        # 各チームに１つジョブを走行させる
+        # 特定チームにジョブ１つ走行させる
+        # 最初に走行させた10件のみ取得され、最後に追加した１件が含まれないことをassertion
+        pass
+
+    def test_scores_view(self):
+        # views.scores に対するテスト
+        # 取得テストのみ
+        pass
+
 
 class BenchQueueTest(TestCase):
 
@@ -166,3 +179,16 @@ class BenchQueueTest(TestCase):
             lambda: BenchQueue.objects.dequeue(job2.target_hostname, max_concurrency=1),
         )
 
+    def test_jobs_view(self):
+        # views.jobs に対するテスト
+        # ジョブをいくつか走行させる
+        # それらのジョブが取得できるか
+        pass
+
+    def test_job_detail_view(self):
+        # views.job_detail に対するテスト
+        # ジョブをいくつか走行させる
+        # 特定のジョブの詳細を取得
+        # ジョブのステータスを変更
+        # 再度取得して更新されている
+        pass
