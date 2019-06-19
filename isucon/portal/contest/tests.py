@@ -39,7 +39,10 @@ class ScoreHistoryTest(TestCase):
         self.assertEqual(got_entry.created_at, want_entry.created_at)
 
     def test_get_top_teams(self):
-        """トップ30チーム取得のテスト"""
+        """トップnチーム取得のテスト"""
+        # 10チーム程度生成
+        # 適当にスコア獲得
+        # top３チーム取得して、結果のassertion
         pass
 
 

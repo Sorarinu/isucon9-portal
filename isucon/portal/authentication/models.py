@@ -19,6 +19,11 @@ class Team(LogicalDeleteMixin, models.Model):
 
     benchmarker = models.ForeignKey('contest.Benchmarker', verbose_name="ベンチマーカー", on_delete=models.SET_NULL, null=True, blank=True)
 
+    # ベンチマーク結果に関連する情報
+    best_score = models.IntegerField('ベストスコア')
+    latest_score = models.IntegerField('最新獲得スコア')
+    latest_status = models.BooleanField('最新ベンチ結果ステータス')
+
     def __name__(self):
         return self.name
 

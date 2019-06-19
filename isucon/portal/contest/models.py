@@ -24,6 +24,13 @@ class Benchmarker(LogicalDeleteMixin, models.Model):
         return self.ip
 
 
+class ServerManager(models.Manager):
+
+    def get_team_servers(self, team):
+        """チームが持つサーバ一覧を取得"""
+        return self.get_queryset().filter(team=team)
+
+
 class Server(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "サーバ"
@@ -37,6 +44,8 @@ class Server(LogicalDeleteMixin, models.Model):
     private_ip = models.CharField("プライベートIPアドレス", max_length=100)
     private_network = models.CharField("プライベートネットワークアドレス", max_length=100)
 
+    objects = ServerManager()
+
     def __str__(self):
         return self.hostname
 
@@ -44,9 +53,8 @@ class Server(LogicalDeleteMixin, models.Model):
 class ScoreHistoryManager(models.Manager):
 
     def get_queryset_by_team(self, team):
-        # FIXME: is_activeのチェック
         return self.get_queryset()\
-                   .filter(team=team, is_passed=True)
+                   .filter(team=team, team__is_active=True, is_passed=True)
 
     def get_best_score(self, team):
         """指定チームのベストスコアを取得"""
@@ -60,27 +68,12 @@ class ScoreHistoryManager(models.Manager):
 
     def get_top_teams(self, limit=30):
         """トップ30チームの取得"""
-        # チームID, チーム名, 学生チームフラグ
-        # ベストスコア、
-        # 直近ステータス、直近獲得スコア、更新時刻
-
         histories = self.get_queryset().filter(team__is_active=True)\
-                        .annotate(best_score=Max('score'))\
                         .annotate(total_score=Sum('score'))\
-                        .order_by('-best_score', '-created_at')[:limit]
-        # NOTE: N+1になるが、上位30チームに限定するため、クエリの負荷がそこまで高くない見積もり
-        # FIXME: パフォーマンス上問題があるようなら、DBスキーマ含め、N+1解消, あるいはサブクエリで頑張るか
-        for history in histories:
-            team = history.team
-            latest_score = self.get_latest_score(team=team)
+                        .order_by('-total_score', '-created_at')[:limit]\
+                        .select_related('team')
 
-            # 最新のステータス(パスしたか否かのフラグ), スコア、時刻を入れる
-            setattr(history, "latest_status", latest_score.is_passed)
-            setattr(history, "latest_score", latest_score.score)
-            history.created_at = latest_score.created_at
-
-        return histories
-
+        return [history.team for history in histories]
 
 class ScoreHistory(models.Model):
     class Meta:
@@ -96,6 +89,7 @@ class ScoreHistory(models.Model):
     updated_at = models.DateTimeField("最終更新日時", auto_now=True)
 
     objects = ScoreHistoryManager()
+
 
 class BenchQueueManager(models.Manager):
 
@@ -245,8 +239,16 @@ class BenchQueue(models.Model):
             is_passed=self.is_passed,
         )
 
+        # チームに最新スコアや最新ステータスを設定
+        self.team.latest_score = self.score
+        self.team.latest_status = self.is_passed
+        self.team.save()
+
     def abort(self, result_json, log_text):
         self.status = BenchQueue.ABORTED
         self.result_json = result_json
         self.log_text = log_text
         self.save()
+
+        # abortの時にスコアは変化しないので、チームにステータスだけ設定
+        self.team.latest_status = self.is_passed

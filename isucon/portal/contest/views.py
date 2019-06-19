@@ -70,8 +70,7 @@ def job_detail(request, pk):
 def scores(request):
     context = get_base_context(request.user)
 
-    # FIXME: Query
-    teams = []
+    teams = ScoreHistory.objects.get_top_teams()
 
     context.update({
         "teams": teams,
@@ -82,8 +81,7 @@ def scores(request):
 def servers(request):
     context = get_base_context(request.user)
 
-    # FIXME: Query
-    servers = []
+    servers = Server.objects.get_team_servers(context['team'])
 
     context.update({
         "servers": servers,
