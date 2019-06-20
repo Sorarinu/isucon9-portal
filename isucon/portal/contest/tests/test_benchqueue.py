@@ -6,58 +6,6 @@ from isucon.portal.authentication.models import User, Team
 from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, BenchQueue
 from isucon.portal.contest import exceptions
 
-class ScoreHistoryTest(TestCase):
-
-    def setUp(self):
-        self.user = User.objects.create()
-        self.benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.xxx", network="xxx.xxx.xxx.xxx", node="node")
-        self.team = Team.objects.create(
-            owner=self.user,
-            benchmarker=self.benchmarker,
-            name="test",
-            password="test",
-        )
-
-    def test_get_best_score(self):
-        """指定チームのベストスコアを取得"""
-        max_score = -1
-        for i in range(10):
-            entry = ScoreHistory.objects.create(team=self.team, score=i, is_passed=True)
-            max_score = max(max_score, entry.score)
-
-        got_entry = ScoreHistory.objects.get_best_score(self.team.id)
-        self.assertEqual(got_entry.score, max_score)
-
-    def test_get_latest_score(self):
-        """指定チームの最新スコアを取得するテスト"""
-        # 同一チームのスコア履歴を複数作成
-        for i in range(10):
-            want_entry = ScoreHistory.objects.create(team=self.team, score=i, is_passed=True)
-
-        # スコア履歴のもので最新のものを取得できているか
-        got_entry = ScoreHistory.objects.get_latest_score(self.team.id)
-        self.assertEqual(got_entry.created_at, want_entry.created_at)
-
-    def test_get_top_teams(self):
-        """トップnチーム取得のテスト"""
-        # 10チーム程度生成
-        # 適当にスコア獲得
-        # top３チーム取得して、結果のassertion
-        pass
-
-    def test_dashboard_view(self):
-        # views.dashboard に対するテスト
-        # 10チーム程度生成
-        # 各チームに１つジョブを走行させる
-        # 特定チームにジョブ１つ走行させる
-        # 最初に走行させた10件のみ取得され、最後に追加した１件が含まれないことをassertion
-        pass
-
-    def test_scores_view(self):
-        # views.scores に対するテスト
-        # 取得テストのみ
-        pass
-
 
 class BenchQueueTest(TestCase):
 
@@ -155,19 +103,20 @@ class BenchQueueTest(TestCase):
 
     def test_concurrency(self):
         """並列度チェック"""
-        user2 = User.objects.create(username="user2")
-        team2 = Team.objects.create(
-            owner=user2,
-            benchmarker=self.benchmarker,
-            name="team2",
-            password="hogehoge",
-        )
-        Server.objects.create(team=team2, hostname="fuga", private_ip="xxx.xxx.xxx.xx2", global_ip="yyy.yyy.yyy.yy2", private_network="zzz.zzz.zzz.zz2")
+        # 同じチームが複数のベンチを走行させる
+        # user2 = User.objects.create(username="user2")
+        # team2 = Team.objects.create(
+            # owner=user2,
+            # benchmarker=self.benchmarker,
+            # name="team2",
+            # password="hogehoge",
+        # )
+        # Server.objects.create(team=team2, hostname="fuga", private_ip="xxx.xxx.xxx.xx2", global_ip="yyy.yyy.yyy.yy2", private_network="zzz.zzz.zzz.zz2")
 
         # ２つジョブをenqueue
         job_id = BenchQueue.objects.enqueue(self.team)
         job = BenchQueue.objects.get(pk=job_id)
-        job_id2 = BenchQueue.objects.enqueue(team2)
+        job_id2 = BenchQueue.objects.enqueue(self.team)
         job2 = BenchQueue.objects.get(pk=job_id2)
 
         # １並列はおk
@@ -179,11 +128,34 @@ class BenchQueueTest(TestCase):
             lambda: BenchQueue.objects.dequeue(job2.target_hostname, max_concurrency=1),
         )
 
-    def test_jobs_view(self):
-        # views.jobs に対するテスト
+    def test_get_recent_jobs(self):
+        """特定チームの最近のジョブ取得テスト"""
+        # ジョブを11件走行
+        # NOTE: 走行中ジョブは１チームにつき１つだけなので、完了済みジョブを複数作る
+        job_ids = []
+        for idx in range(11):
+            job_id = BenchQueue.objects.enqueue(self.team)
+            job = BenchQueue.objects.get(pk=job_id)
+            job.done('{{"score": {}, "pass": true}}'.format(idx), "logloglog")
+
+            job_ids.append(job_id)
+
+        # 最初に走行させた10件のみ取得され、一番最初に追加した１件が含まれないことをassertion
+        recent_jobs = BenchQueue.objects.get_recent_jobs(self.team)
+        for job in recent_jobs:
+            self.assertNotEqual(job.id, job_ids[0])
+
+    def test_get_jobs(self):
+        """特定チームのジョブ取得テスト"""
         # ジョブをいくつか走行させる
+        for idx in range(11):
+            job_id = BenchQueue.objects.enqueue(self.team)
+            job = BenchQueue.objects.get(pk=job_id)
+            job.done('{{"score": {}, "pass": true}}'.format(idx), "logloglog")
+
         # それらのジョブが取得できるか
-        pass
+        jobs = BenchQueue.objects.get_jobs(self.team)
+        self.assertEqual(len(jobs), 11)
 
     def test_job_detail_view(self):
         # views.job_detail に対するテスト

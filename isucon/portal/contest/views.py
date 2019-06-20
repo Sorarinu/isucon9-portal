@@ -28,11 +28,11 @@ def dashboard(request):
 
     recent_jobs = BenchQueue.objects.get_recent_jobs(team=context['team'])
     top_teams = ScoreHistory.objects.get_top_teams()
-
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
     })
+
     return render(request, "dashboard.html", context)
 
 @team_is_authenticated
@@ -40,10 +40,10 @@ def jobs(request):
     context = get_base_context(request.user)
 
     jobs = BenchQueue.objects.get_jobs(context['team'])
-
     context.update({
         "jobs": jobs,
     })
+
     return render(request, "jobs.html", context)
 
 @team_is_authenticated
@@ -51,16 +51,10 @@ def job_detail(request, pk):
     context = get_base_context(request.user)
 
     job = get_object_or_404(BenchQueue.objects.filter(team=context["team"]), pk=pk)
-    job = {
-        "id": pk,
-        "state": "dummy",
-    } # Dummy
-
-    context = get_base_context(request.user)
-
     context.update({
         "job": job,
     })
+
     return render(request, "job_detail.html", context)
 
 @team_is_authenticated
@@ -68,10 +62,10 @@ def scores(request):
     context = get_base_context(request.user)
 
     teams = ScoreHistory.objects.get_top_teams()
-
     context.update({
         "teams": teams,
     })
+
     return render(request, "scores.html", context)
 
 @team_is_authenticated

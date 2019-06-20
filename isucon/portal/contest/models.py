@@ -8,6 +8,9 @@ from isucon.portal import settings
 from isucon.portal.models import LogicalDeleteMixin
 from isucon.portal.contest import exceptions
 
+# FIXME: ベンチマーク対象のサーバを変更する機能
+# https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON8/Portal/Web/Controller/API.pm#L32
+
 
 class Benchmarker(LogicalDeleteMixin, models.Model):
     class Meta:
@@ -42,6 +45,9 @@ class Server(LogicalDeleteMixin, models.Model):
 
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
     private_ip = models.CharField("プライベートIPアドレス", max_length=100)
+
+    # FIXME: isucon8-finalの時、フィールドとして存在するだけっぽい
+    # 使途不明
     private_network = models.CharField("プライベートネットワークアドレス", max_length=100)
 
     objects = ServerManager()
@@ -71,7 +77,7 @@ class ScoreHistoryManager(models.Manager):
         histories = self.get_queryset().filter(team__is_active=True)\
                         .annotate(total_score=Sum('score'))\
                         .order_by('-total_score', '-created_at')[:limit]\
-                        .select_related('team', 'aggregated_score')
+                        .select_related('team', 'team__aggregated_score')
 
         return [history.team for history in histories]
 
@@ -105,9 +111,12 @@ class BenchQueueManager(models.Manager):
         if self.is_duplicated(team):
             raise exceptions.DuplicateJobError
 
-        # チームからサーバやベンチマーカを得る
+        # FIXME: エンキューする際に、リクエスト先サーバを指定できないとダメ
+        # isucon8-finalでは、bench_ipがベンチマーク対象のサーバを指しており、
+        # private_ipの第４オクテットでそれがベンチマーク対象であるかどうか判断していた様子
+
+        # ベンチマーク対象のサーバを取得
         try:
-            # FIXME: 実際に何台になるかまだわからんけど、１台を仮定
             server = Server.objects.get(team=team)
         except Server.DoesNotExist:
             raise exceptions.TeamServerDoesNotExistError
@@ -132,6 +141,7 @@ class BenchQueueManager(models.Manager):
             raise exceptions.JobDoesNotExistError
 
         # ホストの負荷を考慮
+        # FIXME: ここでnodeをみるのでいいのか？
         concurrency = BenchQueue.objects.filter(status=BenchQueue.RUNNING, node=job.node).count()
         if concurrency >= max_concurrency:
             raise exceptions.JobCountReachesMaxConcurrencyError
@@ -231,7 +241,6 @@ class BenchQueue(models.Model):
             self.is_passed = True
         self.save()
 
-        # スコアを記録
         ScoreHistory.objects.create(
             team=self.team,
             job=self,
@@ -239,31 +248,27 @@ class BenchQueue(models.Model):
             is_passed=self.is_passed,
         )
 
-        # チームに最新スコアや最新ステータスを設定
-        aggregated_score = self.team.aggregated_score
-        aggregated_score.best_score = max(aggregated_score.best_score, self.score)
-        aggregated_score.latest_score = self.score
-        aggregated_score.latest_status = self.is_passed
-        aggregated_score.save()
-
     def abort(self, result_json, log_text):
         self.status = BenchQueue.ABORTED
         self.result_json = result_json
         self.log_text = log_text
         self.save()
 
-        # abortの時にスコアは変化しないので、チームにステータスだけ設定
-        aggregated_score = self.team.aggregated_score
-        aggregated_score.latest_status = self.is_passed
-        aggregated_score.save()
-
+        ScoreHistory.objects.create(
+            team=self.team,
+            job=self,
+            score=0,
+            is_passed=self.is_passed,
+        )
 
 # FIXME: ランキングを出す際、チームそれぞれのAggregatedScoreが取得されるので結局 N+1 ?
 # ベンチ結果次第で、Teamのフィールドとして入れることも考えたほうがいいかもしれない
+# AggregatedScoreは、Django signals を用いることで、チーム登録時に作成され、得点履歴が追加されるごとに更新されます
 class AggregatedScore(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "集計スコア"
 
+    total_score = models.IntegerField('合計スコア', default=0)
     best_score = models.IntegerField('ベストスコア', default=0)
     latest_score = models.IntegerField('最新獲得スコア', default=0)
     # latest_status = is_passed (True | False)
