@@ -5,10 +5,8 @@ from django.shortcuts import render, get_object_or_404
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
+from isucon.portal import settings
 
-PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
-PASSWORD_LENGTH = 20
-MAX_TEAM_MEMBER_NUM = 3
 
 @login_required
 def create_team(request):
@@ -19,13 +17,8 @@ def create_team(request):
         return render(request, "create_team.html", {'form': form})
 
 
-    # team = Team()
-    # team.name = form.cleaned_data['name']
-    password = ''.join(random.choice(PASSWORD_LETTERS) for i in range(PASSWORD_LENGTH))
-
-    # if len(Team.objects.filter(name=request.POST['team_name'])) > 0:
-    #     raise ValidationError('team name already exists')
-
+    # パスワードとして使う文字群から指定文字数ランダムに選択してチームパスワードとする
+    password = ''.join(random.choice(settings.PASSWORD_LETTERS) for i in range(settings.PASSWORD_LENGTH))
 
     team = Team.objects.create(name=form.cleaned_data['name'], password=password, owner=user)
 
@@ -49,12 +42,6 @@ def join_team(request):
     team_password = form.cleaned_data['team_password']
     
     team = Team.objects.get(id=int(team_id), password=team_password)
-
-    if team is None:
-        raise RuntimeError('チーム番号かチームパスワードが間違っています')
-    
-    if len(User.objects.filter(team=team)) >= MAX_TEAM_MEMBER_NUM:
-        raise RuntimeError('このチームにはこれ以上メンバーを追加できません')
 
     user.team = team
     user.save()
