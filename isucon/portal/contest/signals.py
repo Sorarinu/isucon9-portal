@@ -37,10 +37,9 @@ def update_aggregated_score(sender, instance, created, **kwargs):
 def set_default_benchmark_target_server(sender, instance, created, **kwargs):
     """サーバ追加時、ベンチマークのターゲットとするかどうか設定する"""
     if created:
-        other_servers_cnt = Server.objects.filter(team=instance.team)\
-                                          .exclude(pk=instance.pk)\
-                                          .count()
-        if other_servers_cnt > 0:
+        queryset = Server.objects.filter(team=instance.team)\
+                                        .exclude(pk=instance.pk)
+        if queryset.exists():
             # すでに他のサーバが存在するならば、ベンチマーク対象は既に存在する
             return
 

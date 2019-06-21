@@ -25,13 +25,13 @@ class Benchmarker(LogicalDeleteMixin, models.Model):
 
 class ServerManager(models.Manager):
 
-    def get_team_servers(self, team):
+    def of_team(self, team):
         """チームが持つサーバ一覧を取得"""
         return self.get_queryset().filter(team=team)
 
     def get_bench_target(self, team):
         """チームのベンチマーク対象を取得"""
-        return self.get_queryset().filter(team=team, is_bench_target=True)
+        return self.get_queryset().get(team=team, is_bench_target=True)
 
     def change_bench_target(self, team):
         """チームのベンチマーク対象を変更"""
@@ -58,25 +58,35 @@ class Server(LogicalDeleteMixin, models.Model):
 
     objects = ServerManager()
 
+    def set_bench_target(self):
+        # 現在のベンチ対象を、ベンチ対象から外す
+        current_bench_target = ServerManager.objects.get_bench_target(self.team)
+        current_bench_target.is_bench_target = False
+        current_bench_target.save()
+
+        # 自分をベンチ対象にする
+        self.is_bench_target = True
+        self.save(using=self._db)
+
     def __str__(self):
         return self.hostname
 
 
 class ScoreHistoryManager(models.Manager):
 
-    def get_queryset_by_team(self, team):
+    def of_team(self, team):
         return self.get_queryset()\
                    .filter(team=team, team__is_active=True, is_passed=True)
 
     def get_best_score(self, team):
         """指定チームのベストスコアを取得"""
-        return self.get_queryset_by_team(team)\
+        return self.of_team(team)\
                    .annotate(best_score=Max('score'))[0]
 
     def get_latest_score(self, team):
         """指定チームの最新スコアを取得"""
         # NOTE: orderingにより最新順に並んでいるので、LIMITで取れば良い
-        return self.get_queryset_by_team(team).all()[0]
+        return self.of_team(team).order_by('-created_at').first()
 
     def get_top_teams(self, limit=30):
         """トップ30チームの取得"""
@@ -114,15 +124,8 @@ class JobManager(models.Manager):
 
     def enqueue(self, team):
         # 重複チェック
-        if self.is_duplicated(team):
+        if self.check_duplicated(team):
             raise exceptions.DuplicateJobError
-
-        # ベンチマーク対象のサーバを取得
-        target_server_cnt = Server.objects.get_bench_target(team).count()
-        if target_server_cnt == 0:
-            raise exceptions.TeamBenchTargetDoesNotExistError
-        elif target_server_cnt == 0:
-            raise exceptions.TeamBenchTargetTooManyError
 
         # 追加
         job = self.model(team=team)
@@ -170,7 +173,7 @@ class JobManager(models.Manager):
         for job in jobs:
             job.abort(result_json='{"reason": "Benchmark timeout"}', log_text='')
 
-    def is_duplicated(self, team):
+    def check_duplicated(self, team):
         """重複enqueue防止"""
         cnt = self.get_queryset().filter(team=team, status__in=[
             Job.WAITING,
@@ -275,4 +278,4 @@ class AggregatedScore(models.Model):
     latest_score = models.IntegerField('最新獲得スコア', default=0)
     # latest_is_passed = is_passed (True | False)
     # NOTE: 旧 latest_status
-    latest_is_passed = models.BooleanField('最新のベンチマーク成否フラグ', default=False)
+    latest_is_passed = models.BooleanField('最新のベンチマーク成否フラグ', default=False, blank=True)
