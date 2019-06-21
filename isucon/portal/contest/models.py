@@ -129,13 +129,6 @@ class JobManager(models.Manager):
     def dequeue(self, benchmarker=None):
         if benchmarker is not None:
             # ベンチマーカーが自身にひもづくチームのサーバにベンチマークを行う場合
-
-            # dequeueしたいベンチマーカーのIPアドレスから、管理しているベンチマーカーのモデルを取得
-            try:
-                benchmarker = Benchmarker.objects.get(ip=benchmarker.ip)
-            except Benchmarker.DoesNotExist:
-                raise exceptions.TeamBenchmarkerDoesNotExistError
-
             # 報告したベンチマーカの紐づいているチーム、かつWAITING状態のジョブを取得
             queryset = self.get_queryset().filter(status=Job.WAITING, team__benchmarker=benchmarker)
         else:
