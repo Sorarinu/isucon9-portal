@@ -81,8 +81,8 @@ class ScoreHistoryManager(models.Manager):
     def get_top_teams(self, limit=30):
         """トップ30チームの取得"""
         histories = self.get_queryset().filter(team__is_active=True)\
-                        .annotate(total_score=Sum('score'))\
-                        .order_by('-total_score', '-created_at')[:limit]\
+                        .annotate(best_score=Max('score'))\
+                        .order_by('-best_score', '-created_at')[:limit]\
                         .select_related('team', 'team__aggregated_score')
 
         return [history.team for history in histories]
@@ -271,7 +271,6 @@ class AggregatedScore(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "集計スコア"
 
-    total_score = models.IntegerField('合計スコア', default=0)
     best_score = models.IntegerField('ベストスコア', default=0)
     latest_score = models.IntegerField('最新獲得スコア', default=0)
     # latest_is_passed = is_passed (True | False)

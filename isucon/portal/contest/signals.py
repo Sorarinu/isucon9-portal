@@ -24,7 +24,6 @@ def update_aggregated_score(sender, instance, created, **kwargs):
 
         if instance.is_passed:
             # ベンチマークが通ったら、スコアとステータスを更新
-            aggregated_score.total_score += instance.score
             aggregated_score.best_score = max(aggregated_score.best_score, instance.score)
             aggregated_score.latest_score = instance.score
             aggregated_score.latest_is_passed = instance.is_passed

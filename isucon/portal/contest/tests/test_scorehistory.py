@@ -64,7 +64,7 @@ class ScoreHistoryTest(TestCase):
         top_teams = ScoreHistory.objects.get_top_teams(limit=3)
         for top_team in top_teams:
             aggregated_score = top_team.aggregated_score
-            self.assertEqual(aggregated_score.total_score, want_score)
+            self.assertEqual(aggregated_score.best_score, want_score)
             self.assertEqual(top_team.name, "team{}".format(want_score))
             want_score -= 1
 
