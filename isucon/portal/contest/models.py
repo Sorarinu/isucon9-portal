@@ -33,11 +33,8 @@ class ServerManager(models.Manager):
         """チームのベンチマーク対象を取得"""
         return self.get_queryset().get(team=team, is_bench_target=True)
 
-    def change_bench_target(self, team):
-        """チームのベンチマーク対象を変更"""
-        # FIXME: WAITING状態でenqueueされていても、変更ができる.
-        # このことのテストを追加
-        pass
+    # FIXME: WAITING状態でenqueueされていても、変更ができる.
+    # このことのテストを追加
 
 
 class Server(LogicalDeleteMixin, models.Model):
