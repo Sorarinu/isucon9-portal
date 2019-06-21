@@ -22,9 +22,7 @@
             </div>
             <div class="message-body">
                 <strong>Login FAILED!!</strong><br>
-                {% if form.errors %}
-                    {{ form.non_field_errors }}
-                {% endif %}
+                {{ form.errors }}
             </div>
         </article>
         {% endif %}
@@ -45,12 +43,20 @@
 
         <div class="box">
             <h5>新規チームを作成</h5>
-            <form method="post" action="{% url 'create_team' %}">
+            <form enctype="multipart/form-data" method="post" action="{% url 'create_team' %}">
                 {% csrf_token %}
                 <div class="field">
                     <label class="label">{{ form.name.label }}</label>
                     <div class="control">
                         {{ form.name }}
+                    </div>
+                    <p class="help">最大100文字</p>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.user_icon.label }}</label>
+                    <div id="preview_image" style="border: 1px solid; display: block; background-image: none; background-size: cover; width: 150px; height: 150px;"></div>
+                    <div class="control">
+                        {{ form.user_icon }}
                     </div>
                     <p class="help">最大100文字</p>
                 </div>
@@ -89,6 +95,17 @@
 <script>
     $("#username").val('{{ username }}');
     $("#email").val('{{ email }}');
+
+    $('#id_user_icon').on('change', function(event) {
+        var files = event.target.files;
+        var reader = new FileReader();
+        reader.onload = (function () {
+            return function (e) {
+                a = $('#preview_image').css({backgroundImage: 'url("' + e.target.result + '")'});
+            };
+        })(files[0]);
+        reader.readAsDataURL(files[0]);
+    });
 </script>
 
 {% endif %}

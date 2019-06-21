@@ -17,6 +17,10 @@ class TeamRegisterForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
     )
+    user_icon = forms.ImageField(
+        label="代表ユーザーのアイコン",
+        required=True,
+    )
     owner_email = forms.CharField(
         label="代表者メールアドレス(公開されません)",
         max_length=256,
@@ -28,12 +32,19 @@ class TeamRegisterForm(forms.Form):
         required=True,
     )
 
+    def clean_user_icon(self):
+        return check_uploaded_filesize(self.cleaned_data['user_icon'])
+
 class JoinToTeamForm(forms.Form):
     display_name = forms.CharField(
         label="公開する参加者名",
         max_length=100,
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
+    )
+    user_icon = forms.ImageField(
+        label="参加するユーザーのアイコン",
+        required=True,
     )
     team_id = forms.IntegerField(
         label="チーム番号",
@@ -51,6 +62,9 @@ class JoinToTeamForm(forms.Form):
         required=True,
     )
 
+    def clean_user_icon(self):
+        return check_uploaded_filesize(self.cleaned_data['user_icon'])
+
     def clean(self):
         cleaned_data = super(JoinToTeamForm, self).clean()
         team_id = cleaned_data.get('team_id')
@@ -66,3 +80,8 @@ class JoinToTeamForm(forms.Form):
         
         return cleaned_data
 
+
+def check_uploaded_filesize(content):
+    if content.size > settings.MAX_UPLOAD_SIZE:
+        raise forms.ValidationError(('ファイルサイズが大きすぎます。'))
+    return content

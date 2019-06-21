@@ -11,7 +11,7 @@ from isucon.portal import settings
 @login_required
 def create_team(request):
     user = request.user
-    form = TeamRegisterForm(request.POST or None)
+    form = TeamRegisterForm(request.POST or None, request.FILES or None)
     if not form.is_valid():
         # フォームの内容が不正なら戻す
         return render(request, "create_team.html", {'form': form, 'username': request.user, 'email': request.user.email})
@@ -23,6 +23,7 @@ def create_team(request):
     team = Team.objects.create(name=form.cleaned_data['name'], password=password, owner=user)
 
     user.team = team
+    user.icon = form.cleaned_data['user_icon']
     user.display_name = form.cleaned_data['owner']
     user.email = form.cleaned_data['owner_email']
     user.save()
@@ -42,7 +43,7 @@ def create_team(request):
 @login_required
 def join_team(request):
     user = request.user
-    form = JoinToTeamForm(request.POST or None)
+    form = JoinToTeamForm(request.POST or None, request.FILES or None)
     print(form.is_valid())
     if not form.is_valid():
         # フォームの内容が不正なら戻す
@@ -55,6 +56,7 @@ def join_team(request):
     team = Team.objects.get(id=int(team_id), password=team_password)
 
     user.team = team
+    user.icon = form.cleaned_data['user_icon']
     user.save()
 
 

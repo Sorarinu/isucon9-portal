@@ -134,6 +134,9 @@ STATIC_URL = '/static/'
 
 LOGIN_URL = "login"
 
+# アイコンの最大アップロードファイルサイズ(5MB)
+MAX_UPLOAD_SIZE = 5242880
+
 # アプリケーション固有設定
 
 # Github認証に使うトークン
