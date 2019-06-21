@@ -266,9 +266,7 @@ class Job(models.Model):
             is_passed=self.is_passed,
         )
 
-# FIXME: ランキングを出す際、チームそれぞれのAggregatedScoreが取得されるので結局 N+1 ?
-# ベンチ結果次第で、Teamのフィールドとして入れることも考えたほうがいいかもしれない
-# AggregatedScoreは、Django signals を用いることで、チーム登録時に作成され、得点履歴が追加されるごとに更新されます
+# NOTE: AggregatedScoreは、Django signals を用いることで、チーム登録時に作成され、得点履歴が追加されるごとに更新されます
 class AggregatedScore(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "集計スコア"
