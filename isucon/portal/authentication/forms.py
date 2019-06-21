@@ -15,13 +15,13 @@ class TeamRegisterForm(forms.Form):
         label="代表者名(ハンドルネーム可)",
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro'}),
+        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
     )
     owner_email = forms.CharField(
         label="代表者メールアドレス(公開されません)",
         max_length=256,
         required=True,
-        widget=forms.TextInput(attrs={'class': "input", 'type': 'email', 'placeholder': 'isucon@example.com'}),
+        widget=forms.TextInput(attrs={'class': "input", 'type': 'email', 'placeholder': 'isucon@example.com', 'id': 'email'}),
     )
     is_ok = forms.BooleanField(
         label="注意を読みましたチェック",
@@ -33,7 +33,7 @@ class JoinToTeamForm(forms.Form):
         label="公開する参加者名",
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro'}),
+        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
     )
     team_id = forms.IntegerField(
         label="チーム番号",

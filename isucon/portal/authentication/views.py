@@ -14,7 +14,7 @@ def create_team(request):
     form = TeamRegisterForm(request.POST or None)
     if not form.is_valid():
         # フォームの内容が不正なら戻す
-        return render(request, "create_team.html", {'form': form})
+        return render(request, "create_team.html", {'form': form, 'username': request.user, 'email': request.user.email})
 
 
     # パスワードとして使う文字群から指定文字数ランダムに選択してチームパスワードとする
@@ -24,9 +24,20 @@ def create_team(request):
 
     user.team = team
     user.display_name = form.cleaned_data['owner']
+    user.email = form.cleaned_data['owner_email']
     user.save()
 
-    return render(request, "team_created.html", {'team_name': team.name, 'team_password': team.password, 'team_id': team.id})
+    
+
+    context = {
+        "team_name": team.name,
+        "team_password": team.password,
+        "team_id": team.id,
+        'username': request.user,
+        'email': request.user.email,
+    }
+
+    return render(request, "team_created.html", context)
 
 @login_required
 def join_team(request):
@@ -35,7 +46,7 @@ def join_team(request):
     print(form.is_valid())
     if not form.is_valid():
         # フォームの内容が不正なら戻す
-        return render(request, "join_team.html", {'form': form})
+        return render(request, "join_team.html", {'form': form, 'username': request.user})
 
 
     team_id = form.cleaned_data['team_id']
@@ -50,6 +61,7 @@ def join_team(request):
     context = {
         "team_name": team.name,
         "team_id": team.id,
+        'username': request.user,
     }
     
     return render(request, "team_joined.html", context)

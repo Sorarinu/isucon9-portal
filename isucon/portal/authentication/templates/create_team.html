@@ -22,7 +22,9 @@
             </div>
             <div class="message-body">
                 <strong>Login FAILED!!</strong><br>
-                {{ form.errors }}
+                {% if form.errors %}
+                    {{ form.non_field_errors }}
+                {% endif %}
             </div>
         </article>
         {% endif %}
@@ -30,15 +32,15 @@
         <h2>Hello {{ user.get_full_name|default:user.username }}!</h2>
         {% if not user.team %}
         <h2>新しくチームを作成する</h2>
+        <div class="notification is-warning">
+            <li><strong>現在ログインしているユーザーを代表者とするチームを作成します。代表者は変更できません。また、他のチームに参加することはできなくなります。</strong></li>
+            <li><strong>代表者メールアドレスは競技環境へのログインに必要です。正しくメール受信が行えるアドレスを入力してください。</strong></li>
+            <li><strong>ご登録いただいたチーム名と代表者名は ISUCON 公式サイト上で公開されます。</strong></li>
+        </div>
         <div class="notification is-info">
             <h4><strong>注意</strong></h4>
-            <ul type="disc">
-                <li>現在ログインしているユーザーを代表者とするチームを作成します</li>
-                <li>チームを作成すると他のチームに参加することはできなくなります</li>
-                <li>ご登録いただいたチーム名と代表者名は ISUCON 公式サイト上で公開されます</li>
-                <li>チーム名・代表者名に公序良俗に反する名前は使わないでください</li>
-                <li>チーム名・代表者名に機種依存文字・絵文字・タグなどが入っていた場合、サイトへの表示時に表現を変えさせていただく場合があります</li>
-            </ul>
+            <li>チーム名・代表者名に公序良俗に反する名前は使わないでください。</li>
+            <li>チーム名・代表者名に機種依存文字・絵文字・タグなどが入っていた場合、サイトへの表示時に表現を変えさせていただく場合があります。</li>
         </div>
 
         <div class="box">
@@ -46,16 +48,25 @@
             <form method="post" action="{% url 'create_team' %}">
                 {% csrf_token %}
                 <div class="field">
+                    <label class="label">{{ form.name.label }}</label>
+                    <div class="control">
+                        {{ form.name }}
+                    </div>
+                    <p class="help">最大100文字</p>
+                </div>
+                <div class="field">
                     <label class="label">{{ form.owner.label }}</label>
                     <div class="control">
                         {{ form.owner }}
                     </div>
+                    <p class="help">最大100文字</p>
                 </div>
                 <div class="field">
-                    <label class="label">{{ form.name.label }}</label>
+                    <label class="label">{{ form.owner_email.label }}</label>
                     <div class="control">
-                        {{ form.name }}
-                        </div>
+                        {{ form.owner_email }}
+                    </div>
+                    <p class="help">最大256文字</p>
                 </div>
                 <div class="field">
                     <label class="label">{{ form.is_ok.label }}</label>
@@ -67,9 +78,6 @@
                   <div class="control">
                     <button class="button is-link">Submit</button>
                   </div>
-                  <div class="control">
-                    <button class="button is-text">Cancel</button>
-                  </div>
                 </div>
             </form>
         </div>
@@ -77,6 +85,11 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    $("#username").val('{{ username }}');
+    $("#email").val('{{ email }}');
+</script>
 
 {% endif %}
 
