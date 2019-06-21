@@ -4,8 +4,21 @@ services:
   django:
     restart: always
     build: ./
+    depends_on:
+      - postgres
+    environment:
+      - DJANGO_DATABASE_TYPE=postgres
     volumes:
       - "staticdata:/opt/app/static/"
+  postgres:
+    restart: always
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_DB=isucon
+      - POSTGRES_USER=isucon
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - "dbdata:/var/lib/postgresql/data"
   nginx:
     restart: always
     image: nginx:latest

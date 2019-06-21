@@ -18,13 +18,33 @@ ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST', "*")]
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
+DATABASES_SQLITE3 = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
+DATABASES_POSTGRES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'isucon',
+        'USER': 'isucon',
+        'PASSWORD': 'password',
+        'HOST': 'postgres',
+        'PORT': '5432',
+    }
+}
+
+DATABASE_TYPE = os.environ.get('DJANGO_DATABASE_TYPE', "sqlite3").lower()
+
+DATABASES = {}
+if DATABASE_TYPE == "sqlite3":
+    DATABASES = DATABASES_SQLITE3
+elif DATABASE_TYPE == "postgres":
+    DATABASES = DATABASES_POSTGRES
+else:
+    raise ValueError("Invalid DJANGO_DATABASE_TYPE '{}'".format(DATABASE_TYPE))
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/

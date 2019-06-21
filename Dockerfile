@@ -6,7 +6,7 @@ RUN mkdir -p /opt/app
 
 WORKDIR /opt/app
 
-RUN pip install gunicorn
+RUN pip install gunicorn psycopg2-binary
 
 ADD requirements.txt /opt/app/
 RUN pip install -r requirements.txt
@@ -15,6 +15,6 @@ ENV DJANGO_SETTINGS_MODULE isucon.portal.docker_settings
 
 RUN python manage.py collectstatic --noinput
 
-CMD ["gunicorn", "isucon.portal.wsgi:application", "-b", "0.0.0.0:5000"]
+CMD ["bash", "-xe", "entrypoint.sh"]
 
 EXPOSE 5000
