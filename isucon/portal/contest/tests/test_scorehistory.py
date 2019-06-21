@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from isucon.portal.authentication.models import User, Team
-from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, BenchQueue
+from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, Job
 from isucon.portal.contest import exceptions
 
 
@@ -9,14 +9,14 @@ class ScoreHistoryTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create()
-        self.benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.xxx", network="xxx.xxx.xxx.xxx", node="node")
+        self.benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.xxx")
         self.team = Team.objects.create(
             owner=self.user,
             benchmarker=self.benchmarker,
             name="test",
             password="test",
         )
-        self.server = Server.objects.create(team=self.team, hostname="hoge", global_ip="xxx.xxx.xxx.xxx", private_ip="yyy.yyy.yyy.yyy", private_network="zzz.zzz.zzz.zzz")
+        self.server = Server.objects.create(team=self.team, hostname="hoge", global_ip="xxx.xxx.xxx.xxx", private_ip="yyy.yyy.yyy.yyy")
 
     def test_get_best_score(self):
         """指定チームのベストスコアを取得"""
@@ -47,7 +47,7 @@ class ScoreHistoryTest(TestCase):
         teams = []
         for idx in range(10):
             user = User.objects.create(username="user{}".format(idx))
-            benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.{}".format(idx), network="xxx.xxx.xxx.{}".format(idx), node="node{}".format(idx))
+            benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.{}".format(idx))
             team = Team.objects.create(
                 owner=user,
                 benchmarker=benchmarker,

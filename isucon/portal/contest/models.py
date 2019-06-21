@@ -16,12 +16,8 @@ class Benchmarker(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "ベンチマーカー"
 
-    # FIXME: ネットワーク構成により今後変更
-    ip = models.CharField("IPアドレス", max_length=100)
-    network = models.CharField("ネットワークアドレス", max_length=100)
-
-    # FIXME: これってなんのフィールドなのかまだわかってない
-    node = models.CharField("ノード", max_length=100)
+    # TODO: ベンチマーカーを管理する上で必要な情報を追加
+    ip = models.CharField("ベンチマーカーのIPアドレス", max_length=100)
 
     def __str__(self):
         return self.ip
@@ -33,12 +29,24 @@ class ServerManager(models.Manager):
         """チームが持つサーバ一覧を取得"""
         return self.get_queryset().filter(team=team)
 
+    def get_bench_target(self, team):
+        """チームのベンチマーク対象を取得"""
+        return self.get_queryset().filter(team=team, is_bench_target=True)
+
+    def change_bench_target(self, team):
+        """チームのベンチマーク対象を変更"""
+        # FIXME: WAITING状態でenqueueされていても、変更ができる.
+        # このことのテストを追加
+        pass
+
 
 class Server(LogicalDeleteMixin, models.Model):
+    """参加者の問題サーバー"""
     class Meta:
         verbose_name = verbose_name_plural = "サーバ"
 
-    # FIXME: パスワード、鍵認証とかにすればいい気がしたのでまだ追加してない
+    # NOTE: パスワード、鍵認証とかにすればいい気がしたのでまだ追加してない
+    # FIXME: デフォルトのベンチマーク対象を設定
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
     hostname = models.CharField("ホスト名", max_length=100, unique=True)
@@ -46,9 +54,7 @@ class Server(LogicalDeleteMixin, models.Model):
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
     private_ip = models.CharField("プライベートIPアドレス", max_length=100)
 
-    # FIXME: isucon8-finalの時、フィールドとして存在するだけっぽい
-    # 使途不明
-    private_network = models.CharField("プライベートネットワークアドレス", max_length=100)
+    is_bench_target = models.BooleanField("ベンチマークターゲットであるかのフラグ", default=False)
 
     objects = ServerManager()
 
@@ -87,7 +93,7 @@ class ScoreHistory(models.Model):
         ordering = ('-created_at',)
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, null=True)
-    job = models.ForeignKey('contest.BenchQueue', verbose_name="ベンチキュー", on_delete=models.PROTECT, null=True)
+    job = models.ForeignKey('contest.Job', verbose_name="ベンチキュー", on_delete=models.PROTECT, null=True)
     score = models.IntegerField("得点")
     is_passed = models.BooleanField("正答フラグ", default=False)
 
@@ -97,7 +103,7 @@ class ScoreHistory(models.Model):
     objects = ScoreHistoryManager()
 
 
-class BenchQueueManager(models.Manager):
+class JobManager(models.Manager):
 
     def get_jobs(self, team):
         return self.get_queryset().filter(team=team)
@@ -111,62 +117,71 @@ class BenchQueueManager(models.Manager):
         if self.is_duplicated(team):
             raise exceptions.DuplicateJobError
 
-        # FIXME: エンキューする際に、リクエスト先サーバを指定できないとダメ
-        # isucon8-finalでは、bench_ipがベンチマーク対象のサーバを指しており、
-        # private_ipの第４オクテットでそれがベンチマーク対象であるかどうか判断していた様子
-
         # ベンチマーク対象のサーバを取得
-        try:
-            server = Server.objects.get(team=team)
-        except Server.DoesNotExist:
-            raise exceptions.TeamServerDoesNotExistError
-
-        benchmarker = team.benchmarker
+        target_server_cnt = Server.objects.get_bench_target(team).count()
+        if target_server_cnt == 0:
+            raise exceptions.TeamBenchTargetDoesNotExistError
+        elif target_server_cnt == 0:
+            raise exceptions.TeamBenchTargetTooManyError
 
         # 追加
-        job = self.model(
-            team=team,
-            target_hostname=server.hostname,
-            target_ip=benchmarker.ip,
-            node=benchmarker.node,
-        )
+        job = self.model(team=team)
         job.save(using=self._db)
 
         return job.id
 
-    def dequeue(self, hostname, max_concurrency=settings.BENCHMARK_MAX_CONCURRENCY):
-        # FIXME: 共用ベンチマーカーを用意するならば、ここでtarget_hostnameを指定する必要はなくなる
-        job = self.get_queryset().filter(target_hostname=hostname, status=BenchQueue.WAITING).first()
+    def dequeue(self, benchmarker_ip=""):
+        # TODO: IPアドレスであることをもうちょっと真面目にチェックしたほうがいいか
+        # とはいえ、ベンチマーカーは運営側の管理範囲なので、おかしな値がくるとも思えないが...
+        # シェル実行結果がおかしくなった時とかぐらいか
+        if len(benchmarker_ip) > 0:
+            # ベンチマーカーが自身にひもづくチームのサーバにベンチマークを行う場合
+
+            # dequeueしたいベンチマーカーのIPアドレスから、管理しているベンチマーカーのモデルを取得
+            try:
+                benchmarker = Benchmarker.objects.get(ip=benchmarker_ip)
+            except Benchmarker.DoesNotExist:
+                raise exceptions.TeamBenchmarkerDoesNotExistError
+
+            # 報告したベンチマーカの紐づいているチーム、かつWAITING状態のジョブを取得
+            queryset = self.get_queryset().filter(status=Job.WAITING, team__benchmarker=benchmarker)
+        else:
+            # ベンチマーカーがチーム気にせずベンチマークを行う場合
+            queryset = self.get_queryset().filter(status=Job.WAITING)
+
+        job = queryset.first()
         if job is None:
             raise exceptions.JobDoesNotExistError
 
         # 状態を処理中にする
-        job.status = BenchQueue.RUNNING
+        job.status = Job.RUNNING
         job.save(using=self._db)
 
         return job
 
     def abort_timeout(self, timeout_sec=settings.BENCHMARK_ABORT_TIMEOUT_SEC):
+        # FIXME: Celeryタスクで定期的に実行させる
+
         # タイムアウトの締め切り
         deadline = datetime.datetime.now() - datetime.timedelta(seconds=timeout_sec)
 
         # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
-        jobs = BenchQueue.objects.filter(status=BenchQueue.RUNNING, updated_at__lt=deadline)
+        jobs = Job.objects.filter(status=Job.RUNNING, updated_at__lt=deadline)
         for job in jobs:
             job.abort(result_json='{"reason": "Benchmark timeout"}', log_text='')
 
     def is_duplicated(self, team):
         """重複enqueue防止"""
         cnt = self.get_queryset().filter(team=team, status__in=[
-            BenchQueue.WAITING,
-            BenchQueue.RUNNING,
+            Job.WAITING,
+            Job.RUNNING,
         ]).count()
         return cnt > 0
 
 
-class BenchQueue(models.Model):
+class Job(models.Model):
     class Meta:
-        verbose_name = verbose_name_plural = "ベンチキュー"
+        verbose_name = verbose_name_plural = "ジョブ"
         ordering=('-created_at',)
 
     # 進捗の選択肢
@@ -185,11 +200,6 @@ class BenchQueue(models.Model):
 
     # FIXME: SET_NULLされたレコードを、ジョブ取得時に考慮
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", null=True, on_delete=models.SET_NULL)
-    node = models.CharField("ノード", max_length=100)
-
-    # ターゲット情報
-    target_hostname = models.CharField("対象ホスト名", max_length=100)
-    target_ip = models.CharField("対象IPアドレス", max_length=100)
 
     # Choice系
     status = models.CharField("進捗", max_length=100, choices=STATUS_CHOICES, default=WAITING)
@@ -205,7 +215,7 @@ class BenchQueue(models.Model):
     created_at = models.DateTimeField("作成日時", auto_now_add=True)
     updated_at = models.DateTimeField("最終更新日時", auto_now=True)
 
-    objects = BenchQueueManager()
+    objects = JobManager()
 
     @property
     def is_finished(self):
@@ -224,9 +234,10 @@ class BenchQueue(models.Model):
         self.save(update_fields=["log_raw"])
 
     def done(self, result_json, log_text):
-        self.status = BenchQueue.DONE
+        self.status = Job.DONE
         self.result_json = result_json
-        self.log_text = log_text # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
+        # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
+        self.log_text = log_text
 
         # 結果のJSONからスコアや結果を参照し、ジョブに設定
         result_json_object = self.result_json_object
@@ -243,7 +254,7 @@ class BenchQueue(models.Model):
         )
 
     def abort(self, result_json, log_text):
-        self.status = BenchQueue.ABORTED
+        self.status = Job.ABORTED
         self.result_json = result_json
         self.log_text = log_text
         self.save()
@@ -265,6 +276,6 @@ class AggregatedScore(models.Model):
     total_score = models.IntegerField('合計スコア', default=0)
     best_score = models.IntegerField('ベストスコア', default=0)
     latest_score = models.IntegerField('最新獲得スコア', default=0)
-    # latest_status = is_passed (True | False)
-    # FIXME: is_passedではなく、BenchQueue.statusと勘違いしうるため、名前改善したほうが良さそう
-    latest_status = models.BooleanField('最新ベンチステータス', default=False)
+    # latest_is_passed = is_passed (True | False)
+    # NOTE: 旧 latest_status
+    latest_is_passed = models.BooleanField('最新のベンチマーク成否フラグ', default=False)

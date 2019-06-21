@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 
 from isucon.portal.authentication.decorators import team_is_authenticated
-from isucon.portal.contest.models import Server, ScoreHistory, BenchQueue
+from isucon.portal.contest.models import Server, ScoreHistory, Job
 
 def index(request):
     return render(request, "index.html")
@@ -26,7 +26,7 @@ def get_base_context(user):
 def dashboard(request):
     context = get_base_context(request.user)
 
-    recent_jobs = BenchQueue.objects.get_recent_jobs(team=context['team'])
+    recent_jobs = Job.objects.get_recent_jobs(team=context['team'])
     top_teams = ScoreHistory.objects.get_top_teams()
     context.update({
         "recent_jobs": recent_jobs,
@@ -39,7 +39,7 @@ def dashboard(request):
 def jobs(request):
     context = get_base_context(request.user)
 
-    jobs = BenchQueue.objects.get_jobs(context['team'])
+    jobs = Job.objects.get_jobs(context['team'])
     context.update({
         "jobs": jobs,
     })
@@ -50,7 +50,7 @@ def jobs(request):
 def job_detail(request, pk):
     context = get_base_context(request.user)
 
-    job = get_object_or_404(BenchQueue.objects.filter(team=context["team"]), pk=pk)
+    job = get_object_or_404(Job.objects.filter(team=context["team"]), pk=pk)
     context.update({
         "job": job,
     })
