@@ -94,29 +94,12 @@ class JobTest(TestCase):
         # ジョブを直近２秒間更新されてない状態にする
         time.sleep(2)
 
-        Job.objects.abort_timeout(timeout_sec=1)
+        Job.objects.discard_timeout_jobs(timeout_sec=1)
 
         aborted_job = Job.objects.get(pk=job_id)
         self.assertEqual(Job.ABORTED, aborted_job.status)
 
-    def test_get_recent_jobs(self):
-        """特定チームの最近のジョブ取得テスト"""
-        # ジョブを11件走行
-        # NOTE: 走行中ジョブは１チームにつき１つだけなので、完了済みジョブを複数作る
-        job_ids = []
-        for idx in range(11):
-            job_id = Job.objects.enqueue(self.team)
-            job = Job.objects.get(pk=job_id)
-            job.done('{{"score": {}, "pass": true}}'.format(idx), "logloglog")
-
-            job_ids.append(job_id)
-
-        # 最初に走行させた10件のみ取得され、一番最初に追加した１件が含まれないことをassertion
-        recent_jobs = Job.objects.get_recent_jobs(self.team)
-        for job in recent_jobs:
-            self.assertNotEqual(job.id, job_ids[0])
-
-    def test_get_jobs(self):
+    def test_of_team(self):
         """特定チームのジョブ取得テスト"""
         # ジョブをいくつか走行させる
         for idx in range(11):
@@ -125,7 +108,7 @@ class JobTest(TestCase):
             job.done('{{"score": {}, "pass": true}}'.format(idx), "logloglog")
 
         # それらのジョブが取得できるか
-        jobs = Job.objects.get_jobs(self.team)
+        jobs = Job.objects.of_team(self.team)
         self.assertEqual(len(jobs), 11)
 
     def test_job_detail_view(self):

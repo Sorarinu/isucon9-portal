@@ -112,12 +112,8 @@ class ScoreHistory(models.Model):
 
 class JobManager(models.Manager):
 
-    def get_jobs(self, team):
+    def of_team(self, team):
         return self.get_queryset().filter(team=team)
-
-    def get_recent_jobs(self, team, limit=10):
-        """直近10件のジョブを取得"""
-        return self.get_queryset().filter(team=team)[:limit]
 
     def enqueue(self, team):
         # 重複チェック
@@ -130,16 +126,13 @@ class JobManager(models.Manager):
 
         return job.id
 
-    def dequeue(self, benchmarker_ip=""):
-        # TODO: IPアドレスであることをもうちょっと真面目にチェックしたほうがいいか
-        # とはいえ、ベンチマーカーは運営側の管理範囲なので、おかしな値がくるとも思えないが...
-        # シェル実行結果がおかしくなった時とかぐらいか
-        if len(benchmarker_ip) > 0:
+    def dequeue(self, benchmarker=None):
+        if benchmarker is not None:
             # ベンチマーカーが自身にひもづくチームのサーバにベンチマークを行う場合
 
             # dequeueしたいベンチマーカーのIPアドレスから、管理しているベンチマーカーのモデルを取得
             try:
-                benchmarker = Benchmarker.objects.get(ip=benchmarker_ip)
+                benchmarker = Benchmarker.objects.get(ip=benchmarker.ip)
             except Benchmarker.DoesNotExist:
                 raise exceptions.TeamBenchmarkerDoesNotExistError
 
@@ -159,7 +152,7 @@ class JobManager(models.Manager):
 
         return job
 
-    def abort_timeout(self, timeout_sec=settings.BENCHMARK_ABORT_TIMEOUT_SEC):
+    def discard_timeout_jobs(self, timeout_sec=settings.BENCHMARK_ABORT_TIMEOUT_SEC):
         # FIXME: Celeryタスクで定期的に実行させる
 
         # タイムアウトの締め切り
@@ -172,11 +165,10 @@ class JobManager(models.Manager):
 
     def check_duplicated(self, team):
         """重複enqueue防止"""
-        cnt = self.get_queryset().filter(team=team, status__in=[
+        return self.get_queryset().filter(team=team, status__in=[
             Job.WAITING,
             Job.RUNNING,
-        ]).count()
-        return cnt > 0
+        ]).exists()
 
 
 class Job(models.Model):

@@ -23,7 +23,7 @@ def get_base_context(user):
 def dashboard(request):
     context = get_base_context(request.user)
 
-    recent_jobs = Job.objects.get_recent_jobs(team=request.user.team)
+    recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[10]
     top_teams = ScoreHistory.objects.get_top_teams()
     context.update({
         "recent_jobs": recent_jobs,
@@ -36,7 +36,7 @@ def dashboard(request):
 def jobs(request):
     context = get_base_context(request.user)
 
-    jobs = Job.objects.get_jobs(request.user.team)
+    jobs = Job.objects.of_team(request.user.team)
     context.update({
         "jobs": jobs,
     })
