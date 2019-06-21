@@ -127,7 +127,7 @@ class BenchQueueManager(models.Manager):
         job = self.model(
             team=team,
             target_hostname=server.hostname,
-            target_ip=server.private_ip, # FIXME: あってるか確認
+            target_ip=benchmarker.ip,
             node=benchmarker.node,
         )
         job.save(using=self._db)
@@ -139,12 +139,6 @@ class BenchQueueManager(models.Manager):
         job = self.get_queryset().filter(target_hostname=hostname, status=BenchQueue.WAITING).first()
         if job is None:
             raise exceptions.JobDoesNotExistError
-
-        # ホストの負荷を考慮
-        # FIXME: ここでnodeをみるのでいいのか？
-        concurrency = BenchQueue.objects.filter(status=BenchQueue.RUNNING, node=job.node).count()
-        if concurrency >= max_concurrency:
-            raise exceptions.JobCountReachesMaxConcurrencyError
 
         # 状態を処理中にする
         job.status = BenchQueue.RUNNING
