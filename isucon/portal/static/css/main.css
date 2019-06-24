@@ -55,15 +55,11 @@ section, :not(body > section) {
 label {
     display: block;
     position: relative;
-    padding-left: 1.25em;
 }
 
-label input {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    margin: auto;
+.field {
+    padding-left: 1.25em;
+
 }
 
 .buruburu:hover {
