@@ -17,7 +17,7 @@ services:
       - django
     environment:
       - DJANGO_DATABASE_TYPE=postgres
-    command: celery -A isucon.portal.contest beat -l info --scheduler=django_celery_beat.schedulers:DatabaseScheduler
+    command: bash -xe ./scripts/celery_beat.sh
   celery_worker:
     restart: always
     build: ./
@@ -25,7 +25,7 @@ services:
       - django
     environment:
       - DJANGO_DATABASE_TYPE=postgres
-    command: celery -A isucon.portal.contest worker -l info
+    command: bash -xe ./scripts/celery_worker.sh
   postgres:
     restart: always
     image: postgres:12-alpine

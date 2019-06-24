@@ -1,9 +1,8 @@
 import datetime
 import os
+from isucon.portal.settings import *
 import logging
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-from isucon.portal.settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,37 +56,48 @@ STATIC_URL = '/static/'
 STATIC_ROOT = "/opt/app/static/"
 
 # Celery
-# NOTE: ポスグレの場合のみ有効化
-if DATABASE_TYPE == "postgres":
-    INSTALLED_APPS += ('django_celery_results', 'django_celery_beat')
+INSTALLED_APPS += ('django_celery_results', 'django_celery_beat')
 
-    CELERY_TIMEZONE = 'Asia/Tokyo'
-    CELERY_MAX_CACAHED_RESULTS = 10
-    CELERY_TASK_RESULT_EXPIRES = 10
-    CELERY_IMPORTS = ('isucon.portal.contest.tasks',)
-    CELERYD_CONCURRENCY = 1
-    BROKER_CONNECTION_TIMEOUT = 5
-    CELERYBEAT_SCHEDULE = {
-        'discard_timeout_jobs': {
-            'task': 'isucon.portal.contest.tasks.discard_timeout_jobs',
-            'schedule': datetime.timedelta(seconds=1),
-        },
-        'celery.backend_cleanup': {
-            'task': 'celery.backend_cleanup',
-            'schedule': datetime.timedelta(seconds=1),
-        }
+CELERY_TIMEZONE = 'Asia/Tokyo'
+CELERY_IMPORTS = ('isucon.portal.contest.tasks',)
+
+CELERYD_CONCURRENCY = 1
+BROKER_CONNECTION_TIMEOUT = 5
+
+CELERYBEAT_SCHEDULE = {
+    'discard_timeout_jobs': {
+        'task': 'isucon.portal.contest.tasks.discard_timeout_jobs',
+        'schedule': datetime.timedelta(seconds=1),
     }
-    BROKER_URL = 'sqla+postgresql://{user}:{password}@{host}:{port}/{dbname}'.format(
+}
+
+CELERY_RESULT_SERIALIZER = 'json'
+if DATABASE_TYPE == "sqlite3":
+    # FIXME: sqlite3を用いる場合、 `database is locked` で celery worker がなんども接続回復を試みる
+    celery_db_str = dict(
+        broker_url='sqla+sqlite:///{filepath}',
+        result_backend='db+sqlite:///{filepath}',
+    )
+    celery_db_params = dict(
+        filepath=DATABASES_SQLITE3['default']['NAME'],
+    )
+elif DATABASE_TYPE == "postgres":
+    celery_db_str = dict(
+        broker_url='sqla+postgresql://{user}:{password}@{host}:{port}/{dbname}',
+        result_backend='db+postgresql://{user}:{password}@{host}:{port}/{dbname}',
+    )
+    celery_db_params = dict(
         user=DATABASES_POSTGRES['default']['USER'],
         password=DATABASES_POSTGRES['default']['PASSWORD'],
         host=DATABASES_POSTGRES['default']['HOST'],
         port=DATABASES_POSTGRES['default']['PORT'],
         dbname=DATABASES_POSTGRES['default']['NAME'],
     )
-    CELERY_TASK_SERIALIZER = 'json'
-    CELERY_RESULT_SERIALIZER = 'json'
-    CELERY_RESULT_BACKEND = 'django-db'
-    CELERY_CACHE_BACKEND = 'django-cache'
+else:
+    raise ValueError("Invalid DJANGO_DATABASE_TYPE '{}'".format(DATABASE_TYPE))
+
+BROKER_URL = celery_db_str['broker_url'].format(**celery_db_params)
+CELERY_RESULT_BACKEND = celery_db_str['result_backend'].format(**celery_db_params)
 
 # アプリケーション固有設定
 
