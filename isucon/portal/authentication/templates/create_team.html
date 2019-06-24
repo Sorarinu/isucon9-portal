@@ -52,9 +52,10 @@
                     </div>
                     <p class="help">最大100文字</p>
                 </div>
-                <div class="field">
+                <div class="field" id='upload_image_field'>
                     <label class="label">{{ form.user_icon.label }}</label>
                     <div id="preview_image" style="border: 1px solid; display: block; background-image: none; background-size: cover; width: 150px; height: 150px;"></div>
+                    <span>{{ form.is_import_github_icon }} {{ form.is_import_github_icon.label }}</span>
                     <div class="control">
                         {{ form.user_icon }}
                     </div>
@@ -105,6 +106,18 @@
             };
         })(files[0]);
         reader.readAsDataURL(files[0]);
+    });
+
+    $('#id_is_import_github_icon').on('change', function (){
+        if ($('#id_is_import_github_icon').prop('checked'))
+        {
+            $('#id_user_icon').val('');
+            $('#id_user_icon').attr('disabled', '');
+            $('#preview_image').css({backgroundImage: 'url(https://github.com/{{ username }}.png)'});
+        } else {
+            $('#id_user_icon').removeAttr('disabled');
+            $('#preview_image').css({backgroundImage: 'none'});
+        }
     });
 </script>
 

@@ -17,9 +17,13 @@ class TeamRegisterForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
     )
+    is_import_github_icon = forms.BooleanField(
+        label="アイコンをGithubから取り込む",
+        required=False,
+    )
     user_icon = forms.ImageField(
         label="代表ユーザーのアイコン",
-        required=True,
+        required=False,
     )
     owner_email = forms.CharField(
         label="代表者メールアドレス(公開されません)",
@@ -33,7 +37,16 @@ class TeamRegisterForm(forms.Form):
     )
 
     def clean_user_icon(self):
+        if self.cleaned_data['user_icon'] is None:
+            return None
         return check_uploaded_filesize(self.cleaned_data['user_icon'])
+    
+    def clean(self):
+        cleaned_data = super(TeamRegisterForm, self).clean()
+        if not cleaned_data['is_import_github_icon'] and cleaned_data['user_icon'] is None:
+            raise ValidationError('アイコンが選択されていません')
+        
+        return cleaned_data
 
 class JoinToTeamForm(forms.Form):
     display_name = forms.CharField(
@@ -44,7 +57,11 @@ class JoinToTeamForm(forms.Form):
     )
     user_icon = forms.ImageField(
         label="参加するユーザーのアイコン",
-        required=True,
+        required=False,
+    )
+    is_import_github_icon = forms.BooleanField(
+        label="アイコンをGithubから取り込む",
+        required=False,
     )
     team_id = forms.IntegerField(
         label="チーム番号",
@@ -63,6 +80,8 @@ class JoinToTeamForm(forms.Form):
     )
 
     def clean_user_icon(self):
+        if self.cleaned_data['user_icon'] is None:
+            return None
         return check_uploaded_filesize(self.cleaned_data['user_icon'])
 
     def clean(self):

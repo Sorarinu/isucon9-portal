@@ -1,12 +1,14 @@
 import random
+from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
+from django.core import files
+import requests
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
 from isucon.portal import settings
-
 
 @login_required
 def create_team(request):
@@ -23,7 +25,18 @@ def create_team(request):
     team = Team.objects.create(name=form.cleaned_data['name'], password=password, owner=user)
 
     user.team = team
-    user.icon = form.cleaned_data['user_icon']
+    if form.cleaned_data['is_import_github_icon']:
+        resp = requests.get("https://github.com/%s.png" % str(user))
+        if resp.status_code != requests.codes.ok:
+            raise RuntimeError('icon fetch failed')
+
+        file_name = "%s.png" % str(user)
+
+        fp = BytesIO()
+        fp.write(resp.content)
+        user.icon.save(file_name, files.File(fp))
+    else:
+        user.icon = form.cleaned_data['user_icon']
     user.display_name = form.cleaned_data['owner']
     user.email = form.cleaned_data['owner_email']
     user.save()
@@ -47,6 +60,7 @@ def join_team(request):
     print(form.is_valid())
     if not form.is_valid():
         # フォームの内容が不正なら戻す
+        print(form.errors)
         return render(request, "join_team.html", {'form': form, 'username': request.user})
 
 
@@ -56,7 +70,18 @@ def join_team(request):
     team = Team.objects.get(id=int(team_id), password=team_password)
 
     user.team = team
-    user.icon = form.cleaned_data['user_icon']
+    if form.cleaned_data['is_import_github_icon']:
+        resp = requests.get("https://github.com/%s.png" % str(user))
+        if resp.status_code != requests.codes.ok:
+            raise RuntimeError('icon fetch failed')
+
+        file_name = "%s.png" % str(user)
+
+        fp = BytesIO()
+        fp.write(resp.content)
+        user.icon.save(file_name, files.File(fp))
+    else:
+        user.icon = form.cleaned_data['user_icon']
     user.save()
 
 
