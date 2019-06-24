@@ -1,6 +1,8 @@
 import datetime
 import random
 
+from django.utils import timezone
+
 import factory
 import factory.fuzzy
 from faker import Faker
@@ -40,12 +42,12 @@ class JobFactory(factory.DjangoModelFactory):
     log_text = factory.Faker('sentence')
 
     created_at = factory.fuzzy.FuzzyDate(
-        start_date=datetime.datetime.now()-datetime.timedelta(days=5),
-        end_date=datetime.datetime.now()-datetime.timedelta(days=3),
+        start_date=timezone.now()-datetime.timedelta(days=5),
+        end_date=timezone.now()-datetime.timedelta(days=3),
     )
     updated_at = factory.fuzzy.FuzzyDate(
-        start_date=datetime.datetime.now()-datetime.timedelta(days=2),
-        end_date=datetime.datetime.now()-datetime.timedelta(days=1),
+        start_date=timezone.now()-datetime.timedelta(days=2),
+        end_date=timezone.now()-datetime.timedelta(days=1),
     )
 
     @factory.lazy_attribute

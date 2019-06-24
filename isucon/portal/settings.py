@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
+    'social_django',
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',
@@ -52,6 +53,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 
 ROOT_URLCONF = 'isucon.portal.urls'
 
@@ -127,6 +134,22 @@ STATIC_URL = '/static/'
 
 LOGIN_URL = "login"
 
+# アイコンの最大アップロードファイルサイズ(5MB)
+MAX_UPLOAD_SIZE = 5242880
+
 # アプリケーション固有設定
 
+# Github認証に使うトークン
+# TODO: 入れ替える
+SOCIAL_AUTH_GITHUB_KEY = '8ad74d7452d59b6d5572'
+SOCIAL_AUTH_GITHUB_SECRET = '3682fb62f9623c93cfc5fa1c2c79cbe9e539e016'
+
 BENCHMARK_ABORT_TIMEOUT_SEC = 300
+
+# チームに所属できる最大人数
+MAX_TEAM_MEMBER_NUM = 3
+
+# チームパスワードとして使う文字群
+PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
+# チームパスワードの文字数
+PASSWORD_LENGTH = 20
