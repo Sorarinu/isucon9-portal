@@ -1,0 +1,126 @@
+{% extends "include/layout_simple.html" %}
+{% load static %}
+
+
+{% block content %}
+
+{% if user and user.is_authenticated and user.team %}
+<script>
+    document.location = "{% url 'dashboard' %}";
+</script>
+{% else %}
+
+<div class="container has-text-centered">
+    <figure class="logo">
+        <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
+    </figure>
+    <div class="column is-4 is-offset-4">
+        {% if form.errors %}
+        <article class="message is-danger">
+            <div class="message-header">
+                <p>Oops!</p>
+            </div>
+            <div class="message-body">
+                <strong>Login FAILED!!</strong><br>
+                {{ form.errors }}
+            </div>
+        </article>
+        {% endif %}
+        {% if user and user.is_authenticated %}
+        <h2>Hello {{ user.get_full_name|default:user.username }}!</h2>
+        {% if not user.team %}
+        <h2>新しくチームを作成する</h2>
+        <div class="notification is-warning">
+            <li><strong>現在ログインしているユーザーを代表者とするチームを作成します。代表者は変更できません。また、他のチームに参加することはできなくなります。</strong></li>
+            <li><strong>代表者メールアドレスは競技環境へのログインに必要です。正しくメール受信が行えるアドレスを入力してください。</strong></li>
+            <li><strong>ご登録いただいたチーム名と代表者名は ISUCON 公式サイト上で公開されます。</strong></li>
+        </div>
+        <div class="notification is-info">
+            <h4><strong>注意</strong></h4>
+            <li>チーム名・代表者名に公序良俗に反する名前は使わないでください。</li>
+            <li>チーム名・代表者名に機種依存文字・絵文字・タグなどが入っていた場合、サイトへの表示時に表現を変えさせていただく場合があります。</li>
+        </div>
+
+        <div class="box">
+            <h5>新規チームを作成</h5>
+            <form enctype="multipart/form-data" method="post" action="{% url 'create_team' %}">
+                {% csrf_token %}
+                <div class="field">
+                    <label class="label">{{ form.name.label }}</label>
+                    <div class="control">
+                        {{ form.name }}
+                    </div>
+                    <p class="help">最大100文字</p>
+                </div>
+                <div class="field" id='upload_image_field'>
+                    <label class="label">{{ form.user_icon.label }}</label>
+                    <div id="preview_image" style="border: 1px solid; display: block; background-image: none; background-size: cover; width: 150px; height: 150px;"></div>
+                    <span>{{ form.is_import_github_icon }} {{ form.is_import_github_icon.label }}</span>
+                    <div class="control">
+                        {{ form.user_icon }}
+                    </div>
+                    <p class="help">最大100文字</p>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.owner.label }}</label>
+                    <div class="control">
+                        {{ form.owner }}
+                    </div>
+                    <p class="help">最大100文字</p>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.owner_email.label }}</label>
+                    <div class="control">
+                        {{ form.owner_email }}
+                    </div>
+                    <p class="help">最大256文字</p>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.is_ok.label }}</label>
+                    <div class="control">
+                        {{ form.is_ok }}
+                    </div>
+                </div>
+                <div class="field is-grouped">
+                  <div class="control">
+                    <button class="button is-link">Submit</button>
+                  </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    $("#username").val('{{ username }}');
+    $("#email").val('{{ email }}');
+
+    $('#id_user_icon').on('change', function(event) {
+        var files = event.target.files;
+        var reader = new FileReader();
+        reader.onload = (function () {
+            return function (e) {
+                a = $('#preview_image').css({backgroundImage: 'url("' + e.target.result + '")'});
+            };
+        })(files[0]);
+        reader.readAsDataURL(files[0]);
+    });
+
+    $('#id_is_import_github_icon').on('change', function (){
+        if ($('#id_is_import_github_icon').prop('checked'))
+        {
+            $('#id_user_icon').val('');
+            $('#id_user_icon').attr('disabled', '');
+            $('#preview_image').css({backgroundImage: 'url(https://github.com/{{ username }}.png)'});
+        } else {
+            $('#id_user_icon').removeAttr('disabled');
+            $('#preview_image').css({backgroundImage: 'none'});
+        }
+    });
+</script>
+
+{% endif %}
+
+{% endblock %}

@@ -1,11 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from stdimage.models import StdImageField
 
 from isucon.portal.models import LogicalDeleteMixin
 
 class User(AbstractUser):
     team = models.ForeignKey("Team", blank=True, null=True, on_delete=models.PROTECT)
+    icon = StdImageField(upload_to='media/icons/', blank=True, null=True, variations={
+        'thumbnail': (150, 150, True),
+    })
 
 class Team(LogicalDeleteMixin, models.Model):
     class Meta:

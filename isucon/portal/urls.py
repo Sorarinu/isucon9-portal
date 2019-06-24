@@ -23,4 +23,5 @@ urlpatterns = [
     path('auth/', include("isucon.portal.authentication.urls")),
     path('contest/', include("isucon.portal.contest.urls")),
     path('admin/', admin.site.urls),
+    path('', include('social_django.urls', namespace='social')),
 ]
