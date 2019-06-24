@@ -10,15 +10,17 @@
 </script>
 {% else %}
 
-<div class="container has-text-centered">
-    <figure class="logo">
+<div class="container">
+    <figure class="logo has-text-centered">
         <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
     </figure>
-    <div class="column is-4 is-offset-4">
+    <div class="column is-8 is-offset-2">
         {% if form.errors %}
         <article class="message is-danger">
             <div class="message-header">
-                <p>Oops!</p>
+              {% for error in form.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
             </div>
             <div class="message-body">
                 <strong>Login FAILED!!</strong><br>
@@ -27,9 +29,7 @@
         </article>
         {% endif %}
         {% if user and user.is_authenticated %}
-        <h2>Hello {{ user.get_full_name|default:user.username }}!</h2>
         {% if not user.team %}
-        <h2>新しくチームを作成する</h2>
         <div class="notification is-warning">
             <li><strong>現在ログインしているユーザーを代表者とするチームを作成します。代表者は変更できません。また、他のチームに参加することはできなくなります。</strong></li>
             <li><strong>代表者メールアドレスは競技環境へのログインに必要です。正しくメール受信が行えるアドレスを入力してください。</strong></li>
@@ -42,9 +42,13 @@
         </div>
 
         <div class="box">
-            <h5>新規チームを作成</h5>
+            <h1 class="title">新しくチームを作成する</h2>
+
             <form enctype="multipart/form-data" method="post" action="{% url 'create_team' %}">
                 {% csrf_token %}
+
+                <h2 class="subtitle">チーム情報</h2>
+
                 <div class="field">
                     <label class="label">{{ form.name.label }}</label>
                     <div class="control">
@@ -52,6 +56,18 @@
                     </div>
                     <p class="help">最大100文字</p>
                 </div>
+
+
+                <div class="field">
+                    <label class="label">{{ form.owner_email.label }}</label>
+                    <div class="control">
+                        {{ form.owner_email }}
+                    </div>
+                    <p class="help">最大256文字</p>
+                </div>
+
+                <h2 class="subtitle">参加者情報</h2>
+
                 <div class="field" id='upload_image_field'>
                     <label class="label">{{ form.user_icon.label }}</label>
                     <div id="preview_image" style="border: 1px solid; display: block; background-image: none; background-size: cover; width: 150px; height: 150px;"></div>
@@ -67,13 +83,6 @@
                         {{ form.owner }}
                     </div>
                     <p class="help">最大100文字</p>
-                </div>
-                <div class="field">
-                    <label class="label">{{ form.owner_email.label }}</label>
-                    <div class="control">
-                        {{ form.owner_email }}
-                    </div>
-                    <p class="help">最大256文字</p>
                 </div>
                 <div class="field">
                     <label class="label">{{ form.is_ok.label }}</label>
