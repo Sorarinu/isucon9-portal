@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from isucon.portal.authentication import factories as auth_factories
+from isucon.portal.contest import factories as contest_factories
 from isucon.portal.authentication.models import User, Team
 from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, Job
 from isucon.portal.contest import exceptions
@@ -8,15 +10,10 @@ from isucon.portal.contest import exceptions
 class ScoreHistoryTest(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create()
-        self.benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.xxx")
-        self.team = Team.objects.create(
-            owner=self.user,
-            benchmarker=self.benchmarker,
-            name="test",
-            password="test",
-        )
-        self.server = Server.objects.create(team=self.team, hostname="hoge", global_ip="xxx.xxx.xxx.xxx", private_ip="yyy.yyy.yyy.yyy")
+        self.team = auth_factories.TeamFactory.create()
+        self.user = self.team.user_set.first()
+        self.benchmarker = self.team.benchmarker
+        self.server = contest_factories.ServerFactory(team=self.team)
 
     def test_get_best_score(self):
         """指定チームのベストスコアを取得"""
@@ -46,14 +43,7 @@ class ScoreHistoryTest(TestCase):
         # FIXME: seedデータに置き換え
         teams = []
         for idx in range(10):
-            user = User.objects.create(username="user{}".format(idx))
-            benchmarker = Benchmarker.objects.create(ip="xxx.xxx.xxx.{}".format(idx))
-            team = Team.objects.create(
-                owner=user,
-                benchmarker=benchmarker,
-                name="team{}".format(idx),
-                password="team{}".format(idx),
-            )
+            team = auth_factories.TeamFactory.create()
             teams.append(team)
 
             # 適当にスコア獲得
@@ -65,7 +55,6 @@ class ScoreHistoryTest(TestCase):
         for top_team in top_teams:
             aggregated_score = top_team.aggregated_score
             self.assertEqual(aggregated_score.best_score, want_score)
-            self.assertEqual(top_team.name, "team{}".format(want_score))
             want_score -= 1
 
 
