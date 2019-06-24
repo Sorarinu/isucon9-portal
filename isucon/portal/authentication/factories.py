@@ -12,6 +12,7 @@ class UserFactory(factory.DjangoModelFactory):
         model = models.User
 
     username = factory.Sequence(lambda idx: "user{}".format(idx))
+    is_student = factory.fuzzy.FuzzyChoice([True, False])
 
 class TeamFactory(factory.DjangoModelFactory):
     class Meta:

@@ -10,6 +10,7 @@ class User(AbstractUser):
     icon = StdImageField(upload_to='media/icons/', blank=True, null=True, variations={
         'thumbnail': (150, 150, True),
     })
+    is_student = models.BooleanField('学生フラグ', default=False)
 
 class Team(LogicalDeleteMixin, models.Model):
     class Meta:
@@ -22,7 +23,6 @@ class Team(LogicalDeleteMixin, models.Model):
 
     benchmarker = models.ForeignKey('contest.Benchmarker', verbose_name="ベンチマーカー", on_delete=models.SET_NULL, null=True, blank=True)
 
-    # FIXME: is_student = models.BooleanField('学生フラグ', default=False)
 
     # ベンチマーク結果に関連する情報(チームと一蓮托生なのでCASCADE)
     aggregated_score = models.ForeignKey('contest.AggregatedScore', on_delete=models.CASCADE, null=True, blank=True)
