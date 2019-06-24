@@ -12,6 +12,15 @@ from isucon.portal.contest import exceptions
 # https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON8/Portal/Web/Controller/API.pm#L32
 
 
+class Information(LogicalDeleteMixin, models.Model):
+    class Meta:
+        verbose_name = verbose_name_plural = "お知らせ"
+
+    # TODO: タイトルあった方がいい？
+    # title = models.CharField('タイトル', max_length=100)
+    description = models.TextField('本文')
+
+
 class Benchmarker(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "ベンチマーカー"

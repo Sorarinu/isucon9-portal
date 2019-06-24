@@ -15,6 +15,13 @@ def random_ip(idx):
     return '.'.join(map(str, octets))
 
 
+class InformationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Information
+
+    description = factory.fuzzy.FuzzyText(length=50)
+
+
 class BenchmarkerFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Benchmarker
