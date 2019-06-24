@@ -14,7 +14,7 @@
     <figure class="logo">
         <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
     </figure>
-    <div class="column is-4 is-offset-4">
+    <div class="column is-8 is-offset-2">
         {% if form.errors %}
         <article class="message is-danger">
             <div class="message-header">
@@ -59,8 +59,11 @@
         <h3 class="title has-text-grey">Login</h3>
         <p class="subtitle has-text-grey">Please login to proceed.</p>
         <div class="box">
-            <a href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
-                <button class="button is-block is-info is-large is-fullwidth">Github de login suru</button>
+            <a href="{% url 'social:begin' 'github' %}?next={{ request.path }}" class="button is-large is-fullwidth is-info">
+                <span class="icon is-medium">
+                    <i class="fab fa-github"></i>
+                </span>
+                <span>GitHubアカウントでログインする</span>
             </a>
         </div>
         {% endif %}
