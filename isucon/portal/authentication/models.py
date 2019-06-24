@@ -22,7 +22,7 @@ class Team(LogicalDeleteMixin, models.Model):
     # FIXME: is_student = models.BooleanField('学生フラグ', default=False)
 
     # ベンチマーク結果に関連する情報(チームと一蓮托生なのでCASCADE)
-    aggregated_score = models.ForeignKey('contest.AggregatedScore', on_delete=models.CASCADE, null=True)
+    aggregated_score = models.ForeignKey('contest.AggregatedScore', on_delete=models.CASCADE, null=True, blank=True)
 
     def __name__(self):
         return self.name
