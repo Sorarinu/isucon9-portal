@@ -1,18 +1,18 @@
 from django.contrib import admin
 
-from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, BenchQueue
+from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, Job
 
 
 class ServerAdmin(admin.ModelAdmin):
-    list_display = ["id", "hostname", "global_ip", "private_ip", "private_network"]
+    list_display = ["id", "hostname", "global_ip", "private_ip"]
     list_filter = ["hostname"]
 
 admin.site.register(Server, ServerAdmin)
 
 
 class BenchmarkerAdmin(admin.ModelAdmin):
-    list_display = ["id", "network", "node"]
-    list_filter = ["node"]
+    list_display = ["id", "ip"]
+    list_filter = ["ip"]
 
 admin.site.register(Benchmarker, BenchmarkerAdmin)
 
@@ -24,8 +24,8 @@ class ScoreHistoryAdmin(admin.ModelAdmin):
 admin.site.register(ScoreHistory, ScoreHistoryAdmin)
 
 
-class BenchQueueAdmin(admin.ModelAdmin):
-    list_display = ["id", "team", "node", "target_hostname", "target_ip", "status", "is_passed", "score", "result_json", "log_text"]
-    list_filter = ["team", "target_hostname", "target_ip", "status", "is_passed"]
+class JobAdmin(admin.ModelAdmin):
+    list_display = ["id", "team", "status", "is_passed", "score", "result_json", "log_text"]
+    list_filter = ["team", "status", "is_passed"]
 
-admin.site.register(BenchQueue, BenchQueueAdmin)
+admin.site.register(Job, JobAdmin)
