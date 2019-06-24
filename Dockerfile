@@ -15,6 +15,6 @@ ENV DJANGO_SETTINGS_MODULE isucon.portal.docker_settings
 
 RUN python manage.py collectstatic --noinput
 
-CMD ["bash", "-xe", "./scripts/entrypoint.sh"]
+CMD ["bash", "-xe", "entrypoint.sh"]
 
 EXPOSE 5000

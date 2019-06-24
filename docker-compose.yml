@@ -10,22 +10,6 @@ services:
       - DJANGO_DATABASE_TYPE=postgres
     volumes:
       - "staticdata:/opt/app/static/"
-  celery_beat:
-    restart: always
-    build: ./
-    depends_on:
-      - django
-    environment:
-      - DJANGO_DATABASE_TYPE=postgres
-    command: bash -xe ./scripts/celery_beat.sh
-  celery_worker:
-    restart: always
-    build: ./
-    depends_on:
-      - django
-    environment:
-      - DJANGO_DATABASE_TYPE=postgres
-    command: bash -xe ./scripts/celery_worker.sh
   postgres:
     restart: always
     image: postgres:12-alpine

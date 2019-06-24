@@ -156,8 +156,6 @@ class JobManager(models.Manager):
         for job in jobs:
             job.abort(result_json='{"reason": "Benchmark timeout"}', log_text='')
 
-        return jobs
-
     def check_duplicated(self, team):
         """重複enqueue防止"""
         return self.get_queryset().filter(team=team, status__in=[
