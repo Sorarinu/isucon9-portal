@@ -1,0 +1,1 @@
+celery -A isucon.portal.contest beat -l info
