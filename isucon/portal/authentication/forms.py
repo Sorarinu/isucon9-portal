@@ -12,7 +12,7 @@ class TeamRegisterForm(forms.Form):
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'Team ISUCON'}),
     )
     owner = forms.CharField(
-        label="代表者名(ハンドルネーム可)",
+        label="参加者名 (ハンドルネーム可)",
         max_length=100,
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
@@ -22,11 +22,11 @@ class TeamRegisterForm(forms.Form):
         required=False,
     )
     user_icon = forms.ImageField(
-        label="代表ユーザーのアイコン",
+        label="アイコン",
         required=False,
     )
     owner_email = forms.CharField(
-        label="代表者メールアドレス(公開されません)",
+        label="代表者メールアドレス (公開されません)",
         max_length=256,
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'type': 'email', 'placeholder': 'isucon@example.com', 'id': 'email'}),
@@ -40,23 +40,23 @@ class TeamRegisterForm(forms.Form):
         if self.cleaned_data['user_icon'] is None:
             return None
         return check_uploaded_filesize(self.cleaned_data['user_icon'])
-    
+
     def clean(self):
         cleaned_data = super(TeamRegisterForm, self).clean()
         if not cleaned_data['is_import_github_icon'] and cleaned_data['user_icon'] is None:
             raise ValidationError('アイコンが選択されていません')
-        
+
         return cleaned_data
 
 class JoinToTeamForm(forms.Form):
     display_name = forms.CharField(
-        label="公開する参加者名",
+        label="参加者名 (ハンドルネーム可)",
         max_length=100,
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
     )
     user_icon = forms.ImageField(
-        label="参加するユーザーのアイコン",
+        label="アイコン",
         required=False,
     )
     is_import_github_icon = forms.BooleanField(
@@ -88,15 +88,15 @@ class JoinToTeamForm(forms.Form):
         cleaned_data = super(JoinToTeamForm, self).clean()
         team_id = cleaned_data.get('team_id')
         team_password = cleaned_data.get('team_password')
-        
+
         try:
             team = Team.objects.get(id=int(team_id), password=team_password)
         except ObjectDoesNotExist:
             raise ValidationError('チーム番号かチームパスワードが間違っています')
-        
+
         if len(User.objects.filter(team=team)) >= settings.MAX_TEAM_MEMBER_NUM:
             raise ValidationError('このチームにはこれ以上メンバーを追加できません')
-        
+
         return cleaned_data
 
 
