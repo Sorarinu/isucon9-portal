@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, Job
+from isucon.portal.contest.models import (
+    Server,
+    Information,
+    Benchmarker,
+    ScoreHistory,
+    Job
+)
 
 
 class ServerAdmin(admin.ModelAdmin):
@@ -8,6 +14,13 @@ class ServerAdmin(admin.ModelAdmin):
     list_filter = ["hostname"]
 
 admin.site.register(Server, ServerAdmin)
+
+
+class InformationAdmin(admin.ModelAdmin):
+    list_display = ["id", "description"]
+    list_filter = ["description"]
+
+admin.site.register(Information, InformationAdmin)
 
 
 class BenchmarkerAdmin(admin.ModelAdmin):
