@@ -28,7 +28,7 @@ class TeamFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda idx: "team{}".format(idx))
     password = factory.Sequence(lambda idx: make_password("password{}".format(idx)))
 
-    participate_date = factory.fuzzy.FuzzyChoice([
+    participate_at = factory.fuzzy.FuzzyChoice([
         timezone.now().date(),
         timezone.now().date() + timezone.timedelta(days=1),
     ])

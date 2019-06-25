@@ -24,7 +24,7 @@ def create_team(request):
     # パスワードとして使う文字群から指定文字数ランダムに選択してチームパスワードとする
     password = ''.join(random.choice(settings.PASSWORD_LETTERS) for i in range(settings.PASSWORD_LENGTH))
 
-    team = Team.objects.create(name=form.cleaned_data['name'], password=password, owner=user)
+    team = Team.objects.create(name=form.cleaned_data['name'], participate_at=form.cleaned_data['participate_at'], password=password, owner=user)
 
     user.team = team
     user.is_student = form.cleaned_data['is_student']

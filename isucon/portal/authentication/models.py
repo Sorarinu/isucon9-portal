@@ -16,6 +16,11 @@ class Team(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "チーム"
 
+    PARTICIPATE_DATES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d"))) for idx, d in enumerate([
+        timezone.datetime(2019, 9, 1),
+        timezone.datetime(2019, 9, 2),
+    ])]
+
     owner = models.OneToOneField(User, verbose_name="オーナー", on_delete=models.PROTECT, related_name="+")
     is_active = models.BooleanField("有効", default=True, blank=True)
     name = models.CharField("名前", max_length=100, unique=True)

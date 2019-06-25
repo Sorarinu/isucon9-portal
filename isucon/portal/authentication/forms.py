@@ -39,6 +39,12 @@ class TeamRegisterForm(forms.Form):
         label="注意を読みましたチェック",
         required=True,
     )
+    participate_at = forms.DateField(
+        label="参加日選択",
+        input_formats=["%Y-%m-%d"],
+        widget=forms.Select(choices=Team.PARTICIPATE_DATES),
+        required=True,
+    )
 
     def clean_user_icon(self):
         if self.cleaned_data['user_icon'] is None:

@@ -141,23 +141,6 @@ MAX_UPLOAD_SIZE = 5242880
 
 # アプリケーション固有設定
 
-# 参加日
-contest_mode = os.getenv("CONTEST_MODE", "pre")
-if contest_mode == "pre":
-    # 予選
-    PARTICIPATE_DATES = [
-        timezone.datetime(2019, 9, 1).date(),
-        timezone.datetime(2019, 9, 2).date(),
-    ]
-elif contest_mode == "final":
-    # 本戦
-    PARTICIPATE_DATES = [
-        timezone.datetime(2019, 10, 1).date(),
-        timezone.datetime(2019, 10, 2).date(),
-    ]
-else:
-    raise ValueError("Invalid DJANGO_CONTEST_MODE '{}'".format(contest_mode))
-
 # Github認証に使うトークン
 # TODO: 入れ替える
 SOCIAL_AUTH_GITHUB_KEY = '8ad74d7452d59b6d5572'
