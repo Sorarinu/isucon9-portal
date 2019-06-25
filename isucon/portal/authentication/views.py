@@ -84,6 +84,7 @@ def join_team(request):
 def team_information(request):
     team = request.user.team
 
-    context = {}
+    team_members = User.objects.filter(team=team)
+    context = {'team_members': team_members}
 
     return render(request, "team_information.html", context)

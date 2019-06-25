@@ -10,13 +10,34 @@
     </figure>
     <div class="column is-8 is-offset-2">
 
-      <h1 class="title">チーム登録情報</h1>
+      <div class="box">
+        <h1 class="title">チーム登録情報</h1>
 
-      <h3>チーム名: </h3>
-      <p>{{ user.team.name }}</p>
-      <h3>チーム番号: </h3>
-      <p>{{ user.team.id }}</p>
+        <h2 class="subtitle">チーム名: </h2>
+        <p>{{ user.team.name }}</p>
+        <hr>
+        <h2 class="subtitle">チーム番号: </h3>
+        <p>{{ user.team.id }}</p>
+        <hr>
+        <h2 class="subtitle">チームパスワード: </h3>
+        <p>{{ user.team.password }}</p>
+        <hr>
+        <h2 class="subtitle">チームメンバー一覧</h2>
+        <div style="display: flex; justify-content: center;">
 
+          {% for member in team_members %}
+          <div class="item" style="width: 200px;">
+            <img src="/{{ member.icon.thumbnail.url }}">
+            <p>{{ member }}</p>
+            {% if member.team.owner == member %}
+            <p>チーム代表者</p>
+            {% else %}
+            <p>チームメンバー</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
 </div>
 
