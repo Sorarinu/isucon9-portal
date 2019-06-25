@@ -17,6 +17,10 @@ class TeamRegisterForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
     )
+    is_student = forms.BooleanField(
+        label="あなたが学生の場合、チェックを入れてください",
+        required=False,
+    )
     is_import_github_icon = forms.BooleanField(
         label="アイコンをGithubから取り込む",
         required=False,
@@ -54,6 +58,10 @@ class JoinToTeamForm(forms.Form):
         max_length=100,
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
+    )
+    is_student = forms.BooleanField(
+        label="あなたが学生の場合、チェックを入れてください",
+        required=False,
     )
     user_icon = forms.ImageField(
         label="アイコン",

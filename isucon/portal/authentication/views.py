@@ -25,6 +25,7 @@ def create_team(request):
     team = Team.objects.create(name=form.cleaned_data['name'], password=password, owner=user)
 
     user.team = team
+    user.is_student = form.cleaned_data['is_student']
     if form.cleaned_data['is_import_github_icon']:
         resp = requests.get("https://github.com/%s.png" % str(user))
         if resp.status_code != requests.codes.ok:
@@ -70,6 +71,7 @@ def join_team(request):
     team = Team.objects.get(id=int(team_id), password=team_password)
 
     user.team = team
+    user.is_student = form.cleaned_data['is_student']
     if form.cleaned_data['is_import_github_icon']:
         resp = requests.get("https://github.com/%s.png" % str(user))
         if resp.status_code != requests.codes.ok:
