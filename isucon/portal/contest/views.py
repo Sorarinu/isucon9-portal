@@ -21,6 +21,7 @@ def get_base_context(user):
         "is_last_spurt": is_last_spurt,
     }
 
+# FIXME: check_contest_is_availableで弾かれる際、他のページからdashboardに飛んできて、またdashboardに飛ぼうとして無限ループに陥る
 @team_is_authenticated
 @team_is_now_on_contest
 def dashboard(request):
