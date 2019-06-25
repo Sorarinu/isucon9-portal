@@ -17,8 +17,8 @@ class Team(LogicalDeleteMixin, models.Model):
         verbose_name = verbose_name_plural = "チーム"
 
     PARTICIPATE_DATES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d"))) for idx, d in enumerate([
-        timezone.datetime(2019, 9, 1),
-        timezone.datetime(2019, 9, 2),
+        timezone.datetime(2019, 9, 1).date(),
+        timezone.datetime(2019, 9, 2).date(),
     ])]
 
     owner = models.OneToOneField(User, verbose_name="オーナー", on_delete=models.PROTECT, related_name="+")
