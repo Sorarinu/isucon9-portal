@@ -144,13 +144,14 @@ MAX_UPLOAD_SIZE = 5242880
 
 # コンテスト開催期間
 # 日付
-PARTICIPATE_DATES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d"))) for idx, d in enumerate([
-    timezone.datetime(2019, 9, 1).date(),
-    timezone.datetime(2019, 9, 2).date(),
-])]
+CONTEST_DATES = [
+    datetime.date(2019, 9, 1),
+    datetime.date(2019, 9, 2)
+]
+
 # 時刻
-CONTEST_START_AT = datetime.time(9, 0, 0)
-CONTEST_END_AT = datetime.time(18, 0, 0)
+CONTEST_START_TIME = datetime.time(9, 0, 0)
+CONTEST_END_TIME = datetime.time(18, 0, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える

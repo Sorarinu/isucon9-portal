@@ -43,7 +43,7 @@ class TeamRegisterForm(forms.Form):
     participate_at = forms.DateField(
         label="参加日選択",
         input_formats=["%Y-%m-%d"],
-        widget=forms.Select(choices=settings.PARTICIPATE_DATES),
+        widget=forms.Select(choices=Team.PARTICIPATE_AT_CHOICES),
         required=True,
     )
 

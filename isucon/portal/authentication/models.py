@@ -17,6 +17,8 @@ class Team(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "チーム"
 
+    PARTICIPATE_AT_CHOICES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d"))) for idx, d in enumerate(settings.CONTEST_DATES)]
+
     owner = models.OneToOneField(User, verbose_name="オーナー", on_delete=models.PROTECT, related_name="+")
     is_active = models.BooleanField("有効", default=True, blank=True)
     name = models.CharField("名前", max_length=100, unique=True)
@@ -33,7 +35,7 @@ class Team(LogicalDeleteMixin, models.Model):
         """参加中か(日付が一致し、時刻が範囲内なら)"""
         now = timezone.now()
         in_date = now.date() == self.participate_at
-        in_time = settings.CONTEST_START_AT <= now.time() <= settings.CONTEST_END_AT
+        in_time = settings.CONTEST_START_TIME <= now.time() <= settings.CONTEST_END_TIME
         return in_date and in_time
 
     def __name__(self):
