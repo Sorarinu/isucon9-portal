@@ -141,8 +141,8 @@ MAX_UPLOAD_SIZE = 5242880
 # アプリケーション固有設定
 
 # コンテスト開催期間
-CONTEST_START_AT = timezone.datetime(2019, 9, 1, 9, 0, 0)
-CONTEST_END_AT = timezone.datetime(2019, 9, 2, 18, 0, 0)
+CONTEST_START_AT = timezone.datetime(2019, 9, 1, 9, 0, 0).time()
+CONTEST_END_AT = timezone.datetime(2019, 9, 2, 18, 0, 0).time()
 
 # Github認証に使うトークン
 # TODO: 入れ替える

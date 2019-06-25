@@ -38,7 +38,7 @@ class Team(LogicalDeleteMixin, models.Model):
         """参加中か(日付が一致し、時刻が範囲内なら)"""
         now = timezone.now()
         in_date = now.date() == self.participate_at
-        in_time = settings.CONTEST_START_AT.time() <= now.time() <= settings.CONTEST_END_AT.time()
+        in_time = settings.CONTEST_START_AT <= now.time() <= settings.CONTEST_END_AT
         return in_date and in_time
 
     def __name__(self):
