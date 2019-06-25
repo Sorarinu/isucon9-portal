@@ -2,6 +2,7 @@ import random
 from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core import files
 import requests
@@ -10,7 +11,6 @@ from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
 from isucon.portal.authentication.decorators import team_is_authenticated
 
-from django.conf import settings
 
 @login_required
 def create_team(request):

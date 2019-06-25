@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from django.utils import timezone
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -138,6 +139,10 @@ LOGIN_URL = "login"
 MAX_UPLOAD_SIZE = 5242880
 
 # アプリケーション固有設定
+
+# コンテスト開催期間
+CONTEST_START_AT = timezone.datetime(2019, 9, 1, 9, 0, 0)
+CONTEST_END_AT = timezone.datetime(2019, 9, 2, 18, 0, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える
