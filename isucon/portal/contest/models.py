@@ -213,7 +213,9 @@ class Job(models.Model):
 
     @property
     def result(self):
-        return json.loads(self.result_json)
+        if self.result_json:
+            return json.loads(self.result_json)
+        return {}
 
     @result.setter
     def result(self, result):
