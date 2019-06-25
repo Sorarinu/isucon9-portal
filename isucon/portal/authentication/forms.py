@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.conf import settings
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal import settings
@@ -42,7 +43,7 @@ class TeamRegisterForm(forms.Form):
     participate_at = forms.DateField(
         label="参加日選択",
         input_formats=["%Y-%m-%d"],
-        widget=forms.Select(choices=Team.PARTICIPATE_DATES),
+        widget=forms.Select(choices=settings.PARTICIPATE_DATES),
         required=True,
     )
 
