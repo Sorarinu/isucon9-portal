@@ -2,7 +2,8 @@ import random
 from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.conf import settings
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core import files
 import requests
 
@@ -10,7 +11,6 @@ from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
 from isucon.portal.authentication.decorators import team_is_authenticated
 
-from django.conf import settings
 
 @login_required
 def create_team(request):
@@ -24,7 +24,7 @@ def create_team(request):
     # パスワードとして使う文字群から指定文字数ランダムに選択してチームパスワードとする
     password = ''.join(random.choice(settings.PASSWORD_LETTERS) for i in range(settings.PASSWORD_LENGTH))
 
-    team = Team.objects.create(name=form.cleaned_data['name'], password=password, owner=user)
+    team = Team.objects.create(name=form.cleaned_data['name'], participate_at=form.cleaned_data['participate_at'], password=password, owner=user)
 
     user.team = team
     user.is_student = form.cleaned_data['is_student']

@@ -5,7 +5,12 @@ from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
 
 def get_base_context(user):
-    target_server = Server.objects.get_bench_target(user.team)
+    try:
+        target_server = Server.objects.get_bench_target(user.team)
+    except Server.DoesNotExist:
+        # FIXME: チーム作成直後、チームのサーバは存在しないため、ここでDoesNotExistが投げられるのを回避するためのコード
+        # チームにサーバを割り当てる時どうするか決める
+        target_server = None
     # FIXME: ラストスパート判定
     # ラスト１時間であるかを判定すれば良いので、競技の開始、終了時刻をsettings.pyなどに突っ込んでおく
     # https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON8/Portal/Web.pm#L92
