@@ -155,7 +155,7 @@ class JobManager(models.Manager):
         # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
         jobs = Job.objects.filter(status=Job.RUNNING, updated_at__lt=deadline)
         for job in jobs:
-            job.abort(result_json='{"reason": "Benchmark timeout"}', log_text='')
+            job.abort(result=dict(reason="Benchmark timeout"), log_text='')
 
     def check_duplicated(self, team):
         """重複enqueue防止"""
@@ -212,23 +212,26 @@ class Job(models.Model):
         ]
 
     @property
-    def result_json_object(self):
+    def result(self):
         return json.loads(self.result_json)
+
+    @result.setter
+    def result(self, result):
+        self.result_json = json.dumps(result)
 
     def append_log(self, log):
         self.log_text += log
         self.save(update_fields=["log_raw"])
 
-    def done(self, result_json, log_text):
+    def done(self, result, log_text):
         self.status = Job.DONE
-        self.result_json = result_json
+        self.result = result
         # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
         self.log_text = log_text
 
         # 結果のJSONからスコアや結果を参照し、ジョブに設定
-        result_json_object = self.result_json_object
-        self.score = result_json_object['score']
-        if result_json_object['pass']:
+        self.score = self.result['score']
+        if self.result['pass']:
             self.is_passed = True
         self.save()
 
@@ -239,9 +242,9 @@ class Job(models.Model):
             is_passed=self.is_passed,
         )
 
-    def abort(self, result_json, log_text):
+    def abort(self, result, log_text):
         self.status = Job.ABORTED
-        self.result_json = result_json
+        self.result = result
         self.log_text = log_text
         self.save()
 
