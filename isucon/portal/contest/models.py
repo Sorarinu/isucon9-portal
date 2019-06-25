@@ -3,6 +3,7 @@ import json
 
 from django.db import models
 from django.db.models import Max, Sum
+from django.forms.models import model_to_dict
 from django.utils import timezone
 
 from isucon.portal import settings
@@ -156,6 +157,8 @@ class JobManager(models.Manager):
         jobs = Job.objects.filter(status=Job.RUNNING, updated_at__lt=deadline)
         for job in jobs:
             job.abort(result_json='{"reason": "Benchmark timeout"}', log_text='')
+
+        return list(map(model_to_dict, jobs))
 
     def check_duplicated(self, team):
         """重複enqueue防止"""
