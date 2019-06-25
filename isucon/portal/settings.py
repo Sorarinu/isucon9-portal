@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from django.utils import timezone
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -138,6 +140,23 @@ LOGIN_URL = "login"
 MAX_UPLOAD_SIZE = 5242880
 
 # アプリケーション固有設定
+
+# 参加日
+contest_mode = os.getenv("CONTEST_MODE", "pre")
+if contest_mode == "pre":
+    # 予選
+    PARTICIPATE_DATES = [
+        timezone.datetime(2019, 9, 1).date(),
+        timezone.datetime(2019, 9, 2).date(),
+    ]
+elif contest_mode == "final":
+    # 本戦
+    PARTICIPATE_DATES = [
+        timezone.datetime(2019, 10, 1).date(),
+        timezone.datetime(2019, 10, 2).date(),
+    ]
+else:
+    raise ValueError("Invalid DJANGO_CONTEST_MODE '{}'".format(contest_mode))
 
 # Github認証に使うトークン
 # TODO: 入れ替える

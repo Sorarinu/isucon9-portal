@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from django.utils import timezone
 
 import factory
 import factory.fuzzy
@@ -26,5 +27,10 @@ class TeamFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda idx: "team{}".format(idx))
     password = factory.Sequence(lambda idx: make_password("password{}".format(idx)))
+
+    participate_date = factory.fuzzy.FuzzyChoice([
+        timezone.now().date(),
+        timezone.now().date() + timezone.timedelta(days=1),
+    ])
 
     is_active = True

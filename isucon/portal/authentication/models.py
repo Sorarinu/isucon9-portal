@@ -23,9 +23,14 @@ class Team(LogicalDeleteMixin, models.Model):
 
     benchmarker = models.ForeignKey('contest.Benchmarker', verbose_name="ベンチマーカー", on_delete=models.SET_NULL, null=True, blank=True)
 
+    participate_at = models.DateField("参加日", blank=True)
 
     # ベンチマーク結果に関連する情報(チームと一蓮托生なのでCASCADE)
     aggregated_score = models.ForeignKey('contest.AggregatedScore', on_delete=models.CASCADE, null=True, blank=True)
+
+    def is_playing(self):
+        """参加中か"""
+        return self.participate_at == timezone.now().date()
 
     def __name__(self):
         return self.name
