@@ -10,7 +10,7 @@ class User(AbstractUser):
     icon = StdImageField(upload_to='media/icons/', blank=True, null=True, variations={
         'thumbnail': (150, 150, True),
     })
-    is_student = models.BooleanField('学生フラグ', default=False)
+    is_student = models.BooleanField('学生フラグ', default=False, blank=True)
 
 class Team(LogicalDeleteMixin, models.Model):
     class Meta:
