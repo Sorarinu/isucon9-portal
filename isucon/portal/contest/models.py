@@ -194,8 +194,8 @@ class Job(models.Model):
     score = models.IntegerField("獲得スコア", default=0, null=False)
 
     # ベタテキスト
-    result_json = models.TextField("結果JSON")
-    log_text = models.TextField("ログ文字列")
+    result_json = models.TextField("結果JSON", blank=True)
+    log_text = models.TextField("ログ文字列", blank=True)
 
     # 日時
     created_at = models.DateTimeField("作成日時", auto_now_add=True)
