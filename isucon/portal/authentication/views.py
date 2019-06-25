@@ -8,7 +8,9 @@ import requests
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
-from isucon.portal import settings
+from isucon.portal.authentication.decorators import team_is_authenticated
+
+from django.conf import settings
 
 @login_required
 def create_team(request):
@@ -42,17 +44,7 @@ def create_team(request):
     user.email = form.cleaned_data['owner_email']
     user.save()
 
-    
-
-    context = {
-        "team_name": team.name,
-        "team_password": team.password,
-        "team_id": team.id,
-        'username': request.user,
-        'email': request.user.email,
-    }
-
-    return render(request, "team_created.html", context)
+    return redirect("team_information")
 
 @login_required
 def join_team(request):
@@ -67,7 +59,7 @@ def join_team(request):
 
     team_id = form.cleaned_data['team_id']
     team_password = form.cleaned_data['team_password']
-    
+
     team = Team.objects.get(id=int(team_id), password=team_password)
 
     user.team = team
@@ -86,11 +78,12 @@ def join_team(request):
         user.icon = form.cleaned_data['user_icon']
     user.save()
 
+    return redirect("team_information")
 
-    context = {
-        "team_name": team.name,
-        "team_id": team.id,
-        'username': request.user,
-    }
-    
-    return render(request, "team_joined.html", context)
+@team_is_authenticated
+def team_information(request):
+    team = request.user.team
+
+    context = {}
+
+    return render(request, "team_information.html", context)

@@ -1,0 +1,23 @@
+{% extends "include/layout_simple.html" %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container has-text-centered">
+    <figure class="logo">
+        <img src="{% static "img/isucon_logo@3x.png" %}" width="400px">
+    </figure>
+    <div class="column is-8 is-offset-2">
+
+      <h1 class="title">チーム登録情報</h1>
+
+      <h3>チーム名: </h3>
+      <p>{{ user.team.name }}</p>
+      <h3>チーム番号: </h3>
+      <p>{{ user.team.id }}</p>
+
+    </div>
+</div>
+
+{% endblock %}

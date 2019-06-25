@@ -1,11 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 
 from isucon.portal.authentication.decorators import team_is_authenticated
+from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
-
-def index(request):
-    return render(request, "index.html")
-
 
 def get_base_context(user):
     target_server = Server.objects.get_bench_target(user.team)
@@ -20,15 +17,13 @@ def get_base_context(user):
     }
 
 @team_is_authenticated
+@team_is_now_on_contest
 def dashboard(request):
     context = get_base_context(request.user)
 
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = ScoreHistory.objects.get_top_teams()
-    
-    # if len(recent_jobs) == 0:
-    #     return render(request, "dashboard.html", context)
-    
+
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
@@ -37,6 +32,7 @@ def dashboard(request):
     return render(request, "dashboard.html", context)
 
 @team_is_authenticated
+@team_is_now_on_contest
 def jobs(request):
     context = get_base_context(request.user)
 
@@ -48,6 +44,7 @@ def jobs(request):
     return render(request, "jobs.html", context)
 
 @team_is_authenticated
+@team_is_now_on_contest
 def job_detail(request, pk):
     context = get_base_context(request.user)
 
@@ -59,6 +56,7 @@ def job_detail(request, pk):
     return render(request, "job_detail.html", context)
 
 @team_is_authenticated
+@team_is_now_on_contest
 def scores(request):
     context = get_base_context(request.user)
 
@@ -70,6 +68,7 @@ def scores(request):
     return render(request, "scores.html", context)
 
 @team_is_authenticated
+@team_is_now_on_contest
 def servers(request):
     context = get_base_context(request.user)
 
