@@ -141,8 +141,7 @@ MAX_UPLOAD_SIZE = 5242880
 # アプリケーション固有設定
 
 # 登録期間
-# REGISTRATION_START_AT = datetime.datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_START_AT = datetime.datetime(2019, 6, 1, 9, 0, 0)
+REGISTRATION_START_AT = datetime.datetime(2019, 7, 1, 9, 0, 0)
 REGISTRATION_END_AT = datetime.datetime(2019, 8, 25, 9, 0, 0)
 
 # コンテスト開催期間
