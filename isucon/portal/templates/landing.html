@@ -44,6 +44,16 @@
                   <span>Twitter</span>
                 </a>
               </span>
+              {% if user and user.is_authenticated and user.team %}
+              <span class="navbar-item">
+                <a class="button is-white is-outlined" target="_blank" href="{% url "team_information" %}">
+                  <span class="icon">
+                    <i class="fas fa-info-circle"></i>
+                  </span>
+                  <span>チーム情報</span>
+                </a>
+              </span>
+              {% endif %}
             </div>
           </div>
         </div>
