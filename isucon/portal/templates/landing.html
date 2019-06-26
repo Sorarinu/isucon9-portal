@@ -89,7 +89,7 @@
                 Final: 2018.10.20 10:00 - 18:00
             </h2>
             <div>
-              {% if user and user.is_authenticated and not user.team %}
+              {% if is_registration_available and user and user.is_authenticated and not user.team %}
               <div class="btn-toolbar">
                 <div class="btn-group">
                   <a class="button is-white is-outlined" href="{% url "create_team" %}">
