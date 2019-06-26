@@ -82,19 +82,23 @@
       <div class="hero-body">
         <div class="container has-text-centered">
           <div class="column is-6 is-offset-3">
+            {% if is_registration_available and user and user.is_authenticated and not user.team %}
             <h1 class="title">
-              Coming Soon
+              大好評参加登録受付中！
             </h1>
             <h2 class="subtitle">
-                Final: 2018.10.20 10:00 - 18:00
+                登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
             </h2>
             <div>
-              {% if is_registration_available and user and user.is_authenticated and not user.team %}
-              <a class="button is-white is-outlined" href="{% url "login" %}">
+              <a class="button is-white is-outlined is-large" href="{% url "login" %}">
                 参加登録！
               </a>
-              {% endif %}
             </div>
+            {% else %}
+            <h1 class="title">
+              Comming soon!
+            </h1>
+            {% endif %}
           </div>
         </div>
       </div>
