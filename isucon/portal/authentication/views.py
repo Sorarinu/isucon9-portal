@@ -9,9 +9,10 @@ import requests
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
-from isucon.portal.authentication.decorators import team_is_authenticated
+from isucon.portal.authentication.decorators import team_is_authenticated, check_registration
 
 
+@check_registration
 @login_required
 def create_team(request):
     user = request.user
@@ -46,6 +47,7 @@ def create_team(request):
 
     return redirect("team_information")
 
+@check_registration
 @login_required
 def join_team(request):
     user = request.user

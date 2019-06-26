@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import datetime
 import os
 
-from django.utils import timezone
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -141,6 +139,10 @@ LOGIN_URL = "login"
 MAX_UPLOAD_SIZE = 5242880
 
 # アプリケーション固有設定
+
+# 登録期間
+REGISTRATION_START_AT = datetime.datetime(2019, 7, 1, 9, 0, 0)
+REGISTRATION_END_AT = datetime.datetime(2019, 8, 25, 9, 0, 0)
 
 # コンテスト開催期間
 # 日付
