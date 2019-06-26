@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
 
 from isucon.portal.authentication.decorators import team_is_authenticated
+from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
 
@@ -83,3 +85,19 @@ def servers(request):
         "servers": servers,
     })
     return render(request, "servers.html", context)
+
+
+def teams(request):
+
+    teams = Team.objects.order_by('id').all()
+    
+    paginator = Paginator(teams, 100)
+
+    page = request.GET.get('page')
+    teams = paginator.get_page(page)
+
+    context = {
+        'teams': teams,
+    }
+
+    return render(request, "teams.html", context)

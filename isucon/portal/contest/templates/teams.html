@@ -1,0 +1,47 @@
+{% extends "include/layout.html" %}
+
+{% block content %}
+<div class="column is-9">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/">ISUCON8</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Show All Teams</a></li>
+        </ul>
+    </nav>
+
+    <section class="table-list">
+        <div class="card events-card">
+            <header class="card-header is-danger">
+                <p class="card-header-title">
+                    <span class="icon">
+                        <i class="fas fa-chart-area"></i>
+                    </span>
+                    <span>All Teams</span>
+                </p>
+            </header>
+            <div class="card-table">
+                <div class="content">
+                    <table class="table is-fullwidth is-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Team Name</th>
+                                <th>Members</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr {% if team.id == user.team.id %}class="is-selected"{% endif %}>
+                                <td class="has-text-right">{{ team.id }}</td>
+                                <td class="has-text-right">{{ team.name }}</td>
+                                <td class="has-text-right">{% for member in team.user_set.all %}{{ member }}, {% endfor %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
