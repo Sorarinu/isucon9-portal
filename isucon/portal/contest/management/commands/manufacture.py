@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def generate_team_users(self, team):
         user_num = random.randint(0, 2) # 追加メンバは 0 ~ 2
-        UserFactory.create_batch(user_num)
+        UserFactory.create_batch(user_num, team=team)
 
     def generate_servers(self, team, server_num):
         for _ in range(server_num):
