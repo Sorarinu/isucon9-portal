@@ -16,6 +16,6 @@ def check_registration(function):
     def _function(request, *args, **kwargs):
         now = timezone.now().now()
         if not (settings.REGISTRATION_START_AT <= now <= settings.REGISTRATION_END_AT):
-            return redirect("/")
+            return redirect("index")
         return function(request, *args, **kwargs)
     return _function
