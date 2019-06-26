@@ -53,23 +53,6 @@
                   <span>チーム情報</span>
                 </a>
               </span>
-              {% elif user and user.is_authenticated and not user.team %}
-              <span class="navbar-item">
-                <a class="button is-white is-outlined" href="{% url "create_team" %}">
-                  <span class="icon">
-                    <i class="fas fa-plus"></i>
-                  </span>
-                  <span>チームを作成</span>
-                </a>
-              </span>
-              <span class="navbar-item">
-                <a class="button is-white is-outlined" href="{% url "join_team" %}">
-                  <span class="icon">
-                    <i class="fas fa-user-plus"></i>
-                  </span>
-                  <span>チームに参加</span>
-                </a>
-              </span>
               {% endif %}
               {% if user and user.is_authenticated %}
               <span class="navbar-item">
@@ -105,6 +88,26 @@
             <h2 class="subtitle">
                 Final: 2018.10.20 10:00 - 18:00
             </h2>
+            <div>
+              {% if user and user.is_authenticated and not user.team %}
+              <div class="btn-toolbar">
+                <div class="btn-group">
+                  <a class="button is-white is-outlined" href="{% url "create_team" %}">
+                    <span class="icon">
+                      <i class="fas fa-plus"></i>
+                    </span>
+                    <span>チームを作成</span>
+                  </a>
+                  <a class="button is-white is-outlined" href="{% url "join_team" %}">
+                    <span class="icon">
+                      <i class="fas fa-user-plus"></i>
+                    </span>
+                    <span>チームに参加</span>
+                  </a>
+                </div>
+              </div>
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
