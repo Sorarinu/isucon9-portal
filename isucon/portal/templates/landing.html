@@ -90,22 +90,9 @@
             </h2>
             <div>
               {% if is_registration_available and user and user.is_authenticated and not user.team %}
-              <div class="btn-toolbar">
-                <div class="btn-group">
-                  <a class="button is-white is-outlined" href="{% url "create_team" %}">
-                    <span class="icon">
-                      <i class="fas fa-plus"></i>
-                    </span>
-                    <span>チームを作成</span>
-                  </a>
-                  <a class="button is-white is-outlined" href="{% url "join_team" %}">
-                    <span class="icon">
-                      <i class="fas fa-user-plus"></i>
-                    </span>
-                    <span>チームに参加</span>
-                  </a>
-                </div>
-              </div>
+              <a class="button is-white is-outlined" href="{% url "login" %}">
+                参加登録！
+              </a>
               {% endif %}
             </div>
           </div>
