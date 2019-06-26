@@ -139,6 +139,8 @@ LOGIN_URL = "login"
 MAX_UPLOAD_SIZE = 5242880
 
 # アプリケーション固有設定
+MEDIA_URL = 'media/'
+
 
 # 登録期間
 REGISTRATION_START_AT = datetime.datetime(2019, 7, 1, 9, 0, 0)
