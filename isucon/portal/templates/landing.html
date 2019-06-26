@@ -46,11 +46,47 @@
               </span>
               {% if user and user.is_authenticated and user.team %}
               <span class="navbar-item">
-                <a class="button is-white is-outlined" target="_blank" href="{% url "team_information" %}">
+                <a class="button is-white is-outlined" href="{% url "team_information" %}">
                   <span class="icon">
                     <i class="fas fa-info-circle"></i>
                   </span>
                   <span>チーム情報</span>
+                </a>
+              </span>
+              {% elif user and user.is_authenticated and not user.team %}
+              <span class="navbar-item">
+                <a class="button is-white is-outlined" href="{% url "create_team" %}">
+                  <span class="icon">
+                    <i class="fas fa-plus"></i>
+                  </span>
+                  <span>チームを作成</span>
+                </a>
+              </span>
+              <span class="navbar-item">
+                <a class="button is-white is-outlined" href="{% url "join_team" %}">
+                  <span class="icon">
+                    <i class="fas fa-user-plus"></i>
+                  </span>
+                  <span>チームに参加</span>
+                </a>
+              </span>
+              {% endif %}
+              {% if user and user.is_authenticated %}
+              <span class="navbar-item">
+                <a class="button is-white is-outlined" href="{% url "logout" %}">
+                  <span class="icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                  </span>
+                  <span>ログアウト</span>
+                </a>
+              </span>
+              {% else %}
+              <span class="navbar-item">
+                <a class="button is-white is-outlined" href="{% url "login" %}">
+                  <span class="icon">
+                    <i class="fas fa-sign-in-alt"></i>
+                  </span>
+                  <span>ログイン</span>
                 </a>
               </span>
               {% endif %}
