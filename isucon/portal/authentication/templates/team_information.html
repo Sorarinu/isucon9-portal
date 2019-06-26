@@ -13,19 +13,19 @@
       <div class="box">
         <h1 class="title">チーム登録情報</h1>
 
-        <h2 class="subtitle">チーム名: </h2>
-        <p>{{ user.team.name }}</p>
+        <h2 class="subtitle">チーム名</h2>
+        <p class="is-size-4">{{ user.team.name }}</p>
         <hr>
-        <h2 class="subtitle">チーム番号: </h3>
-        <p>{{ user.team.id }}</p>
+        <h2 class="subtitle">チーム番号</h3>
+        <p class="is-size-4">{{ user.team.id }}</p>
         <hr>
-        <h2 class="subtitle">チームパスワード: </h3>
+        <h2 class="subtitle">チームパスワード</h3>
           <div style="display: flex;">
             <textarea class="textarea has-fixed-size" id="team_password" style="flex-basis: auto; min-width: 50%; min-height: 6ex; text-align: center;" readonly>{{ user.team.password }}</textarea>
             <button id="copy_button" style="flex-basis: 6em; min-height: 6ex; " class="button is-info">コピー</button>
           </div>
         <hr>
-        <h2 class="subtitle">チームメンバー一覧</h2>
+        <h2 class="subtitle">チームメンバー</h2>
         <div style="display: flex; flex-wrap: wrap;justify-content: center;">
 
           {% for member in team_members %}
