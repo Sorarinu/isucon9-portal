@@ -10,12 +10,15 @@ def has_team(user):
 
 team_is_authenticated = user_passes_test(has_team)
 
-def check_registration(function):
+def is_registration_available():
     """登録可能か日時チェック"""
+    now = timezone.now().now()
+    return settings.REGISTRATION_START_AT <= now <= settings.REGISTRATION_END_AT
+
+def check_registration(function):
     @functools.wraps(function)
     def _function(request, *args, **kwargs):
-        now = timezone.now().now()
-        if not (settings.REGISTRATION_START_AT <= now <= settings.REGISTRATION_END_AT):
+        if not is_registration_available():
             return redirect("index")
         return function(request, *args, **kwargs)
     return _function
