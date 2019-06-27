@@ -141,10 +141,21 @@ MAX_UPLOAD_SIZE = 5242880
 # アプリケーション固有設定
 MEDIA_URL = 'media/'
 
+def get_utc_time(hour, minute, second):
+    """指定時刻をUTCとして取得"""
+    return datetime.datetime.now()\
+            .replace(hour=hour, minute=minute, second=second)\
+            .astimezone(datetime.timezone.utc)\
+            .time()
+
+def get_utc_datetime(year, month, date, hour, minute, second):
+    """指定日時をUTCとして取得"""
+    return datetime.datetime(year, month, date, hour, minute, second)\
+            .astimezone(datetime.timezone.utc)
 
 # 登録期間
-REGISTRATION_START_AT = datetime.datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_END_AT = datetime.datetime(2019, 8, 25, 9, 0, 0)
+REGISTRATION_START_AT = get_utc_datetime(2019, 7, 1, 9, 0, 0)
+REGISTRATION_END_AT = get_utc_datetime(2019, 8, 25, 9, 0, 0)
 
 # コンテスト開催期間
 # 日付
@@ -154,8 +165,8 @@ CONTEST_DATES = [
 ]
 
 # 時刻
-CONTEST_START_TIME = datetime.time(9, 0, 0)
-CONTEST_END_TIME = datetime.time(18, 0, 0)
+CONTEST_START_TIME = get_utc_time(9, 0, 0)
+CONTEST_END_TIME = get_utc_time(18, 0, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える
