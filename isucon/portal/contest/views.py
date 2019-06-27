@@ -93,8 +93,12 @@ def teams(request):
     
     paginator = Paginator(teams, 100)
 
-    page = request.GET.get('page')
-    teams = paginator.get_page(page)
+    if request.GET.get('page') is None:
+        page_index = 1
+    else:
+        page_index = int(request.GET.get('page'))
+    
+    teams = paginator.get_page(page_index)
 
     context = {
         'teams': teams,

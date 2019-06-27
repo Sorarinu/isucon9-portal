@@ -42,6 +42,31 @@
                 </div>
             </div>
         </div>
+        <div>
+            <p style="text-align: right;">{{ teams.number }} / {{ teams.paginator.num_pages }}</p>
+            <div style="display: flex">
+                <div style="margin-right: 20px;">
+                    {% if teams.has_previous %}
+                    <a href="{% url 'teams' %}?page={{ teams.previous_page_number }}">
+                        {% endif %}
+                        <button class="button is-info" {% if not teams.has_previous %} disabled{% endif %}>
+                            前のページ
+                        </button>
+                        {% if teams.has_previous %}
+                    </a>
+                    {% endif %}
+                </div>
+                <div style="margin-left: auto;">
+                    {% if teams.has_next %}
+                    <a href="{% url 'teams' %}?page={{ teams.next_page_number }}">
+                        {% endif %}
+                        <button class="button is-info"{% if not teams.has_next %} disabled{% endif %}>次のページ</button>
+                        {% if teams.has_next %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </section>
 </div>
 {% endblock %}
