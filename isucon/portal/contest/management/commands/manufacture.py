@@ -17,6 +17,7 @@ class Command(BaseCommand):
 
             # チームがownerに設定される
             owner.team = team
+            owner.save()
             yield team
 
     def generate_team_users(self, team):
