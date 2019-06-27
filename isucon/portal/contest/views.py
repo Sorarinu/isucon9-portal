@@ -93,11 +93,11 @@ def teams(request):
     
     paginator = Paginator(teams, 100)
 
-    if request.GET.get('page') is None:
+    try:
+        page_index = int(request.GET.get('page', 1))
+    except ValueError:
         page_index = 1
-    else:
-        page_index = int(request.GET.get('page'))
-    
+
     teams = paginator.get_page(page_index)
 
     context = {
