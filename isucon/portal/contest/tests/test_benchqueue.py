@@ -12,8 +12,10 @@ from isucon.portal.contest import exceptions
 class JobTest(TestCase):
 
     def setUp(self):
-        self.team = auth_factories.TeamFactory.create()
-        self.user = self.team.user_set.first()
+        self.owner = auth_factories.UserFactory()
+        self.team = auth_factories.TeamFactory.create(owner=self.owner)
+        self.owner.team = self.team
+
         self.benchmarker = self.team.benchmarker
         self.server = contest_factories.ServerFactory(team=self.team)
 
