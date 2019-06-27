@@ -1,0 +1,72 @@
+{% extends "include/layout.html" %}
+
+{% block content %}
+<div class="column is-9">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/">ISUCON8</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Show All Teams</a></li>
+        </ul>
+    </nav>
+
+    <section class="table-list">
+        <div class="card events-card">
+            <header class="card-header is-danger">
+                <p class="card-header-title">
+                    <span class="icon">
+                        <i class="fas fa-chart-area"></i>
+                    </span>
+                    <span>All Teams</span>
+                </p>
+            </header>
+            <div class="card-table">
+                <div class="content">
+                    <table class="table is-fullwidth is-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Team Name</th>
+                                <th>Members</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr {% if team.id == user.team.id %}class="is-selected"{% endif %}>
+                                <td class="has-text-right">{{ team.id }}</td>
+                                <td class="has-text-right">{{ team.name }}</td>
+                                <td class="has-text-right">{% for member in team.user_set.all %}{{ member }}, {% endfor %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <p style="text-align: right;">{{ teams.number }} / {{ teams.paginator.num_pages }}</p>
+            <div style="display: flex">
+                <div style="margin-right: 20px;">
+                    {% if teams.has_previous %}
+                    <a href="{% url 'teams' %}?page={{ teams.previous_page_number }}">
+                        {% endif %}
+                        <button class="button is-info" {% if not teams.has_previous %} disabled{% endif %}>
+                            前のページ
+                        </button>
+                        {% if teams.has_previous %}
+                    </a>
+                    {% endif %}
+                </div>
+                <div style="margin-left: auto;">
+                    {% if teams.has_next %}
+                    <a href="{% url 'teams' %}?page={{ teams.next_page_number }}">
+                        {% endif %}
+                        <button class="button is-info"{% if not teams.has_next %} disabled{% endif %}>次のページ</button>
+                        {% if teams.has_next %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
