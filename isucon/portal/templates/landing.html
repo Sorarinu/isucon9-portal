@@ -87,7 +87,7 @@
               大好評参加登録受付中！
             </h1>
             <h2 class="subtitle">
-                登録期間: {{ registration_start_at | localtime | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
+                登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
             </h2>
             <div>
               <a class="button is-white is-outlined is-large" href="{% url "login" %}">
@@ -99,7 +99,7 @@
               Comming soon!
             </h1>
             <h2 class="subtitle">
-                登録期間: {{ registration_start_at | localtime | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
+                登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
             </h2>
             {% endif %}
           </div>
