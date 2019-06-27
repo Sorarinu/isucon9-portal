@@ -22,7 +22,7 @@ class TeamFactory(factory.DjangoModelFactory):
         model = models.Team
 
     # NOTE: owner以外は、別スクリプトで設定
-    owner = factory.SubFactory(UserFactory)
+    owner = factory.LazyAttribute(lambda o: UserFactory(team=o))
     benchmarker = factory.SubFactory(contest_factories.BenchmarkerFactory)
 
     name = factory.Sequence(lambda idx: "team{}".format(idx))
