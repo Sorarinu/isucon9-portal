@@ -8,6 +8,8 @@ services:
       - postgres
     environment:
       - DJANGO_DATABASE_TYPE=postgres
+      - GITHUB_KEY
+      - GITHUB_SECRET
     volumes:
       - "staticdata:/opt/app/static/"
   discard_forever:

@@ -46,6 +46,9 @@ elif DATABASE_TYPE == "postgres":
 else:
     raise ValueError("Invalid DJANGO_DATABASE_TYPE '{}'".format(DATABASE_TYPE))
 
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get("GITHUB_KEY", "")
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("GITHUB_SECRET", "")
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
