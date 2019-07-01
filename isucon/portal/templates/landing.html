@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static %}{% load tz %}<!DOCTYPE html>
 <html>
 
 <head>
@@ -82,6 +82,7 @@
       <div class="hero-body">
         <div class="container has-text-centered">
           <div class="column is-6 is-offset-3">
+            {% localtime on %}
             {% if is_registration_available and user and user.is_authenticated and not user.team %}
             <h1 class="title">
               大好評参加登録受付中！
@@ -102,6 +103,7 @@
                 登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
             </h2>
             {% endif %}
+            {% endlocaltime %}
           </div>
         </div>
       </div>
