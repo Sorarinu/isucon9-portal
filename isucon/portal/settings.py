@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import datetime
 import os
 
+from isucon.portal import utils as portal_utils
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -141,10 +143,9 @@ MAX_UPLOAD_SIZE = 5242880
 # アプリケーション固有設定
 MEDIA_URL = 'media/'
 
-
 # 登録期間
-REGISTRATION_START_AT = datetime.datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_END_AT = datetime.datetime(2019, 8, 25, 9, 0, 0)
+REGISTRATION_START_AT = portal_utils.get_utc_datetime(2019, 7, 1, 9, 0, 0)
+REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 8, 25, 9, 0, 0)
 
 # コンテスト開催期間
 # 日付
@@ -154,8 +155,8 @@ CONTEST_DATES = [
 ]
 
 # 時刻
-CONTEST_START_TIME = datetime.time(9, 0, 0)
-CONTEST_END_TIME = datetime.time(18, 0, 0)
+CONTEST_START_TIME = portal_utils.get_utc_time(9, 0, 0)
+CONTEST_END_TIME = portal_utils.get_utc_time(18, 0, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える

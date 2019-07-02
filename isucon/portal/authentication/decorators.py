@@ -12,7 +12,7 @@ team_is_authenticated = user_passes_test(has_team)
 
 def is_registration_available():
     """登録可能か日時チェック"""
-    now = timezone.now().now()
+    now = timezone.now()
     return settings.REGISTRATION_START_AT <= now <= settings.REGISTRATION_END_AT
 
 def check_registration(function):

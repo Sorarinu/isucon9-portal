@@ -10,8 +10,10 @@ from isucon.portal.contest import exceptions
 class ScoreHistoryTest(TestCase):
 
     def setUp(self):
-        self.team = auth_factories.TeamFactory.create()
-        self.user = self.team.user_set.first()
+        self.owner = auth_factories.UserFactory.create()
+        self.team = auth_factories.TeamFactory.create(owner=self.owner)
+        self.owner.team = self.team
+
         self.benchmarker = self.team.benchmarker
         self.server = contest_factories.ServerFactory(team=self.team)
 
@@ -43,7 +45,9 @@ class ScoreHistoryTest(TestCase):
         # FIXME: seedデータに置き換え
         teams = []
         for idx in range(10):
-            team = auth_factories.TeamFactory.create()
+            owner = auth_factories.UserFactory.create()
+            team = auth_factories.TeamFactory.create(owner=owner)
+            owner.team = team
             teams.append(team)
 
             # 適当にスコア獲得

@@ -11,7 +11,14 @@ class Command(BaseCommand):
 
     def generate_teams(self, team_num):
         for _ in range(team_num):
-            yield TeamFactory.create()
+            # ユーザ作成 -> チーム登録
+            owner = UserFactory.create()
+            team = TeamFactory.create(owner=owner)
+
+            # チームがownerに設定される
+            owner.team = team
+            owner.save()
+            yield team
 
     def generate_team_users(self, team):
         user_num = random.randint(0, 2) # 追加メンバは 0 ~ 2
