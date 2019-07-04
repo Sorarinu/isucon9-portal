@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'isucon.portal.contest.context_processors.settings_url',
             ],
         },
     },
@@ -172,3 +173,10 @@ MAX_TEAM_MEMBER_NUM = 3
 PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
 # チームパスワードの文字数
 PASSWORD_LENGTH = 20
+
+# 外部リンク
+MANUAL_URL = 'https://gist.github.com/misodengaku/a7fcb08f74c42a3a65b271704aa02ed6' # リンク先例
+REGULATION_URL = 'http://oomurosakura.co/' # リンク先例
+DISCORD_URL = 'https://discordapp.com/'
+ISUCON_OFFICIAL_URL = 'http://isucon.net/'
+TWITTER_URL = 'https://twitter.com/isucon_official'
