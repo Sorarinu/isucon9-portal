@@ -82,7 +82,7 @@
       <div class="hero-body">
         <div class="container has-text-centered">
           <div class="column is-6 is-offset-3">
-            {% if is_registration_available and user and user.is_authenticated and not user.team %}
+            {% if is_registration_available %}
             <h1 class="title">
               大好評参加登録受付中！
             </h1>
@@ -90,9 +90,16 @@
                 登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
             </h2>
             <div>
+              {% if user.team %}
+              <a class="button is-white is-outlined is-large" href="{% url "team_information" %}">
+                チーム登録情報はこちら
+              </a>
+              {% else %}
               <a class="button is-white is-outlined is-large" href="{% url "login" %}">
                 参加登録！
               </a>
+              {% endif %}
+
             </div>
             {% else %}
             <h1 class="title">
