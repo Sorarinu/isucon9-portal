@@ -9,5 +9,4 @@ def index(request):
         'registration_start_at': settings.REGISTRATION_START_AT,
         'registration_end_at': settings.REGISTRATION_END_AT,
     }
-    print(context)
     return render(request, "landing.html", context)
