@@ -13,8 +13,6 @@ RUN pip install -r requirements.txt
 ADD . /opt/app/
 ENV DJANGO_SETTINGS_MODULE isucon.portal.docker_settings
 
-RUN python manage.py collectstatic --noinput
-
 CMD ["bash", "-xe", "entrypoint.sh"]
 
 EXPOSE 5000
