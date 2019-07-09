@@ -180,3 +180,4 @@ REGULATION_URL = 'http://oomurosakura.co/' # リンク先例
 DISCORD_URL = 'https://discordapp.com/'
 ISUCON_OFFICIAL_URL = 'http://isucon.net/'
 TWITTER_URL = 'https://twitter.com/isucon_official'
+TERM_URL = 'http://isucon.net/archives/53567239.html'
