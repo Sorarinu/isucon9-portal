@@ -20,7 +20,7 @@
           <h2>{{ team.name }}</h2>
             <ul>
             {% for u in team.user_set.all %}
-              <li>{{ u.display_name }}</li>
+              <li>{{ u.display_name }}{% if u.is_student %} [学生]{% endif %}</li>
             {% endfor %}
             </ul>
           </div>
