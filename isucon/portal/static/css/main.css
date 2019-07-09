@@ -75,8 +75,9 @@ label {
     animation: hikaru-brown 1.4s  infinite;
 }
 
-.teamlist p {
-  padding-left: 10px;
+.teamlist ul {
+  list-style-type: disc;
+  padding-left: 30px;
 }
 
 @keyframes hurueru {

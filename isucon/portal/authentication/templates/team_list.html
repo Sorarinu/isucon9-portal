@@ -18,9 +18,11 @@
           {% for team in teams %}
           <div class="box">
           <h2>{{ team.name }}</h2>
+            <ul>
             {% for u in team.user_set.all %}
-              <p>{{ u.display_name }}</p>
+              <li>{{ u.display_name }}</li>
             {% endfor %}
+            </ul>
           </div>
           {% endfor %}
 
