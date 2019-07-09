@@ -1,5 +1,6 @@
 import random
 import requests
+import uuid
 from io import BytesIO
 from django import forms
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -85,7 +86,7 @@ class TeamRegisterForm(forms.Form):
             if resp.status_code != requests.codes.ok:
                 raise RuntimeError('icon fetch failed')
 
-            file_name = "%d.png" % user.id
+            file_name = "{}_{}.png".format(user.id, str(uuid.uuid4()))
 
             fp = BytesIO()
             fp.write(resp.content)
@@ -170,7 +171,7 @@ class JoinToTeamForm(forms.Form):
             if resp.status_code != requests.codes.ok:
                 raise RuntimeError('icon fetch failed')
 
-            file_name = "%d.png" % user.id
+            file_name = "{}_{}.png".format(user.id, str(uuid.uuid4()))
 
             fp = BytesIO()
             fp.write(resp.content)
