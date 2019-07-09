@@ -13,6 +13,10 @@ class User(AbstractUser):
         'thumbnail': (150, 150, True),
     })
     is_student = models.BooleanField('学生フラグ', default=False, blank=True)
+    display_name = models.CharField('表示名', max_length=100)
+
+    def __str__(self):
+        return self.display_name
 
 class Team(LogicalDeleteMixin, models.Model):
     class Meta:
@@ -39,7 +43,7 @@ class Team(LogicalDeleteMixin, models.Model):
         in_time = settings.CONTEST_START_TIME <= now.time() <= settings.CONTEST_END_TIME
         return in_date and in_time
 
-    def __name__(self):
+    def __str__(self):
         return self.name
 
     @property
