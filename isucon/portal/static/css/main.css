@@ -75,6 +75,10 @@ label {
     animation: hikaru-brown 1.4s  infinite;
 }
 
+.teamlist p {
+  padding-left: 10px;
+}
+
 @keyframes hurueru {
     0% {transform: translate(0px, 0px) rotateZ(0deg)}
     25% {transform: translate(2px, 2px) rotateZ(1deg)}

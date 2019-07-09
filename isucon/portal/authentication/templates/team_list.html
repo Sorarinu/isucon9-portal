@@ -1,0 +1,32 @@
+{% extends "include/layout_simple.html" %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container">
+    <div class="has-text-centered">
+    <figure class="logo">
+        <img src="{% static "img/isucon9_logo.svg" %}" width="400px">
+    </figure>
+    </div>
+    <div class="column is-8 is-offset-2 teamlist">
+
+      <div class="box">
+        <h1 class="title">参加チーム一覧</h1>
+
+          {% for team in teams %}
+          <div class="box">
+          <h2>{{ team.name }}</h2>
+            {% for u in team.user_set.all %}
+              <p>{{ u.display_name }}</p>
+            {% endfor %}
+          </div>
+          {% endfor %}
+
+      </div>
+    </div>
+</div>
+
+
+{% endblock %}

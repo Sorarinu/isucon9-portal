@@ -2,7 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core import files
+from django.http import HttpResponse
 import requests
+import csv
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
@@ -44,3 +46,25 @@ def team_information(request):
     context = {'team_members': team_members}
 
     return render(request, "team_information.html", context)
+
+
+def team_list(request):
+    teams = Team.objects.order_by("id").prefetch_related("user_set")
+    context = {"teams": teams}
+
+    return render(request, "team_list.html", context)
+
+def team_list_csv(request):
+    teams = Team.objects.order_by("id").prefetch_related("user_set")
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="teams.csv"'
+    writer = csv.writer(response)
+
+    for team in teams:
+        row = [team.name]
+        for u in team.user_set.all():
+            row.append(u.display_name)
+        writer.writerow(row)
+
+    return response
