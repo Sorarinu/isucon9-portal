@@ -1,3 +1,5 @@
+import random
+from io import BytesIO
 from django import forms
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.conf import settings
@@ -12,11 +14,11 @@ class TeamRegisterForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'Team ISUCON'}),
     )
-    owner = forms.CharField(
+    display_name = forms.CharField(
         label="参加者名 (ハンドルネーム可)",
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
+        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'display_name'}),
     )
     is_student = forms.BooleanField(
         label="あなたが学生の場合、チェックを入れてください",
@@ -30,7 +32,7 @@ class TeamRegisterForm(forms.Form):
         label="アイコン",
         required=False,
     )
-    owner_email = forms.CharField(
+    email = forms.CharField(
         label="代表者メールアドレス (公開されません)",
         max_length=256,
         required=True,
@@ -47,6 +49,10 @@ class TeamRegisterForm(forms.Form):
         required=True,
     )
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super().__init__(*args, **kwargs)
+
     def clean_user_icon(self):
         if self.cleaned_data['user_icon'] is None:
             return None
@@ -59,12 +65,41 @@ class TeamRegisterForm(forms.Form):
 
         return cleaned_data
 
+    def save(self):
+        user = self.user
+
+        # パスワードとして使う文字群から指定文字数ランダムに選択してチームパスワードとする
+        password = ''.join(random.choice(settings.PASSWORD_LETTERS) for i in range(settings.PASSWORD_LENGTH))
+
+        team = Team.objects.create(name=self.cleaned_data['name'], participate_at=self.cleaned_data['participate_at'], password=password, owner=user)
+
+        user.team = team
+        user.is_student = self.cleaned_data['is_student']
+        user.display_name = self.cleaned_data['display_name']
+        user.email = self.cleaned_data['email']
+
+        if self.cleaned_data['is_import_github_icon']:
+            resp = requests.get("https://github.com/%s.png" % str(user))
+            if resp.status_code != requests.codes.ok:
+                raise RuntimeError('icon fetch failed')
+
+            file_name = "%s.png" % str(user)
+
+            fp = BytesIO()
+            fp.write(resp.content)
+            user.icon.save(file_name, files.File(fp))
+        else:
+            user.icon = self.cleaned_data['user_icon']
+        user.save()
+
+        return user
+
 class JoinToTeamForm(forms.Form):
     display_name = forms.CharField(
         label="参加者名 (ハンドルネーム可)",
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'username'}),
+        widget=forms.TextInput(attrs={'class': "input", 'placeholder': 'ISUCON Taro', 'id': 'display_name'}),
     )
     is_student = forms.BooleanField(
         label="あなたが学生の場合、チェックを入れてください",
@@ -94,6 +129,10 @@ class JoinToTeamForm(forms.Form):
         required=True,
     )
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super().__init__(*args, **kwargs)
+
     def clean_user_icon(self):
         if self.cleaned_data['user_icon'] is None:
             return None
@@ -114,6 +153,31 @@ class JoinToTeamForm(forms.Form):
 
         return cleaned_data
 
+    def save(self):
+        user = self.user
+        team_id = self.cleaned_data['team_id']
+        team_password = self.cleaned_data['team_password']
+
+        team = Team.objects.get(id=int(team_id), password=team_password)
+
+        user.team = team
+        user.is_student = self.cleaned_data['is_student']
+        user.display_name = self.cleaned_data['display_name']
+        if self.cleaned_data['is_import_github_icon']:
+            resp = requests.get("https://github.com/%s.png" % str(user))
+            if resp.status_code != requests.codes.ok:
+                raise RuntimeError('icon fetch failed')
+
+            file_name = "%s.png" % str(user)
+
+            fp = BytesIO()
+            fp.write(resp.content)
+            user.icon.save(file_name, files.File(fp))
+        else:
+            user.icon = self.cleaned_data['user_icon']
+        user.save()
+
+        return user
 
 def check_uploaded_filesize(content):
     if content.size > settings.MAX_UPLOAD_SIZE:
