@@ -152,8 +152,8 @@ REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 8, 25, 9, 0, 0)
 # コンテスト開催期間
 # 日付
 CONTEST_DATES = [
-    datetime.date(2019, 9, 1),
-    datetime.date(2019, 9, 2)
+    datetime.date(2019, 9, 7),
+    datetime.date(2019, 9, 8)
 ]
 
 # 時刻
