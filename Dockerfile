@@ -2,6 +2,9 @@ FROM python:3.6
 
 ENV PYTHONUNBUFFERED 1
 
+RUN apt-get update && apt-get install -y locales locales-all
+RUN locale-gen ja_JP.UTF-8
+
 RUN mkdir -p /opt/app
 
 WORKDIR /opt/app
