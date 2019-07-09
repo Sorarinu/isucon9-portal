@@ -44,3 +44,10 @@ def team_information(request):
     context = {'team_members': team_members}
 
     return render(request, "team_information.html", context)
+
+
+def team_list(request):
+    teams = Team.objects.order_by("id").prefetch_related("user_set")
+    context = {"teams": teams}
+
+    return render(request, "team_list.html", context)

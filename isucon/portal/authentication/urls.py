@@ -13,6 +13,7 @@ urlpatterns = [
     path('create_team/', views.create_team, name="create_team"),
     path('join_team/', views.join_team, name="join_team"),
     path('team/', views.team_information, name="team_information"),
+    path('teams/', views.team_list, name="team_list"),
 ]
 
 if settings.DEBUG:

@@ -8,3 +8,10 @@ ISUCON9 Portal
 docker-compose build
 docker-compose up
 ```
+
+
+## テストデータ生成
+
+```bash
+python manage.py manufacture -t 300
+```
