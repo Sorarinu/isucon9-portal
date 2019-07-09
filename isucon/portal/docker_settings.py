@@ -22,6 +22,7 @@ DATABASES_SQLITE3 = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -33,6 +34,7 @@ DATABASES_POSTGRES = {
         'PASSWORD': 'password',
         'HOST': 'postgres',
         'PORT': '5432',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
