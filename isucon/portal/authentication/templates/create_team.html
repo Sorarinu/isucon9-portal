@@ -125,9 +125,6 @@
 </div>
 
 <script>
-    $("#username").val('{{ username }}');
-    $("#email").val('{{ email }}');
-
     $('#id_user_icon').on('change', function(event) {
         var files = event.target.files;
         var reader = new FileReader();
@@ -144,7 +141,7 @@
         {
             $('#id_user_icon').val('');
             $('#id_user_icon').attr('disabled', '');
-            $('#preview_image').css({backgroundImage: 'url(https://github.com/{{ username }}.png)'});
+            $('#preview_image').css({backgroundImage: 'url(https://github.com/{{ user.username }}.png)'});
         } else {
             $('#id_user_icon').removeAttr('disabled');
             $('#preview_image').css({backgroundImage: 'none'});
