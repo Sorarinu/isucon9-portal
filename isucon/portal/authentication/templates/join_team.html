@@ -66,14 +66,14 @@
                 <h2 class="subtitle">参加者情報</h2>
 
                 <div class="field">
-                    <label class="label">{{ form.display_name.label }}</label>
+                    <label class="label">{{ form.display_name.label }} (公開されます)</label>
                     <div class="control">
                         {{ form.display_name }}
                     </div>
                     <p class="help">最大100文字</p>
                 </div>
                 <div class="field">
-                    <label class="label">{{ form.user_icon.label }}</label>
+                    <label class="label">{{ form.user_icon.label }} (公開されます)</label>
                     <div id="preview_image" style="border: 1px solid; display: block; background-image: none; background-size: cover; width: 150px; height: 150px;"></div>
                     <span>{{ form.is_import_github_icon }} {{ form.is_import_github_icon.label }}</span>
                     <div class="control">
@@ -85,7 +85,7 @@
                     <div class="control">
                         <label class="checkbox">
                             {{ form.is_student }}
-                            {{ form.is_student.label }}
+                            {{ form.is_student.label }} (公開されます)
                         </label>
                     </div>
                 </div>
