@@ -31,6 +31,9 @@
             <button id="copy_button" style="flex-basis: 6em; min-height: 6ex; " class="button is-info">コピー</button>
           </div>
         <hr>
+        <h2 class="subtitle">参加日</h2>
+        <p class="is-size-4">{{ user.team.participate_at|date:"Y-m-d (D)" }}</p>
+        <hr>
         <h2 class="subtitle">チームメンバー</h2>
         <div style="display: flex; flex-wrap: wrap;justify-content: center;">
 
