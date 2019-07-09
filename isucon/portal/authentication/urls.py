@@ -14,6 +14,7 @@ urlpatterns = [
     path('join_team/', views.join_team, name="join_team"),
     path('team/', views.team_information, name="team_information"),
     path('teams/', views.team_list, name="team_list"),
+    path('teams.csv', views.team_list_csv, name="team_list_csv"),
 ]
 
 if settings.DEBUG:
