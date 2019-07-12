@@ -42,7 +42,7 @@
 
           {% for member in team_members %}
           <div class="item" style="width: 200px;">
-            <img src="/{{ member.icon.thumbnail.url }}">
+            <img src="{{ member.icon.thumbnail.url }}">
             <p>{{ member }}</p>
             {% if member.team.owner == member %}
             <p>チーム代表者</p>
