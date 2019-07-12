@@ -12,7 +12,7 @@ locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
 
 class User(AbstractUser):
     team = models.ForeignKey("Team", blank=True, null=True, on_delete=models.SET_NULL)
-    icon = StdImageField(upload_to=settings.MEDIA_URL + '/icons/', blank=True, null=True, variations={
+    icon = StdImageField(upload_to='icons/', blank=True, null=True, variations={
         'thumbnail': (150, 150, True),
     })
     is_student = models.BooleanField('学生フラグ', default=False, blank=True)
