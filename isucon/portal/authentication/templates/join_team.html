@@ -32,13 +32,14 @@
         <div class="notification is-warning">
             <h2 class="subtitle is-4">参加規約</h2>
             <p class="is-size-5">ISUCON 9への参加には参加規約への同意が必要となります。下記のリンクから内容を確認し、同意する場合はフォームのチェックボックスにチェックを入れてください。</p>
-            <p class="is-size-5"><a href="{% static "terms.html" %}" target="_blank">ISUCON 9 参加規約</a></p>
+            <p class="is-size-5"><a href="{{ term_url }}" target="_blank">ISUCON 9 参加規約</a></p>
             <hr>
             <h2 class="subtitle is-4">注意事項</h2>
             <li class="is-size-5">チーム参加にはチーム番号とパスワードが必要です。事前にチーム代表者からチーム番号とパスワードを受け取ってください。</li>
             <li class="is-size-5">ご登録いただいた参加者名は ISUCON 公式サイト上で公開されます。</li>
             <li class="is-size-5">参加者名に公序良俗に反する名前は使わないでください。</li>
             <li class="is-size-5">参加者名に機種依存文字・絵文字・タグなどが入っていた場合、サイトへの表示時に表現を変えさせていただく場合があります。</li>
+            <li class="is-size-5">参加登録完了メールは届きません、登録完了後のページをブックマークしてください。</li>
         </div>
 
         <div class="box">
@@ -65,14 +66,14 @@
                 <h2 class="subtitle">参加者情報</h2>
 
                 <div class="field">
-                    <label class="label">{{ form.display_name.label }}</label>
+                    <label class="label">{{ form.display_name.label }} (公開されます)</label>
                     <div class="control">
                         {{ form.display_name }}
                     </div>
                     <p class="help">最大100文字</p>
                 </div>
                 <div class="field">
-                    <label class="label">{{ form.user_icon.label }}</label>
+                    <label class="label">{{ form.user_icon.label }} (公開されます)</label>
                     <div id="preview_image" style="border: 1px solid; display: block; background-image: none; background-size: cover; width: 150px; height: 150px;"></div>
                     <span>{{ form.is_import_github_icon }} {{ form.is_import_github_icon.label }}</span>
                     <div class="control">
@@ -84,7 +85,7 @@
                     <div class="control">
                         <label class="checkbox">
                             {{ form.is_student }}
-                            {{ form.is_student.label }}
+                            {{ form.is_student.label }} (公開されます)
                         </label>
                     </div>
                 </div>
@@ -93,7 +94,7 @@
                   <div class="control">
                     <label class="checkbox">
                       {{ form.is_ok }}
-                      上記の注意、および<a href="{% static "terms.html" %}" target="_blank">参加規約</a>に同意します。
+                      上記の注意、および<a href="{{ term_url }}" target="_blank">参加規約</a>に同意します。
                     </label>
                   </div>
                 </div>
@@ -112,8 +113,6 @@
 
 
 <script>
-    $("#username").val('{{ username }}');
-
     $('#id_user_icon').on('change', function(event) {
         var files = event.target.files;
         var reader = new FileReader();
@@ -130,7 +129,7 @@
         {
             $('#id_user_icon').val('');
             $('#id_user_icon').attr('disabled', '');
-            $('#preview_image').css({backgroundImage: 'url(https://github.com/{{ username }}.png)'});
+            $('#preview_image').css({backgroundImage: 'url(https://github.com/{{ user.username }}.png)'});
         } else {
             $('#id_user_icon').removeAttr('disabled');
             $('#preview_image').css({backgroundImage: 'none'});

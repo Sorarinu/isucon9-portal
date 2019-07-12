@@ -1,8 +1,11 @@
 import random
+import requests
+import uuid
 from io import BytesIO
 from django import forms
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.conf import settings
+from django.core import files
 
 from isucon.portal.authentication.models import Team, User
 from isucon.portal import settings
@@ -79,11 +82,11 @@ class TeamRegisterForm(forms.Form):
         user.email = self.cleaned_data['email']
 
         if self.cleaned_data['is_import_github_icon']:
-            resp = requests.get("https://github.com/%s.png" % str(user))
+            resp = requests.get("https://github.com/%s.png" % user.username)
             if resp.status_code != requests.codes.ok:
                 raise RuntimeError('icon fetch failed')
 
-            file_name = "%s.png" % str(user)
+            file_name = "{}_{}.png".format(user.id, str(uuid.uuid4()))
 
             fp = BytesIO()
             fp.write(resp.content)
@@ -164,11 +167,11 @@ class JoinToTeamForm(forms.Form):
         user.is_student = self.cleaned_data['is_student']
         user.display_name = self.cleaned_data['display_name']
         if self.cleaned_data['is_import_github_icon']:
-            resp = requests.get("https://github.com/%s.png" % str(user))
+            resp = requests.get("https://github.com/%s.png" % user.username)
             if resp.status_code != requests.codes.ok:
                 raise RuntimeError('icon fetch failed')
 
-            file_name = "%s.png" % str(user)
+            file_name = "{}_{}.png".format(user.id, str(uuid.uuid4()))
 
             fp = BytesIO()
             fp.write(resp.content)

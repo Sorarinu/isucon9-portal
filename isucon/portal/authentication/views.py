@@ -15,7 +15,10 @@ from isucon.portal.authentication.decorators import team_is_authenticated, check
 @login_required
 def create_team(request):
     user = request.user
-    form = TeamRegisterForm(request.POST or None, request.FILES or None, user=user)
+    initial = {
+        "email": user.email,
+    }
+    form = TeamRegisterForm(request.POST or None, request.FILES or None, user=user, initial=initial)
     if not form.is_valid():
         # フォームの内容が不正なら戻す
         return render(request, "create_team.html", {'form': form, 'username': request.user, 'email': request.user.email})
@@ -28,7 +31,7 @@ def create_team(request):
 @login_required
 def join_team(request):
     user = request.user
-    form = JoinToTeamForm(request.POST or None, request.FILES or None, user=user)
+    form = JoinToTeamForm(request.POST or None, request.FILES or None, user=user, initial=initial)
 
     if not form.is_valid():
         # フォームの内容が不正なら戻す

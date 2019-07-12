@@ -87,7 +87,7 @@
               大好評参加登録受付中！
             </h1>
             <h2 class="subtitle">
-                登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
+                登録期間: {{ registration_end_at | date:"Y年m月d日 H時i分" }} まで
             </h2>
             <div>
               {% if user.team %}
@@ -98,6 +98,7 @@
               <a class="button is-white is-outlined is-large" href="{% url "login" %}">
                 参加登録！
               </a>
+              <p>参加登録にはGitHubのアカウントを利用します</p>
               {% endif %}
 
             </div>
@@ -106,7 +107,7 @@
               Comming soon!
             </h1>
             <h2 class="subtitle">
-                登録期間: {{ registration_start_at | date:"Y年m月d日 H時i分" }} - {{ registration_end_at | date:"Y年m月d日 H時i分" }}
+                登録期間: {{ registration_end_at | date:"Y年m月d日 H時i分" }} まで
             </h2>
             {% endif %}
           </div>

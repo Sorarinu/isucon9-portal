@@ -8,5 +8,6 @@ def settings_url(request):
         'isucon_official_url': settings.ISUCON_OFFICIAL_URL,
         'regulation_url': settings.REGULATION_URL,
         'twitter_url': settings.TWITTER_URL,
+        'term_url': settings.TERM_URL,
     }
     return context

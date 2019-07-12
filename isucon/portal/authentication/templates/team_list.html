@@ -13,14 +13,16 @@
     <div class="column is-8 is-offset-2 teamlist">
 
       <div class="box">
-        <h1 class="title">参加チーム一覧</h1>
+        <h1 class="title">参加チーム一覧 (参加登録順)</h1>
 
           {% for team in teams %}
           <div class="box">
           <h2>{{ team.name }}</h2>
+            <ul>
             {% for u in team.user_set.all %}
-              <p>{{ u.display_name }}</p>
+              <li>{{ u.display_name }}{% if u.is_student %} [学生]{% endif %}</li>
             {% endfor %}
+            </ul>
           </div>
           {% endfor %}
 

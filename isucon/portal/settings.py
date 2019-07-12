@@ -92,6 +92,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -151,8 +152,8 @@ REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 8, 25, 9, 0, 0)
 # コンテスト開催期間
 # 日付
 CONTEST_DATES = [
-    datetime.date(2019, 9, 1),
-    datetime.date(2019, 9, 2)
+    datetime.date(2019, 9, 7),
+    datetime.date(2019, 9, 8)
 ]
 
 # 時刻
@@ -180,3 +181,4 @@ REGULATION_URL = 'http://oomurosakura.co/' # リンク先例
 DISCORD_URL = 'https://discordapp.com/'
 ISUCON_OFFICIAL_URL = 'http://isucon.net/'
 TWITTER_URL = 'https://twitter.com/isucon_official'
+TERM_URL = 'http://isucon.net/archives/53567239.html'

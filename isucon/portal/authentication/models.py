@@ -1,3 +1,4 @@
+import locale
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -6,6 +7,8 @@ from django.conf import settings
 from stdimage.models import StdImageField
 
 from isucon.portal.models import LogicalDeleteMixin
+
+locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
 
 class User(AbstractUser):
     team = models.ForeignKey("Team", blank=True, null=True, on_delete=models.SET_NULL)
@@ -22,7 +25,7 @@ class Team(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "チーム"
 
-    PARTICIPATE_AT_CHOICES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d"))) for idx, d in enumerate(settings.CONTEST_DATES)]
+    PARTICIPATE_AT_CHOICES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d %a"))) for idx, d in enumerate(settings.CONTEST_DATES)]
 
     owner = models.OneToOneField(User, verbose_name="オーナー", on_delete=models.PROTECT, related_name="+")
     is_active = models.BooleanField("有効", default=True, blank=True)

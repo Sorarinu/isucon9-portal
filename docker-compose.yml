@@ -12,6 +12,7 @@ services:
       - GITHUB_SECRET
     volumes:
       - "staticdata:/opt/app/static/"
+      - "mediadata:/opt/app/media/"
   discard_forever:
     restart: always
     build: ./
@@ -43,3 +44,4 @@ services:
 volumes:
   dbdata:
   staticdata:
+  mediadata:
