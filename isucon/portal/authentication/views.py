@@ -31,6 +31,7 @@ def create_team(request):
 @login_required
 def join_team(request):
     user = request.user
+    initial = {}
     form = JoinToTeamForm(request.POST or None, request.FILES or None, user=user, initial=initial)
 
     if not form.is_valid():

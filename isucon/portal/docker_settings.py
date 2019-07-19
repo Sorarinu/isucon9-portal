@@ -67,3 +67,42 @@ STATIC_ROOT = "/opt/app/static/"
 
 BENCHMARK_MAX_CONCURRENCY = 3
 BENCHMARK_ABORT_TIMEOUT_SEC = 300
+
+SLACK_ENDPOINT_URL = os.environ.get('SLACK_ENDPOINT_URL', "https://slack.com/api/chat.postMessage")
+SLACK_USERNAME = 'portal'
+SLACK_ICON_EMOJI = ':django:'
+SLACK_FAIL_SILENTLY = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {},
+    'handlers': {
+        'slack_admins': {
+            'level': 'ERROR',
+            'filters': [],
+            'class': 'django_slack.log.SlackExceptionHandler',
+        },
+        'console': {
+            'level': 'INFO',
+            'filters': [],
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'formatters': {
+        'simple': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s a',
+        }
+    },
+    'loggers': {
+        'django': {
+            'level': 'INFO',
+            'handlers': ['slack_admins', 'console'],
+        },
+        'isucon': {
+            'level': 'INFO',
+            'handlers': ['slack_admins', 'console'],
+        },
+    },
+}

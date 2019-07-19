@@ -12,6 +12,7 @@ services:
       - GITHUB_SECRET
       - DJANGO_ALLOWED_HOST
       - DJANGO_DEBUG
+      - SLACK_TOKEN
     volumes:
       - "staticdata:/opt/app/static/"
       - "mediadata:/opt/app/media/"
