@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django.contrib.staticfiles',
     'social_django',
-    'django_slack',
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',
