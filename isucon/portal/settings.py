@@ -147,6 +147,41 @@ MAX_UPLOAD_SIZE = 5242880
 MEDIA_ROOT = 'media/'
 MEDIA_URL = '/media/'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {},
+    'handlers': {
+        'slack_admins': {
+            'level': 'ERROR',
+            'filters': [],
+            'class': 'isucon.portal.logging.SlackExceptionHandler',
+        },
+        'console': {
+            'level': 'INFO',
+            'filters': [],
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'formatters': {
+        'simple': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s a',
+        }
+    },
+    'loggers': {
+        'django': {
+            'level': 'INFO',
+            'handlers': ['slack_admins', 'console'],
+        },
+        'isucon': {
+            'level': 'INFO',
+            'handlers': ['slack_admins', 'console'],
+        },
+    },
+}
+
+
 # 登録期間
 REGISTRATION_START_AT = portal_utils.get_utc_datetime(2019, 7, 1, 9, 0, 0)
 REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 8, 25, 9, 0, 0)
@@ -176,6 +211,10 @@ MAX_TEAM_MEMBER_NUM = 3
 PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
 # チームパスワードの文字数
 PASSWORD_LENGTH = 20
+
+# Slack
+SLACK_ENDPOINT_URL = "https://hooks.slack.com/services/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"
+
 
 # 外部リンク
 MANUAL_URL = 'https://gist.github.com/misodengaku/a7fcb08f74c42a3a65b271704aa02ed6' # リンク先例
