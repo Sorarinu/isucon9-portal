@@ -9,7 +9,7 @@ import csv
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
 from isucon.portal.authentication.decorators import team_is_authenticated, check_registration
-
+from isucon.portal.authentication.notify import notify_registration
 
 @check_registration
 @login_required
@@ -25,6 +25,11 @@ def create_team(request):
 
     form.save()
 
+    try:
+        notify_registration()
+    except:
+        pass
+
     return redirect("team_information")
 
 @check_registration
@@ -39,6 +44,11 @@ def join_team(request):
         return render(request, "join_team.html", {'form': form, 'username': request.user})
 
     form.save()
+
+    try:
+        notify_registration()
+    except:
+        pass
 
     return redirect("team_information")
 
