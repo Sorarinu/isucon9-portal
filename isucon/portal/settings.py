@@ -216,9 +216,9 @@ SLACK_ENDPOINT_URL = "https://hooks.slack.com/services/T029XH1LD/BLKL56VHB/YJ5lN
 
 
 # 外部リンク
-MANUAL_URL = 'https://gist.github.com/misodengaku/a7fcb08f74c42a3a65b271704aa02ed6' # リンク先例
-REGULATION_URL = 'http://oomurosakura.co/' # リンク先例
-DISCORD_URL = 'https://discordapp.com/'
+MANUAL_URL = '' # TODO:
+REGULATION_URL = '' # TODO:
+DISCORD_URL = '' # TODO:
 ISUCON_OFFICIAL_URL = 'http://isucon.net/'
 TWITTER_URL = 'https://twitter.com/isucon_official'
 TERM_URL = 'http://isucon.net/archives/53567239.html'

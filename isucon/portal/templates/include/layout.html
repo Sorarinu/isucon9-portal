@@ -140,6 +140,7 @@
                         Links
                     </p>
                     <ul class="menu-list">
+                        {% if discord_url %}
                         <li>
                             <a target="_blank" href="{{ discord_url }}">
                                 <span class="icon">
@@ -148,6 +149,8 @@
                                 <span>Discord</span>
                             </a>
                         </li>
+                        {% endif %}
+                        {% if is_now_on_contest and manual_url %}
                         <li>
                             <a target="_blank" href="{{ manual_url }}">
                                 <span class="icon">
@@ -156,15 +159,8 @@
                                 <span>Manual</span>
                             </a>
                         </li>
-                        <li>
-                            <a target="_blank" href="{{ isucon_official_url }}">
-                                <span class="icon">
-                                    <i class="fa fa-home"></i>
-                                </span>
-                                <span>ISUCON Site</span>
-                            </a>
-                        </li>
-                        {% comment %}
+                        {% endif %}
+                        {% if is_now_on_contest and regulation_url %}
                         <li>
                             <a target="_blank" href="{{ regulation_url }}">
                                 <span class="icon">
@@ -173,7 +169,15 @@
                                 <span>Regulation</span>
                             </a>
                         </li>
-                        {% endcomment %}
+                        {% endif %}
+                        <li>
+                            <a target="_blank" href="{{ isucon_official_url }}">
+                                <span class="icon">
+                                    <i class="fa fa-home"></i>
+                                </span>
+                                <span>ISUCON Site</span>
+                            </a>
+                        </li>
                         <li>
                             <a target="_blank" href="{{ twitter_url }}">
                                 <span class="icon">
