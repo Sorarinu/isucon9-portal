@@ -72,6 +72,14 @@
         : }
         {% endcomment %}
 
+        {% if not user.team.alibaba_account %}
+        <article class="message is-warning">
+          <div class="message-body">
+            Alibaba CloudのAccount IDが設定されていません。<a href="{% url "team_settings" %}">Team Settings</a>から設定してください。
+          </div>
+        </article>
+        {% endif %}
+
         {% for message in messages %}
         <article class="message is-{{ message.tags }}">
           <div class="message-body">
