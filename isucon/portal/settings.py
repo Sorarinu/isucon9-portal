@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django.contrib.staticfiles',
     'social_django',
+    'widget_tweaks',
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',

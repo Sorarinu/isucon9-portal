@@ -1,10 +1,12 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.contrib import messages
 
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
+from isucon.portal.contest.forms import TeamForm
 
 def get_base_context(user):
     try:
@@ -111,7 +113,16 @@ def teams(request):
 
 @team_is_authenticated
 def team_settings(request):
+    form = TeamForm(instance=request.user.team)
+    if request.method == "POST":
+        form = TeamForm(request.POST, instance=request.user.team)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "チーム情報を更新しました")
+            return redirect("team_settings")
+
     context = {
+        "form": form,
         "team_members": request.user.team.user_set.all()
     }
     return render(request, "team_settings.html", context)
