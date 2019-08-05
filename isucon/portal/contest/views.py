@@ -87,10 +87,12 @@ def servers(request):
     return render(request, "servers.html", context)
 
 
+@team_is_authenticated
+@team_is_now_on_contest
 def teams(request):
 
     teams = Team.objects.order_by('id').all()
-    
+
     paginator = Paginator(teams, 100)
 
     try:
@@ -105,3 +107,11 @@ def teams(request):
     }
 
     return render(request, "teams.html", context)
+
+
+@team_is_authenticated
+def team_settings(request):
+    context = {
+        "team_members": request.user.team.user_set.all()
+    }
+    return render(request, "team_settings.html", context)

@@ -74,6 +74,7 @@
         <div class="columns">
             <div class="column is-3">
                 <aside class="menu">
+                    {% if is_now_on_contest %}
                     <p class="menu-label">
                         General
                     </p>
@@ -103,10 +104,20 @@
                             </a>
                         </li>
                     </ul>
+                    {% endif %}
                     <p class="menu-label">
                         Settings
                     </p>
                     <ul class="menu-list">
+                        <li>
+                            <a class="{% if page == "team_settings" %}active{% endif %}" href="{% url "team_settings" %}">
+                                <span class="icon">
+                                    <i class="fas fa-cogs"></i>
+                                </span>
+                                <span>Team Settings</span>
+                            </a>
+                        </li>
+                        {% comment %}
                         <li>
                             <a class="{% if page == "servers" %}active{% endif %}" href="{% url "servers" %}">
                                 <span class="icon">
@@ -115,15 +126,14 @@
                                 <span>Servers</span>
                             </a>
                         </li>
-                        {% comment %}
-                            <li>
-                                <a class="{% if page == "members" %}active{% endif %}" href="/members">
-                                    <span class="icon">
-                                        <i class="far fa-address-card"></i>
-                                    </span>
-                                    <span>Manage Your Team</span>
-                                </a>
-                            </li>
+                        <li>
+                            <a class="{% if page == "members" %}active{% endif %}" href="/members">
+                                <span class="icon">
+                                    <i class="far fa-address-card"></i>
+                                </span>
+                                <span>Manage Your Team</span>
+                            </a>
+                        </li>
                         {% endcomment %}
                     </ul>
                     <p class="menu-label">

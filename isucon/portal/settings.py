@@ -171,11 +171,11 @@ LOGGING = {
     'loggers': {
         'django': {
             'level': 'INFO',
-            'handlers': ['slack_admins', 'console'],
+            'handlers': ['console'],
         },
         'isucon': {
             'level': 'INFO',
-            'handlers': ['slack_admins', 'console'],
+            'handlers': ['console'],
         },
     },
 }
