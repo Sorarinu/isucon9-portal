@@ -1,5 +1,5 @@
 {% extends "include/layout.html" %}
-
+{% load widget_tweaks %}
 {% block content %}
 <div class="column is-9">
     <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -9,28 +9,90 @@
         </ul>
     </nav>
 
+    <form method="post">
+      {% csrf_token %}
 
-    <section class="section">
-      <h1 class="title">Information</h1>
-      <div class="box">
+      <section class="section">
+        <h1 class="title">Information</h1>
+        <div class="box">
 
-
-        <h2 class="subtitle">チーム名</h2>
-        <p>{{ user.team.name }}</p>
-        <hr>
-        <h2 class="subtitle">チーム番号</h2>
-        <p>{{ user.team.id }}</p>
-        <hr>
-        <h2 class="subtitle">チームパスワード</h2>
-          <div style="display: flex;">
-            <textarea class="textarea has-fixed-size" id="team_password" style="flex-basis: auto; min-width: 50%; min-height: 6ex; text-align: center;" readonly>{{ user.team.password }}</textarea>
-            <button id="copy_button" style="flex-basis: 6em; min-height: 6ex; " class="button is-info">コピー</button>
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">チーム名</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input is-static" value="{{ user.team.name }}" readonly>
+                </p>
+              </div>
+            </div>
           </div>
-        <hr>
-        <h2 class="subtitle">参加日</h2>
-        <p>{{ user.team.participate_at|date:"Y-m-d (D)" }}</p>
-      </div>
-    </section>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">チーム番号</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input is-static" value="{{ user.team.id }}" readonly>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">パスワード</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input is-static" style="width: 200px;" id="team_password" value="{{ user.team.password }}" readonly>
+                  <button id="copy_button" type="button" class="button is-rounded">コピー</button>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">参加日</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input is-static" value="{{ user.team.participate_at|date:"Y-m-d (D)" }}" readonly>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Alibaba Cloud Account ID</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ form.alibaba_account|add_class:"input" }}
+                </p>
+                {% if form.alibaba_account.errors %}
+                  <p class="help is-danger">{{ form.alibaba_account.errors.0 }}</p>
+                {% endif %}
+              </div>
+
+            </div>
+          </div>
+
+          <button type="submit" class="button is-primary">保存</button>
+
+
+        </div>
+      </section>
+
+    </form>
 
     <section class="section">
       <h1 class="title">Members</h1>
