@@ -10,5 +10,5 @@ urlpatterns = [
     path('scores/', views.scores, name="scores"),
     path('servers/', views.servers, name="servers"),
     path('teams/', views.teams, name="teams"),
-    path('settings/', views.settings, name="settings"),
+    path('settings/team/', views.team_settings, name="team_settings"),
 ]

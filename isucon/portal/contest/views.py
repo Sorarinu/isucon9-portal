@@ -110,6 +110,8 @@ def teams(request):
 
 
 @team_is_authenticated
-def settings(request):
-    context = {}
-    return render(request, "settings.html", context)
+def team_settings(request):
+    context = {
+        "team_members": request.user.team.user_set.all()
+    }
+    return render(request, "team_settings.html", context)

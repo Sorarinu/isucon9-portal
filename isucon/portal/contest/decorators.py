@@ -7,6 +7,6 @@ def team_is_now_on_contest(function):
         team = request.user.team
         if not team.is_playing():
             # 開催日でなければ、チーム情報ページに飛ばす
-            return redirect("team_information")
+            return redirect("team_settings")
         return function(request, *args, **kwargs)
     return _function

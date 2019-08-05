@@ -1,0 +1,72 @@
+{% extends "include/layout.html" %}
+
+{% block content %}
+<div class="column is-9">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/">ISUCON9</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Team Settings</a></li>
+        </ul>
+    </nav>
+
+
+    <section class="section">
+      <h1 class="title">Information</h1>
+      <div class="box">
+
+
+        <h2 class="subtitle">チーム名</h2>
+        <p>{{ user.team.name }}</p>
+        <hr>
+        <h2 class="subtitle">チーム番号</h2>
+        <p>{{ user.team.id }}</p>
+        <hr>
+        <h2 class="subtitle">チームパスワード</h2>
+          <div style="display: flex;">
+            <textarea class="textarea has-fixed-size" id="team_password" style="flex-basis: auto; min-width: 50%; min-height: 6ex; text-align: center;" readonly>{{ user.team.password }}</textarea>
+            <button id="copy_button" style="flex-basis: 6em; min-height: 6ex; " class="button is-info">コピー</button>
+          </div>
+        <hr>
+        <h2 class="subtitle">参加日</h2>
+        <p>{{ user.team.participate_at|date:"Y-m-d (D)" }}</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h1 class="title">Members</h1>
+      <div class="box">
+
+
+        <div style="display: flex; flex-wrap: wrap;justify-content: center;">
+
+          {% for member in team_members %}
+          <div class="item" style="width: 200px;">
+            <img src="{{ member.icon.thumbnail.url }}">
+            <p>{{ member }}</p>
+            {% if member.team.owner == member %}
+            <p>チーム代表者</p>
+            {% else %}
+            <p>チームメンバー</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+  $('#team_password').focus(function(){
+    this.select();
+  });
+
+  $('#copy_button').click(function(){
+    $('#team_password').select();
+    document.execCommand('copy');
+    alert('チームパスワードをクリップボードにコピーしました');
+  });
+</script>
+{% endblock %}
