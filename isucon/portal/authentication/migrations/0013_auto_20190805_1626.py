@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='team',
             name='alibaba_account',
-            field=models.CharField(blank=True, max_length=20, unique=True, verbose_name='Alibaba Cloud Account ID'),
+            field=models.CharField(blank=True, max_length=20, verbose_name='Alibaba Cloud Account ID'),
         ),
         migrations.AlterField(
             model_name='user',
