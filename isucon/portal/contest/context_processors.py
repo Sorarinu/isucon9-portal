@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from isucon.portal.authentication.decorators import is_registration_available
 
 def settings_url(request):
     is_now_on_contest = False
@@ -14,5 +15,8 @@ def settings_url(request):
         'twitter_url': settings.TWITTER_URL,
         'term_url': settings.TERM_URL,
         'is_now_on_contest': is_now_on_contest,
+        'registration_start_at': settings.REGISTRATION_START_AT,
+        'registration_end_at': settings.REGISTRATION_END_AT,
+        'is_registration_available': is_registration_available(),
     }
     return context

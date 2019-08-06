@@ -9,6 +9,23 @@
         </ul>
     </nav>
 
+    {% if form.is_registration_available %}
+      <article class="message is-info">
+        <div class="message-body">
+          チームメンバーの変更や登録情報の変更は {{ registration_end_at | date:"Y年m月d日 H時i分" }} までです。
+        </div>
+      </article>
+    {% else %}
+      <article class="message is-info">
+        <div class="message-body">
+          チームメンバーの変更や登録情報の変更をしたい場合は運営へご連絡ください。<br>
+          <a href="https://twitter.com/isucon_official" target="_blank">@isucon_official</a>へReplyまたはDMをお願いします。
+        </div>
+      </article>
+    {% endif %}
+
+
+
     <form method="post">
       <input type="hidden" name="action" value="team"/>
       {% csrf_token %}
@@ -51,7 +68,7 @@
               <div class="field">
                 <p class="control">
                   <input class="input is-static" style="width: 200px;" id="team_password" value="{{ user.team.password }}" readonly>
-                  <button id="copy_button" type="button" class="button is-rounded">コピー</button>
+                  <button id="copy_button" type="button" class="button is-rounded is-small">コピー</button>
                 </p>
               </div>
             </div>
