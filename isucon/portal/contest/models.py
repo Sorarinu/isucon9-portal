@@ -56,7 +56,7 @@ class Server(LogicalDeleteMixin, models.Model):
     # NOTE: パスワード、鍵認証とかにすればいい気がしたのでまだ追加してない
     # FIXME: デフォルトのベンチマーク対象を設定
 
-    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT)
+    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, related_name="servers")
     hostname = models.CharField("ホスト名", max_length=100, unique=True)
 
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
@@ -165,7 +165,7 @@ class JobManager(models.Manager):
         # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
         jobs = Job.objects.filter(status=Job.RUNNING, updated_at__lt=deadline)
         for job in jobs:
-            job.abort(result=dict(reason="Benchmark timeout"), log_text='')
+            job.abort(reason="Benchmark timeout", stdout='', stderr='')
 
         return list(map(model_to_dict, jobs))
 
@@ -203,11 +203,12 @@ class Job(models.Model):
     status = models.CharField("進捗", max_length=100, choices=STATUS_CHOICES, default=WAITING)
     is_passed = models.BooleanField("正答フラグ", default=False)
 
+    reason = models.CharField("失敗原因", max_length=255, blank=True)
     score = models.IntegerField("獲得スコア", default=0, null=False)
 
     # ベタテキスト
-    result_json = models.TextField("結果JSON", blank=True)
-    log_text = models.TextField("ログ文字列", blank=True)
+    stdout = models.TextField("ログ標準出力", blank=True)
+    stderr = models.TextField("ログ標準エラー出力", blank=True)
 
     # 日時
     created_at = models.DateTimeField("作成日時", auto_now_add=True)
@@ -217,36 +218,23 @@ class Job(models.Model):
 
     @property
     def is_finished(self):
-        return self.result in [
+        return self.status in [
             self.DONE,
             self.ABORTED,
             self.CANCELED,
         ]
 
-    @property
-    def result(self):
-        if self.result_json:
-            return json.loads(self.result_json)
-        return {}
+    def done(self, score, is_passed, stdout, stderr, reason):
+        # ベンチマークが終了したらログを書き込む
+        self.stdout = stdout
+        self.stderr = stderr
 
-    @result.setter
-    def result(self, result):
-        self.result_json = json.dumps(result)
-
-    def append_log(self, log):
-        self.log_text += log
-        self.save(update_fields=["log_raw"])
-
-    def done(self, result, log_text):
+        self.score = score
+        self.is_passed = is_passed
         self.status = Job.DONE
-        self.result = result
-        # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
-        self.log_text = log_text
 
-        # 結果のJSONからスコアや結果を参照し、ジョブに設定
-        self.score = self.result['score']
-        if self.result['pass']:
-            self.is_passed = True
+        self.reason = reason
+
         self.save()
 
         ScoreHistory.objects.create(
@@ -256,10 +244,11 @@ class Job(models.Model):
             is_passed=self.is_passed,
         )
 
-    def abort(self, result, log_text):
+    def abort(self, reason, stdout, stderr):
         self.status = Job.ABORTED
-        self.result = result
-        self.log_text = log_text
+        self.reason = reason
+        self.stdout = stdout
+        self.stderr = stderr
         self.save()
 
         ScoreHistory.objects.create(

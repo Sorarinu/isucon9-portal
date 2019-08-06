@@ -38,7 +38,7 @@ admin.site.register(ScoreHistory, ScoreHistoryAdmin)
 
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ["id", "team", "status", "is_passed", "score", "result_json", "log_text"]
+    list_display = ["id", "team", "status", "is_passed", "score", "stdout", "stderr"]
     list_filter = ["team", "status", "is_passed"]
 
 admin.site.register(Job, JobAdmin)

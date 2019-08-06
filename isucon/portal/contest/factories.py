@@ -46,7 +46,8 @@ class JobFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Job
 
-    log_text = factory.Faker('sentence')
+    stdout = factory.Faker('sentence')
+    stderr = factory.Faker('sentence')
 
     created_at = factory.fuzzy.FuzzyDate(
         start_date=timezone.now()-datetime.timedelta(days=5),
@@ -58,16 +59,10 @@ class JobFactory(factory.DjangoModelFactory):
     )
 
     @factory.lazy_attribute
-    def result_json(self):
+    def reason(self):
         if self.status == models.Job.ABORTED:
-            return '{"reason": "Benchmark timeout"}'
-
-        if self.is_passed:
-            pass_str = "true"
-        else:
-            pass_str = "false"
-
-        return '{{ "score": {}, "pass": {} }}'.format(self.score, pass_str)
+            return "Benchmark timeout"
+        return ""
 
 
 class ScoreHistoryFactory(factory.DjangoModelFactory):
