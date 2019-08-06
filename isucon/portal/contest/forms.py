@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import RegexValidator
 
 from isucon.portal.authentication.decorators import is_registration_available
-from isucon.portal.authentication.models import Team
+from isucon.portal.authentication.models import Team, User
 
 alibaba_account_validator = RegexValidator(r'^\d{16}$', "Invalid Account ID Format")
 
@@ -38,3 +38,8 @@ class TeamForm(forms.ModelForm):
         if not self.is_registration_available:
             return self.instance.participate_at
         return self.cleaned_data.get("participate_at", None)
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["display_name", ]

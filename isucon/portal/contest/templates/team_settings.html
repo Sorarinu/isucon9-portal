@@ -10,6 +10,7 @@
     </nav>
 
     <form method="post">
+      <input type="hidden" name="action" value="team"/>
       {% csrf_token %}
 
       <section class="section">
@@ -126,13 +127,30 @@
         <div style="display: flex; flex-wrap: wrap;justify-content: center;">
 
           {% for member in team_members %}
-          <div class="item" style="width: 200px;">
-            <img src="{{ member.icon.thumbnail.url }}">
-            <p>{{ member }}</p>
-            {% if member.team.owner == member %}
-            <p>チーム代表者</p>
+          <div class="item" style="width: 200px; padding-left: auto; text-align: center;">
+            {% if member.id == user.id %}
+              {# 編集可能 #}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="user"/>
+                <img src="{{ member.icon.thumbnail.url }}">
+                <p>{% render_field user_form.display_name style="text-align: center" class="input is-small" %}
+                {% if member.team.owner == member %}
+                <p>チーム代表者</p>
+                {% else %}
+                <p>チームメンバー</p>
+                {% endif %}
+                <button type="submit" class="button is-small is-primary">保存</button>
+              </form>
             {% else %}
-            <p>チームメンバー</p>
+              {# 表示のみ #}
+              <img src="{{ member.icon.thumbnail.url }}">
+              <p>{{ member.display_name }}</p>
+              {% if member.team.owner == member %}
+              <p>チーム代表者</p>
+              {% else %}
+              <p>チームメンバー</p>
+              {% endif %}
             {% endif %}
           </div>
           {% endfor %}
