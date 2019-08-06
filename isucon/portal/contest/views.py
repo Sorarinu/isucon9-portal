@@ -6,7 +6,7 @@ from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
-from isucon.portal.contest.forms import TeamForm
+from isucon.portal.contest.forms import TeamForm, UserForm
 
 def get_base_context(user):
     try:
@@ -114,15 +114,24 @@ def teams(request):
 @team_is_authenticated
 def team_settings(request):
     form = TeamForm(instance=request.user.team)
-    if request.method == "POST":
+    user_form = UserForm(instance=request.user)
+    if request.method == "POST" and request.POST.get("action") == "team":
         form = TeamForm(request.POST, instance=request.user.team)
         if form.is_valid():
             form.save()
             messages.success(request, "チーム情報を更新しました")
             return redirect("team_settings")
 
+    if request.method == "POST" and request.POST.get("action") == "user":
+        user_form = UserForm(request.POST, instance=request.user)
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, "ユーザー情報を更新しました")
+            return redirect("team_settings")
+
     context = {
         "form": form,
+        "user_form": user_form,
         "team_members": request.user.team.user_set.all()
     }
     return render(request, "team_settings.html", context)
