@@ -2,8 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 
 from rest_framework import viewsets, status
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.routers import SimpleRouter
 from ipware import get_client_ip
 
 from isucon.portal.authentication.models import Team
@@ -11,10 +12,13 @@ from isucon.portal.contest.models import Benchmarker, Job
 from isucon.portal.internal.serializers import JobSerializer, JobResultSerializer
 
 
-class JobViewSet(viewsets.GenericAPIViewSet):
+router = SimpleRouter()
+
+
+class JobViewSet(viewsets.ViewSet):
     serializer_class = JobSerializer
 
-    @detail_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def dequeue(self, request, *args, **kwargs):
         """ベンチマーカが処理すべきジョブをジョブキューからdequeueします"""
         # ベンチマーカーを取得するため、HTTPクライアントのIPアドレスを用いる
@@ -43,13 +47,16 @@ class JobViewSet(viewsets.GenericAPIViewSet):
         return Response(serializer.data)
 
 
-class JobResultViewSet(viewsets.GenericAPIViewSet):
+router.register("job", JobViewSet, base_name="job")
+
+
+class JobResultViewSet(viewsets.ViewSet):
     serializer_class = JobResultSerializer
 
-    @detail_route(methods=['post'])
-    def report_result(self, request, *args, **kwargs):
+    @action(methods=['post'], detail=True)
+    def report(self, request, pk=None):
         """ベンチマーカーからの結果報告を受け取り、ジョブを更新します"""
-        instance = self.get_object()
+        instance = get_object_or_404(Job.objects.all(), pk=pk)
         serializer = self.get_serializer(data=request.data, partial=True)
         try:
             serializer.is_valid(raise_exception=True)
@@ -58,3 +65,6 @@ class JobResultViewSet(viewsets.GenericAPIViewSet):
             return HttpResponse('ジョブ結果報告の形式が不正です', status.HTTP_400_BAD_REQUEST)
 
         return HttpResponse('ジョブ結果報告を受け付けました', status.HTTP_201_ACCEPTED)
+
+
+router.register("job", JobResultViewSet, base_name="job-result")

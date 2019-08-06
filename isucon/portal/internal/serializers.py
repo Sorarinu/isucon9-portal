@@ -21,7 +21,8 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
-    team = TeamSerializer(many=False, read_only=True)
+    # NOTE: ジョブのdequeue時に、チームと紐づける
+    team = TeamSerializer(many=False, read_only=False)
 
     class Meta:
         model = Job

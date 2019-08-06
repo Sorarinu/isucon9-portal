@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
