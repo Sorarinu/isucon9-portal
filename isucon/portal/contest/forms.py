@@ -9,8 +9,14 @@ alibaba_account_validator = RegexValidator(r'^\d{16}$', "Invalid Account ID Form
 class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
-        fields = ("name", "alibaba_account", )
+        fields = ("name", "participate_at", "alibaba_account", )
 
+    participate_at = forms.DateField(
+        label="参加日選択",
+        input_formats=["%Y-%m-%d"],
+        widget=forms.Select(choices=Team.PARTICIPATE_AT_CHOICES),
+        required=True,
+    )
     alibaba_account = forms.CharField(required=True, validators=[alibaba_account_validator], )
 
     def __init__(self, *args, **kwargs):
@@ -26,3 +32,9 @@ class TeamForm(forms.ModelForm):
         if not self.is_registration_available:
             return self.instance.name
         return self.cleaned_data.get("name", "")
+
+
+    def clean_participate_at(self):
+        if not self.is_registration_available:
+            return self.instance.participate_at
+        return self.cleaned_data.get("participate_at", None)

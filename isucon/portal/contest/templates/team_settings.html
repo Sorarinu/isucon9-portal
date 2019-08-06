@@ -62,9 +62,17 @@
             </div>
             <div class="field-body">
               <div class="field">
+                {% if form.is_registration_available %}
+                <p class="control">
+                  <div class="select">
+                    {{ form.participate_at }}
+                  </div>
+                </p>
+                {% else %}
                 <p class="control">
                   <input class="input is-static" value="{{ user.team.participate_at|date:"Y-m-d (D)" }}" readonly>
                 </p>
+                {% endif %}
               </div>
             </div>
           </div>
