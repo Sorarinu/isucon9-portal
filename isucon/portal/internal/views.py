@@ -17,7 +17,7 @@ from isucon.portal.contest import exceptions as contest_exceptions
 router = SimpleRouter()
 
 
-class JobViewSet(viewsets.ViewSet):
+class JobViewSet(viewsets.GenericViewSet):
     serializer_class = JobSerializer
 
     @action(methods=['post'], detail=False)
@@ -36,7 +36,7 @@ class JobViewSet(viewsets.ViewSet):
         # チームとベンチマーカーが紐づくと仮定して、ジョブを取ってくる
         try:
             job = Job.objects.dequeue(benchmarker)
-            serializer = self.get_serializer()(instance=job)
+            serializer = self.get_serializer_class()(instance=job)
             return Response(serializer.data)
         except contest_exceptions.JobDoesNotExistError:
             pass
@@ -45,7 +45,7 @@ class JobViewSet(viewsets.ViewSet):
         # TODO: ポータルが、チームとベンチマーカーの紐付けがない状況かどうか判断できる何かしらを用意し、それを根拠に分岐する
         try:
             job = Job.objects.dequeue()
-            serializer = self.get_serializer()(instance=job)
+            serializer = self.get_serializer_class()(instance=job)
             return Response(serializer.data)
         except contest_exceptions.JobDoesNotExistError:
             # 結局ジョブが見つからなかった
@@ -55,7 +55,7 @@ class JobViewSet(viewsets.ViewSet):
 router.register("job", JobViewSet, base_name="job")
 
 
-class JobResultViewSet(viewsets.ViewSet):
+class JobResultViewSet(viewsets.GenericViewSet):
     serializer_class = JobResultSerializer
 
     @action(methods=['post'], detail=True)
@@ -69,7 +69,6 @@ class JobResultViewSet(viewsets.ViewSet):
         except RuntimeError:
             return HttpResponse('ジョブ結果報告の形式が不正です', status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer()(instance=instance)
         return Response(serializer.data)
 
 
