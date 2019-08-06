@@ -5,11 +5,13 @@ from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.routers import SimpleRouter
+from rest_framework import exceptions
 from ipware import get_client_ip
 
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Benchmarker, Job
 from isucon.portal.internal.serializers import JobSerializer, JobResultSerializer
+from isucon.portal.contest import exceptions as contest_exceptions
 
 
 router = SimpleRouter()
@@ -22,30 +24,25 @@ class JobViewSet(viewsets.ViewSet):
     def dequeue(self, request, *args, **kwargs):
         """ベンチマーカが処理すべきジョブをジョブキューからdequeueします"""
         # ベンチマーカーを取得するため、HTTPクライアントのIPアドレスを用いる
-
         client_ip, _ = get_client_ip(request)
         if client_ip is None:
-            return HttpResponse('Invalid IP Address', status.HTTP_400_BAD_REQUEST)
+            raise exceptions.ParseError()
 
         try:
             benchmarker = Benchmarker.objects.get(ip=client_ip)
         except Benchmarker.DoesNotExist:
             return HttpResponse('Unknown IP Address', status.HTTP_400_BAD_REQUEST)
+
         try:
-            team = Team.objects.get(benchmarker=benchmarker)
-        except Team.DoesNotExist:
-            return HttpResponse('Team not found', status.HTTP_400_BAD_REQUEST)
-
-        job = Job.objects.dequeue(benchmarker)
-        if job is None:
-            return HttpResponse('Empty', status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-        # ジョブとチームを紐づける
-        job.team = team
-        job.save()
-
-        serializer = self.get_serializer()(instance=job)
-        return Response(serializer.data)
+            job = Job.objects.dequeue(benchmarker)
+            serializer = self.get_serializer()(instance=job)
+            return Response(serializer.data)
+        except contest_exceptions.JobDoesNotExistError:
+            # チームに紐づくジョブを見つけられなかったら、他に手頃なジョブを引っ張ってくる
+            # TODO: ポータルが、チームとベンチマーカーの紐付けがない状況かどうか判断できる何かしらを用意し、それを根拠に分岐する
+            job = Job.objects.dequeue()
+            serializer = self.get_serializer()(instance=job)
+            return Response(serializer.data)
 
 
 router.register("job", JobViewSet, base_name="job")
@@ -65,7 +62,8 @@ class JobResultViewSet(viewsets.ViewSet):
         except RuntimeError:
             return HttpResponse('ジョブ結果報告の形式が不正です', status.HTTP_400_BAD_REQUEST)
 
-        return HttpResponse('ジョブ結果報告を受け付けました', status.HTTP_201_ACCEPTED)
+        serializer = self.get_serializer()(instance=instance)
+        return Response(serializer.data)
 
 
 router.register("job", JobResultViewSet, base_name="job-result")

@@ -25,7 +25,7 @@ class TeamSerializer(serializers.ModelSerializer):
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        fields = ('id', 'team')
+        fields = ('id', 'team', 'status', 'score', 'reason', 'stdout', 'stderr')
         read_only_fields = fields
 
     # NOTE: ジョブのdequeue時に、チームと紐づける
