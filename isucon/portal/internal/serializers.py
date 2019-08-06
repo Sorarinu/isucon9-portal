@@ -21,6 +21,14 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    team = TeamSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Job
+        fields = ('id', 'team')
+
+
+class JobResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
