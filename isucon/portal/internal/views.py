@@ -33,16 +33,23 @@ class JobViewSet(viewsets.ViewSet):
         except Benchmarker.DoesNotExist:
             return HttpResponse('Unknown IP Address', status.HTTP_400_BAD_REQUEST)
 
+        # チームとベンチマーカーが紐づくと仮定して、ジョブを取ってくる
         try:
             job = Job.objects.dequeue(benchmarker)
             serializer = self.get_serializer()(instance=job)
             return Response(serializer.data)
         except contest_exceptions.JobDoesNotExistError:
-            # チームに紐づくジョブを見つけられなかったら、他に手頃なジョブを引っ張ってくる
-            # TODO: ポータルが、チームとベンチマーカーの紐付けがない状況かどうか判断できる何かしらを用意し、それを根拠に分岐する
+            pass
+
+        # チームに紐づくジョブを見つけられなかったら、他に手頃なジョブを引っ張ってくる
+        # TODO: ポータルが、チームとベンチマーカーの紐付けがない状況かどうか判断できる何かしらを用意し、それを根拠に分岐する
+        try:
             job = Job.objects.dequeue()
             serializer = self.get_serializer()(instance=job)
             return Response(serializer.data)
+        except contest_exceptions.JobDoesNotExistError:
+            # 結局ジョブが見つからなかった
+            raise exceptions.NotFound()
 
 
 router.register("job", JobViewSet, base_name="job")
