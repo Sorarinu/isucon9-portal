@@ -165,7 +165,7 @@ class JobManager(models.Manager):
         # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
         jobs = Job.objects.filter(status=Job.RUNNING, updated_at__lt=deadline)
         for job in jobs:
-            job.abort(result=dict(reason="Benchmark timeout"), log_text='')
+            job.abort(result=dict(reason="Benchmark timeout"), stdout='', stderr='')
 
         return list(map(model_to_dict, jobs))
 
@@ -207,7 +207,8 @@ class Job(models.Model):
 
     # ベタテキスト
     result_json = models.TextField("結果JSON", blank=True)
-    log_text = models.TextField("ログ文字列", blank=True)
+    stdout = models.TextField("ログ標準出力", blank=True)
+    stderr = models.TextField("ログ標準エラー出力", blank=True)
 
     # 日時
     created_at = models.DateTimeField("作成日時", auto_now_add=True)
@@ -233,15 +234,17 @@ class Job(models.Model):
     def result(self, result):
         self.result_json = json.dumps(result)
 
-    def append_log(self, log):
-        self.log_text += log
+    def append_log(self, stdout, stderr):
+        self.stdout += stdout
+        self.stderr += stderr
         self.save(update_fields=["log_raw"])
 
-    def done(self, result, log_text):
+    def done(self, result, stdout, stderr):
         self.status = Job.DONE
         self.result = result
         # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
-        self.log_text = log_text
+        self.stdout = stdout
+        self.stderr = stderr
 
         # 結果のJSONからスコアや結果を参照し、ジョブに設定
         self.score = self.result['score']
@@ -256,10 +259,11 @@ class Job(models.Model):
             is_passed=self.is_passed,
         )
 
-    def abort(self, result, log_text):
+    def abort(self, result, stdout, stderr):
         self.status = Job.ABORTED
         self.result = result
-        self.log_text = log_text
+        self.stdout = stdout
+        self.stderr = stderr
         self.save()
 
         ScoreHistory.objects.create(

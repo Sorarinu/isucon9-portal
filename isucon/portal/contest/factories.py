@@ -46,7 +46,8 @@ class JobFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Job
 
-    log_text = factory.Faker('sentence')
+    stdout = factory.Faker('sentence')
+    stderr = factory.Faker('sentence')
 
     created_at = factory.fuzzy.FuzzyDate(
         start_date=timezone.now()-datetime.timedelta(days=5),
