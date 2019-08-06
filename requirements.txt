@@ -5,3 +5,5 @@ Pillow
 django-stdimage
 requests
 django-widget-tweaks
+django-ipware==2.1.0
+djangorestframework==3.10.2
