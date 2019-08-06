@@ -69,6 +69,22 @@
             </div>
           </div>
 
+          {% if user.team.owner.id == user.id %}
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">連絡先</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input is-static" value="{{ user.team.owner.email }}" readonly>
+                </p>
+                <p class="help">メールアドレスはチーム代表者にのみ表示されています</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
           <div class="field is-horizontal">
             <div class="field-label is-normal">
               <label class="label">Alibaba Cloud Account ID</label>
