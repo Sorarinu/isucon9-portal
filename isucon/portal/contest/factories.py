@@ -59,16 +59,10 @@ class JobFactory(factory.DjangoModelFactory):
     )
 
     @factory.lazy_attribute
-    def result_json(self):
+    def reason(self):
         if self.status == models.Job.ABORTED:
-            return '{"reason": "Benchmark timeout"}'
-
-        if self.is_passed:
-            pass_str = "true"
-        else:
-            pass_str = "false"
-
-        return '{{ "score": {}, "pass": {} }}'.format(self.score, pass_str)
+            return "Benchmark timeout"
+        return ""
 
 
 class ScoreHistoryFactory(factory.DjangoModelFactory):

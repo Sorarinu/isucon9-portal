@@ -35,4 +35,10 @@ class JobViewSet(viewsets.GenericAPIViewSet):
     @detail_route(methods=['post'])
     def report_result(self, request, *args, **kwargs):
         """ベンチマーカーからの結果報告を受け取り、ジョブを更新します"""
-        pass
+        serializer = self.get_serializer(data=request.data, partial=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+
+
+        except RuntimeError as e:
+            return HttpResponse('結果の形式が不正です', status.HTTP_400_BAD_REQUEST)

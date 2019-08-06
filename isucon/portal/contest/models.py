@@ -165,7 +165,7 @@ class JobManager(models.Manager):
         # タイムアウトした(=締め切りより更新時刻が古い) ジョブを aborted にしていく
         jobs = Job.objects.filter(status=Job.RUNNING, updated_at__lt=deadline)
         for job in jobs:
-            job.abort(result=dict(reason="Benchmark timeout"), stdout='', stderr='')
+            job.abort(reason="Benchmark timeout", stdout='', stderr='')
 
         return list(map(model_to_dict, jobs))
 
@@ -203,10 +203,10 @@ class Job(models.Model):
     status = models.CharField("進捗", max_length=100, choices=STATUS_CHOICES, default=WAITING)
     is_passed = models.BooleanField("正答フラグ", default=False)
 
+    reason = models.CharField("失敗原因", max_length=255, blank=True)
     score = models.IntegerField("獲得スコア", default=0, null=False)
 
     # ベタテキスト
-    result_json = models.TextField("結果JSON", blank=True)
     stdout = models.TextField("ログ標準出力", blank=True)
     stderr = models.TextField("ログ標準エラー出力", blank=True)
 
@@ -218,38 +218,21 @@ class Job(models.Model):
 
     @property
     def is_finished(self):
-        return self.result in [
+        return self.status in [
             self.DONE,
             self.ABORTED,
             self.CANCELED,
         ]
 
-    @property
-    def result(self):
-        if self.result_json:
-            return json.loads(self.result_json)
-        return {}
-
-    @result.setter
-    def result(self, result):
-        self.result_json = json.dumps(result)
-
-    def append_log(self, stdout, stderr):
-        self.stdout += stdout
-        self.stderr += stderr
-        self.save(update_fields=["log_raw"])
-
-    def done(self, result, stdout, stderr):
-        self.status = Job.DONE
-        self.result = result
-        # FIXME: append? そうなると逐次報告だが、どうログを投げるか話し合う
+    def done(self, score, is_passed, stdout, stderr):
+        # ベンチマークが終了したらログを書き込む
         self.stdout = stdout
         self.stderr = stderr
 
-        # 結果のJSONからスコアや結果を参照し、ジョブに設定
-        self.score = self.result['score']
-        if self.result['pass']:
-            self.is_passed = True
+        self.score = score
+        self.is_passed = is_passed
+        self.status = Job.DONE
+
         self.save()
 
         ScoreHistory.objects.create(
@@ -259,9 +242,9 @@ class Job(models.Model):
             is_passed=self.is_passed,
         )
 
-    def abort(self, result, stdout, stderr):
+    def abort(self, reason, stdout, stderr):
         self.status = Job.ABORTED
-        self.result = result
+        self.reason = reason
         self.stdout = stdout
         self.stderr = stderr
         self.save()
