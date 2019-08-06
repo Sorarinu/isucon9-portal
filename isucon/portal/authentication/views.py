@@ -30,7 +30,7 @@ def create_team(request):
     except:
         pass
 
-    return redirect("team_information")
+    return redirect("team_settings")
 
 @check_registration
 @login_required
@@ -50,17 +50,7 @@ def join_team(request):
     except:
         pass
 
-    return redirect("team_information")
-
-@team_is_authenticated
-def team_information(request):
-    team = request.user.team
-
-    team_members = User.objects.filter(team=team)
-    context = {'team_members': team_members}
-
-    return render(request, "team_information.html", context)
-
+    return redirect("team_settings")
 
 def team_list(request):
     teams = Team.objects.order_by("id").prefetch_related("user_set")

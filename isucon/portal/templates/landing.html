@@ -46,7 +46,7 @@
               </span>
               {% if user and user.is_authenticated and user.team %}
               <span class="navbar-item">
-                <a class="button is-white is-outlined" href="{% url "team_information" %}">
+                <a class="button is-white is-outlined" href="{% url "team_settings" %}">
                   <span class="icon">
                     <i class="fas fa-info-circle"></i>
                   </span>
@@ -91,7 +91,7 @@
             </h2>
             <div>
               {% if user.team %}
-              <a class="button is-white is-outlined is-large" href="{% url "team_information" %}">
+              <a class="button is-white is-outlined is-large" href="{% url "team_settings" %}">
                 チーム登録情報はこちら
               </a>
               {% else %}
