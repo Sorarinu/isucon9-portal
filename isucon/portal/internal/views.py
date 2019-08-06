@@ -6,6 +6,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from ipware import get_client_ip
 
+from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Benchmarker, Job
 from isucon.portal.internal.serializers import JobSerializer, JobResultSerializer
 
@@ -16,6 +17,7 @@ class JobViewSet(viewsets.GenericAPIViewSet):
     @detail_route(methods=['post'])
     def dequeue(self, request, *args, **kwargs):
         """ベンチマーカが処理すべきジョブをジョブキューからdequeueします"""
+        # ベンチマーカーを取得するため、HTTPクライアントのIPアドレスを用いる
         client_ip, _ = get_client_ip(request)
         if client_ip is None:
             return HttpResponse('IPアドレスが不正です', status.HTTP_400_BAD_REQUEST)
@@ -24,14 +26,21 @@ class JobViewSet(viewsets.GenericAPIViewSet):
             benchmarker = Benchmarker.objects.get(ip=client_ip)
         except Benchmarker.DoesNotExist:
             return HttpResponse('登録されていないベンチマーカーです', status.HTTP_400_BAD_REQUEST)
+        try:
+            team = Team.objects.get(benchmarker=benchmarker)
+        except Team.DoesNotExist:
+            return HttpResponse('ベンチマーカーがチームに紐づいていません', status.HTTP_400_BAD_REQUEST)
 
         job = Job.objects.dequeue(benchmarker)
         if job is None:
             return HttpResponse('ジョブキューが空です', status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        # FIXME: うまく整形して返す
-        job_serializer = self.serializer_class(instance=job)
-        return Response(job_serializer.data)
+        # ジョブとチームを紐づける
+        job.team = team
+        job.save()
+
+        serializer = self.serializer_class(instance=job)
+        return Response(serializer.data)
 
 
 class JobResultViewSet(viewsets.GenericAPIViewSet):
