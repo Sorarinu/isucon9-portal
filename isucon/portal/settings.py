@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
+    'rest_framework',
     'social_django',
     'widget_tweaks',
     'isucon.portal',

@@ -9,24 +9,27 @@ class ServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Server
         fields = ('id', 'hostname', 'global_ip', 'private_ip', 'is_bench_target')
+        read_only_fields = fields
 
 
 class TeamSerializer(serializers.ModelSerializer):
     """チームと、ベンチマークやblackboxで必要なサーバ情報のシリアライザ"""
-    servers = ServerSerializer(many=True, read_only=True)
 
     class Meta:
         model = Team
         fields = ('id', 'owner', 'name', 'servers')
+        read_only_fields = fields
 
+    servers = ServerSerializer(many=True, read_only=True)
 
 class JobSerializer(serializers.ModelSerializer):
-    # NOTE: ジョブのdequeue時に、チームと紐づける
-    team = TeamSerializer(many=False, read_only=False)
-
     class Meta:
         model = Job
         fields = ('id', 'team')
+        read_only_fields = fields
+
+    # NOTE: ジョブのdequeue時に、チームと紐づける
+    team = TeamSerializer(many=False, read_only=True)
 
 
 class JobResultSerializer(serializers.ModelSerializer):

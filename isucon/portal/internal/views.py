@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.routers import SimpleRouter
@@ -22,28 +22,29 @@ class JobViewSet(viewsets.ViewSet):
     def dequeue(self, request, *args, **kwargs):
         """ベンチマーカが処理すべきジョブをジョブキューからdequeueします"""
         # ベンチマーカーを取得するため、HTTPクライアントのIPアドレスを用いる
+
         client_ip, _ = get_client_ip(request)
         if client_ip is None:
-            return HttpResponse('IPアドレスが不正です', status.HTTP_400_BAD_REQUEST)
+            return HttpResponse('Invalid IP Address', status.HTTP_400_BAD_REQUEST)
 
         try:
             benchmarker = Benchmarker.objects.get(ip=client_ip)
         except Benchmarker.DoesNotExist:
-            return HttpResponse('登録されていないベンチマーカーです', status.HTTP_400_BAD_REQUEST)
+            return HttpResponse('Unknown IP Address', status.HTTP_400_BAD_REQUEST)
         try:
             team = Team.objects.get(benchmarker=benchmarker)
         except Team.DoesNotExist:
-            return HttpResponse('ベンチマーカーがチームに紐づいていません', status.HTTP_400_BAD_REQUEST)
+            return HttpResponse('Team not found', status.HTTP_400_BAD_REQUEST)
 
         job = Job.objects.dequeue(benchmarker)
         if job is None:
-            return HttpResponse('ジョブキューが空です', status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return HttpResponse('Empty', status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         # ジョブとチームを紐づける
         job.team = team
         job.save()
 
-        serializer = self.serializer_class(instance=job)
+        serializer = self.get_serializer()(instance=job)
         return Response(serializer.data)
 
 
