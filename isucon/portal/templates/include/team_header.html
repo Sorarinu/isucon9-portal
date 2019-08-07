@@ -1,4 +1,7 @@
 {% load humanize %}
+
+{% comment %}
+
 <section class="hero welcome is-small <: $score.latest_status == 'fail' ? 'is-danger' : 'is-info' :>">
     <div class="hero-body">
         <div class="container">
@@ -11,6 +14,7 @@
         </div>
     </div>
 </section>
+
 
 {% with score=user.team.score %}
   {% if score %}
@@ -44,3 +48,4 @@
       </section>
   {% endif %}
 {% endwith %}
+{% endcomment %}

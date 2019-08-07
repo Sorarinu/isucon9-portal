@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 
 from isucon.portal.authentication.decorators import is_registration_available
 from isucon.portal.authentication.models import Team, User
+from isucon.portal.contest.models import Server
 
 alibaba_account_validator = RegexValidator(r'^\d{16}$', "Invalid Account ID Format")
 
@@ -55,3 +56,25 @@ class UserIconForm(forms.Form):
         self.user.icon = self.cleaned_data['icon']
         self.user.save()
         return self.user
+
+class ServerTargetForm(forms.Form):
+
+    target = forms.IntegerField(label="対象サーバID")
+
+    def __init__(self, *args, **kwargs):
+        self.team = kwargs.pop("team")
+        super().__init__(*args, **kwargs)
+
+    def clean_target(self):
+        data = self.cleaned_data['target']
+
+        if not Server.objects.filter(id=data, team=self.team).exists():
+            raise form.ValidationError("Invalid Server ID")
+
+        return data
+
+
+    def save(self):
+
+        Server.objects.filter(team=self.team).update(is_bench_target=False)
+        Server.objects.filter(id=self.cleaned_data["target"], team=self.team).update(is_bench_target=True)

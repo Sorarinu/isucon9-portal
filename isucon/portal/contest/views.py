@@ -7,7 +7,7 @@ from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
-from isucon.portal.contest.forms import TeamForm, UserForm, UserIconForm
+from isucon.portal.contest.forms import TeamForm, UserForm, UserIconForm, ServerTargetForm
 
 def get_base_context(user):
     try:
@@ -81,8 +81,14 @@ def scores(request):
 @team_is_now_on_contest
 def servers(request):
     context = get_base_context(request.user)
-
     servers = Server.objects.of_team(request.user.team)
+
+    if request.method == "POST":
+        form = ServerTargetForm(request.POST, team=request.user.team)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "ベンチマーク対象のサーバを変更しました")
+            return redirect("servers")
 
     context.update({
         "servers": servers,
