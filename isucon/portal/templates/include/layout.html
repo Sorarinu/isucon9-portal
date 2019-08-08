@@ -72,7 +72,7 @@
         : }
         {% endcomment %}
 
-        {% if not user.team.alibaba_account %}
+        {% if not user.team.alibaba_account and not form.is_registration_available %}
         <article class="message is-warning">
           <div class="message-body">
             Alibaba CloudのAccount IDが設定されていません。<a href="{% url "team_settings" %}">Team Settings</a>から設定してください。
