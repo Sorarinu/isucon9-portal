@@ -1,5 +1,5 @@
 {% extends "include/layout.html" %}
-
+{% load widget_tweaks %}
 {% block content %}
 <div class="column is-9">
     <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -13,6 +13,7 @@
 
     {# サーバの一覧 #}
     <form method="post">
+      <input type="hidden" name="action" value="target"/>
       {% csrf_token %}
       <section class="table-list">
           <div class="card events-card">
@@ -29,9 +30,10 @@
                       <table class="table is-fullwidth is-striped">
                           <thead>
                               <tr>
-                                  <th>Hostname</th>
+                                  <th>Name</th>
                                   <th>Global IP</th>
                                   <th>Private IP</th>
+                                  <th></th>
                               </tr>
                           </thead>
                           <tbody>
@@ -46,6 +48,9 @@
                                       </td>
                                       <td>{{ server.global_ip }}</td>
                                       <td>{{ server.private_ip }}</td>
+                                      <td>
+                                        <button type="button" class="button is-small is-danger button-delete-server" data-id="{{ server.id }}">削除</button>
+                                      </td>
                                   </tr>
                                   {% endfor %}
                               </div>
@@ -58,21 +63,97 @@
                       <button class="button is-info" id="btn-change-target">Change Benchmark Target</button>
                       <p>※ ベンチマーカーがアクセスするサーバーを変更することができます。</p>
                   </div>
-                  <div class="modal" id="change-target-modal">
-                          <div class="modal-background"></div>
-                          <div class="modal-content">
-                              <div class="notification">...</div>
-                          </div>
-                          <button class="modal-close is-large" aria-label="close"></button>
-                      </div>
-                  </div>
               </div>
           </div>
       </section>
     </form>
 
+
     {# サーバの追加フォーム #}
 
+    <form method="post">
+      <input type="hidden" name="action" value="add"/>
+      {% csrf_token %}
 
+      <section class="section">
+        <h1 class="title">サーバの追加</h1>
+        <div class="box">
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Name</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ add_form.hostname|add_class:"input" }}
+                </p>
+                {% if add_form.hostname.errors %}
+                  <p class="help is-danger">{{ add_form.hostname.errors.0 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Global IP</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ add_form.global_ip|add_class:"input" }}
+                </p>
+                {% if add_form.global_ip.errors %}
+                  <p class="help is-danger">{{ add_form.global_ip.errors.0 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Private IP</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ add_form.private_ip|add_class:"input" }}
+                </p>
+                {% if add_form.private_ip.errors %}
+                  <p class="help is-danger">{{ add_form.private_ip.errors.0 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="button is-primary">保存</button>
+
+        </div>
+      </section>
+
+    </form>
 </div>
 {% endblock content %}
+
+{% block script %}
+<script>
+$(function(){
+  $(".button-delete-server").click(function(){
+    var id = $(this).data("id");
+    var url = "{% url "servers" %}" + id + "/";
+    $.ajax({
+  		"url" : url,
+  		"type" : "DELETE",
+  		"cache" : false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+      }
+  	}).then(function(){
+      location.reload();
+    });
+  });
+});
+</script>
+{% endblock %}
