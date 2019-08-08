@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.http import HttpResponseNotAllowed, HttpResponse
 
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
-from isucon.portal.contest.forms import TeamForm, UserForm
+from isucon.portal.contest.forms import TeamForm, UserForm, UserIconForm
 
 def get_base_context(user):
     try:
@@ -135,3 +136,20 @@ def team_settings(request):
         "team_members": request.user.team.user_set.all()
     }
     return render(request, "team_settings.html", context)
+
+@team_is_authenticated
+def update_user_icon(request):
+    form = UserIconForm(user=request.user)
+    if request.method == "POST":
+        form = UserIconForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "ユーザーのアイコンを更新しました")
+        else:
+            messages.error(request, "ユーザーのアイコンを更新に失敗しました")
+    else:
+        return HttpResponseNotAllowed(["POST"])
+
+    if request.is_ajax():
+        return HttpResponse("OK")
+    return redirect("team_settings")

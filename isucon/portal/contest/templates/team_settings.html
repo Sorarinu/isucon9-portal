@@ -154,7 +154,7 @@
               <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="user"/>
-                <img src="{{ member.icon.thumbnail.url }}">
+                <img src="{{ member.icon.thumbnail.url }}" id="open-icon">
                 <p>{% render_field user_form.display_name style="text-align: center" class="input is-small" %}
                 {% if member.team.owner == member %}
                 <p>チーム代表者</p>
@@ -180,6 +180,25 @@
     </section>
 </div>
 
+
+<div class="modal" id="icon-modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">アイコン登録</p>
+      <button class="delete close-icon" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <div id="icon-croppie"></div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" id="icon-save">保存</button>
+      <button class="button close-icon">キャンセル</button>
+    </footer>
+  </div>
+</div>
+
+
 {% endblock %}
 
 {% block script %}
@@ -193,5 +212,80 @@
     document.execCommand('copy');
     alert('チームパスワードをクリップボードにコピーしました');
   });
+
+
+  var iconCroppie = $("#icon-croppie").croppie({
+      enableExif: true,
+      viewport: {
+          width: 400,
+          height: 400,
+          type: 'square'
+      },
+      boundary: {
+          width: 600,
+          height: 600
+      },
+      showZoomer: true,
+      enableResize: false,
+      enableOrientation: true,
+      mouseWheelZoom: 'ctrl'
+  });
+
+  $("#open-icon").click(function(){
+
+    var input = $('<input type="file" accept="image/*">');
+    input.change(function(){
+      var file = this.files[0];
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        $("#icon-modal").addClass("is-active");
+        iconCroppie.croppie('bind', {
+          url: e.target.result
+        }).then(function(){
+          console.log('Croppie bind complete');
+        });
+      }
+      reader.readAsDataURL(file);
+    });
+    input.click();
+  });
+
+  $(".close-icon").click(function(){
+    $("#icon-modal").removeClass("is-active");
+  });
+
+  $("#icon-save").click(function(){
+    iconCroppie.croppie('result', 'blob',).then(function(blob){
+      console.log(blob);
+      var fd = new FormData();
+      fd.append("icon", blob, "icon-cropped.png");
+
+      $.ajaxSetup({
+          crossDomain: false,
+          beforeSend: function(xhr, settings) {
+              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+          }
+      });
+      $.ajax('{% url "update_user_icon" %}',{
+        type: 'post',
+        processData: false,
+        contentType: false,
+        dataType: "html",
+        data:fd,
+        success: function(data) {
+          location.reload();
+        },error: function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log("ERROR");
+            console.log(textStatus);
+            console.log(errorThrown);
+            alert("失敗しました");
+        }
+      });
+
+
+    });
+  });
+
+
 </script>
 {% endblock %}

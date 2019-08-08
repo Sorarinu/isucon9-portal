@@ -43,3 +43,15 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["display_name", ]
+
+class UserIconForm(forms.Form):
+    icon = forms.ImageField(label="アイコン", required=True)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super().__init__(*args, **kwargs)
+
+    def save(self):
+        self.user.icon = self.cleaned_data['icon']
+        self.user.save()
+        return self.user
