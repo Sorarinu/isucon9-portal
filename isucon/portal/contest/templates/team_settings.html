@@ -111,6 +111,9 @@
           </div>
           {% endif %}
 
+          {% if form.is_registration_available %}
+            {{ form.alibaba_account.as_hidden }}
+          {% else %}
           <div class="field is-horizontal">
             <div class="field-label is-normal">
               <label class="label">Alibaba Cloud Account ID</label>
@@ -127,6 +130,7 @@
 
             </div>
           </div>
+          {% endif %}
 
           <button type="submit" class="button is-primary">保存</button>
 
