@@ -154,13 +154,14 @@
               <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="user"/>
-                <img src="{{ member.icon.thumbnail.url }}" id="open-icon">
+                <img src="{{ member.icon.thumbnail.url }}" class="open-icon">
                 <p>{% render_field user_form.display_name style="text-align: center" class="input is-small" %}
                 {% if member.team.owner == member %}
                 <p>チーム代表者</p>
                 {% else %}
                 <p>チームメンバー</p>
                 {% endif %}
+                <button type="button" class="button open-icon is-small">アイコン変更</button>
                 <button type="submit" class="button is-small is-primary">保存</button>
               </form>
             {% else %}
@@ -231,7 +232,7 @@
       mouseWheelZoom: 'ctrl'
   });
 
-  $("#open-icon").click(function(){
+  $(".open-icon").click(function(){
 
     var input = $('<input type="file" accept="image/*">');
     input.change(function(){
