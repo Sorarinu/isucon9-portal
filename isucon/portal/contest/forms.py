@@ -17,7 +17,7 @@ class TeamForm(forms.ModelForm):
         widget=forms.Select(choices=Team.PARTICIPATE_AT_CHOICES),
         required=True,
     )
-    alibaba_account = forms.CharField(required=True, validators=[alibaba_account_validator], )
+    alibaba_account = forms.CharField(required=False, validators=[alibaba_account_validator], )
 
     def __init__(self, *args, **kwargs):
         self.is_registration_available = is_registration_available()
