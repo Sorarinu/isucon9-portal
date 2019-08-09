@@ -52,6 +52,7 @@ class Server(LogicalDeleteMixin, models.Model):
     """参加者の問題サーバー"""
     class Meta:
         verbose_name = verbose_name_plural = "サーバ"
+        unique_together = (("team", "hostname"),)
 
     # NOTE: パスワード、鍵認証とかにすればいい気がしたのでまだ追加してない
     # FIXME: デフォルトのベンチマーク対象を設定

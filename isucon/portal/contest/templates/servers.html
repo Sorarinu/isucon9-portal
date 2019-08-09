@@ -1,119 +1,159 @@
 {% extends "include/layout.html" %}
-
+{% load widget_tweaks %}
 {% block content %}
 <div class="column is-9">
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="/">ISUCON8</a></li>
+            <li><a href="/">ISUCON9</a></li>
             <li class="is-active"><a href="#" aria-current="page">Servers</a></li>
         </ul>
     </nav>
 
     {% include "include/team_header.html" %}
 
-    <section class="table-list">
-        <div class="card events-card">
-            <header class="card-header is-info">
-                <p class="card-header-title">
-                    <span class="icon">
-                        <i class="fas fa-server"></i>
-                    </span>
-                    <span>Servers</span>
-                </p>
-            </header>
-            <div class="card-table">
-                <div class="content">
-                    <table class="table is-fullwidth is-striped">
-                        <thead>
-                            <tr>
-                                <th>Hostname</th>
-                                <th>Password</th>
-                                <th>Global IP</th>
-                                <th>Private IP</th>
-                                <th>Bench IP</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <div class="control">
-                                {% for server in servers %}
-                                <tr>
-                                    <td>
-                                        <label class="radio">
-                                            <input type="radio" name="target" value="{{ server.id }}" />
-                                            {{ server.hostname }}
-                                        </label>
-                                    </td>
-                                    <td>
-                                    <td>{{ server.password }}</td>
-                                    <td>{{ server.global_ip }}</td>
-                                    <td>{{ server.private_ip }}</td>
-                                    <td>{{ server.bench_ip }}</td>
-                                </tr>
-                                {% endfor %}
-                            </div>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="notification">
-                    <!-- dummy -->
-                    <form method="post"></form>
-                    <button class="button is-info" id="btn-change-target">Change Benchmark Target</button>
-                    <p>※ ベンチマーカーがアクセスするサーバーを変更することができます。</p>
-                </div>
-                <div class="modal" id="change-target-modal">
-                        <div class="modal-background"></div>
-                        <div class="modal-content">
-                            <div class="notification">...</div>
-                        </div>
-                        <button class="modal-close is-large" aria-label="close"></button>
-                    </div>
-                </div>
+    {# サーバの一覧 #}
+    <form method="post">
+      <input type="hidden" name="action" value="target"/>
+      {% csrf_token %}
+      <section class="table-list">
+          <div class="card events-card">
+              <header class="card-header is-info">
+                  <p class="card-header-title">
+                      <span class="icon">
+                          <i class="fas fa-server"></i>
+                      </span>
+                      <span>Servers</span>
+                  </p>
+              </header>
+              <div class="card-table">
+                  <div class="content">
+                      <table class="table is-fullwidth is-striped">
+                          <thead>
+                              <tr>
+                                  <th>Name</th>
+                                  <th>Global IP</th>
+                                  <th>Private IP</th>
+                                  <th></th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              <div class="control">
+                                  {% for server in servers %}
+                                  <tr>
+                                      <td>
+                                          <label class="radio">
+                                              <input type="radio" name="target" value="{{ server.id }}" {% if server.is_bench_target %}checked="checked"{% endif %} />
+                                              {{ server.hostname }}
+                                          </label>
+                                      </td>
+                                      <td>{{ server.global_ip }}</td>
+                                      <td>{{ server.private_ip }}</td>
+                                      <td>
+                                        <button type="button" class="button is-small is-danger button-delete-server" data-id="{{ server.id }}">削除</button>
+                                      </td>
+                                  </tr>
+                                  {% endfor %}
+                              </div>
+                          </tbody>
+                      </table>
+                  </div>
+                  <div class="notification">
+                      <!-- dummy -->
+                      <form method="post"></form>
+                      <button class="button is-info" id="btn-change-target">Change Benchmark Target</button>
+                      <p>※ ベンチマーカーがアクセスするサーバーを変更することができます。</p>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </form>
+
+
+    {# サーバの追加フォーム #}
+
+    <form method="post">
+      <input type="hidden" name="action" value="add"/>
+      {% csrf_token %}
+
+      <section class="section">
+        <h1 class="title">サーバの追加</h1>
+        <div class="box">
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Name</label>
             </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ add_form.hostname|add_class:"input" }}
+                </p>
+                {% if add_form.hostname.errors %}
+                  <p class="help is-danger">{{ add_form.hostname.errors.0 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Global IP</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ add_form.global_ip|add_class:"input" }}
+                </p>
+                {% if add_form.global_ip.errors %}
+                  <p class="help is-danger">{{ add_form.global_ip.errors.0 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Private IP</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  {{ add_form.private_ip|add_class:"input" }}
+                </p>
+                {% if add_form.private_ip.errors %}
+                  <p class="help is-danger">{{ add_form.private_ip.errors.0 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="button is-primary">保存</button>
+
         </div>
-    </section>
+      </section>
+
+    </form>
 </div>
 {% endblock content %}
 
-
-
 {% block script %}
 <script>
-"use strict";
-(function() {
-    var modalId = "#change-target-modal";
-    $(modalId).find(".modal-background, .modal-close").click(function() {
-        $(modalId).removeClass("is-active");
-        $(modalId).find(".notification").text("...");
-        $(modalId).find(".notification").removeClass("is-success");
-        $(modalId).find(".notification").removeClass("is-danger");
-    })
-
-    $("#btn-change-target").click(function(e) {
-        var THIS = this;
-        THIS.disabled = true;
-        var global_ip = $('input[name=target]:checked').val()
-        var sendData = {
-            'global_ip': global_ip,
-            'XSRF-TOKEN': $('input[name="XSRF-TOKEN"]').val(),
-        };
-        $.post("/api/target/change", sendData).done(function(data) {
-            console.log(data);
-            if (data.success) {
-                $(modalId).find(".notification").addClass("is-success");
-                $(modalId).find(".notification").text("Successfully changed!!");
-            } else {
-                $(modalId).find(".notification").addClass("is-danger");
-                $(modalId).find(".notification").text(data.error);
-            }
-            $(modalId).addClass("is-active");
-        }).fail(function(data) {
-            $(modalId).find(".notification").text("エラーが発生しました！！！！？！！？！");
-            $(modalId).find(".notification").addClass("is-danger");
-            $(modalId).addClass("is-active");
-        }).always(function() {
-            THIS.disabled = false;
-        });
+$(function(){
+  $(".button-delete-server").click(function(){
+    var id = $(this).data("id");
+    var url = "{% url "servers" %}" + id + "/";
+    $.ajax({
+  		"url" : url,
+  		"type" : "DELETE",
+  		"cache" : false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+      }
+  	}).then(function(){
+      location.reload();
     });
-})();
+  });
+});
 </script>
-{% endblock script %}
+{% endblock %}

@@ -136,7 +136,7 @@
                                 <span>Team Settings</span>
                             </a>
                         </li>
-                        {% comment %}
+                        {% if is_now_on_contest %}
                         <li>
                             <a class="{% if page == "servers" %}active{% endif %}" href="{% url "servers" %}">
                                 <span class="icon">
@@ -145,6 +145,8 @@
                                 <span>Servers</span>
                             </a>
                         </li>
+                        {% endif %}
+                        {% comment %}
                         <li>
                             <a class="{% if page == "members" %}active{% endif %}" href="/members">
                                 <span class="icon">

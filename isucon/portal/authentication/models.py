@@ -1,4 +1,6 @@
+import os
 import locale
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -43,6 +45,11 @@ class Team(LogicalDeleteMixin, models.Model):
 
     def is_playing(self):
         """参加中か(日付が一致し、時刻が範囲内なら)"""
+
+        if os.environ.get("CONTEST", "").lower() == "true":
+            # 強制的にコンテスト開催中にする (開発用)
+            return True
+
         now = timezone.now()
         in_date = now.date() == self.participate_at
         in_time = settings.CONTEST_START_TIME <= now.time() <= settings.CONTEST_END_TIME

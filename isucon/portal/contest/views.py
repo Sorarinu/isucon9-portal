@@ -7,7 +7,9 @@ from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, ScoreHistory, Job
-from isucon.portal.contest.forms import TeamForm, UserForm, UserIconForm
+
+from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
+
 
 def get_base_context(user):
     try:
@@ -81,13 +83,56 @@ def scores(request):
 @team_is_now_on_contest
 def servers(request):
     context = get_base_context(request.user)
-
     servers = Server.objects.of_team(request.user.team)
+    add_form = ServerAddForm(team=request.user.team)
+
+    if request.method == "POST":
+        action = request.POST.get("action", "").lower()
+
+        if action == "target":
+            form = ServerTargetForm(request.POST, team=request.user.team)
+            if form.is_valid():
+                server = form.save()
+                if Server.objects.of_team(request.user.team).count() == 1:
+                    Server.objects.of_team(request.user.team).update(is_bench_target=True)
+                messages.success(request, "ベンチマーク対象のサーバを変更しました")
+                return redirect("servers")
+
+        if action == "add":
+            add_form = ServerAddForm(request.POST, team=request.user.team)
+            if add_form.is_valid():
+                add_form.save()
+                messages.success(request, "サーバを追加しました")
+                return redirect("servers")
 
     context.update({
         "servers": servers,
+        "add_form": add_form
     })
     return render(request, "servers.html", context)
+
+
+@team_is_authenticated
+@team_is_now_on_contest
+def delete_server(request, pk):
+    if request.method != "DELETE":
+        return HttpResponseNotAllowed(["DELETE"])
+
+    server = get_object_or_404(Server.objects.of_team(request.user.team), pk=pk)
+
+    if server.is_bench_target:
+        messages.warning(request, "ベンチマーク対象のサーバは削除できません")
+        if request.is_ajax():
+            return HttpResponse("Error")
+        return redirect("servers")
+
+    server.delete()
+
+    if request.is_ajax():
+        return HttpResponse("OK")
+
+    messages.success(request, "サーバを削除しました")
+    return redirect("servers")
 
 
 @team_is_authenticated
@@ -146,7 +191,7 @@ def update_user_icon(request):
             form.save()
             messages.success(request, "ユーザーのアイコンを更新しました")
         else:
-            messages.error(request, "ユーザーのアイコンを更新に失敗しました")
+            messages.warning(request, "ユーザーのアイコンを更新に失敗しました")
     else:
         return HttpResponseNotAllowed(["POST"])
 
