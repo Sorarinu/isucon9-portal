@@ -32,11 +32,17 @@
         <h2>新しくチームを作成するか、参加するチームの情報を入力してください</h2>
 
         <div class="box">
+            {% if create_team_limited %}
+            <span>
+              <button class="button is-block is-warning is-large is-fullwidth" disabled>チーム数の上限に達したため、新規のチーム登録はできません</button>
+            </span>
+            {% else %}
             <span>
                 <a href="{% url 'create_team' %}">
                     <button class="button is-block is-info is-large is-fullwidth">新規チームを作成</button>
                 </a>
             </span>
+            {% endif %}
             <br>
             <span>
                 <a href="{% url 'join_team' %}">

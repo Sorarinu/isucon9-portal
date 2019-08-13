@@ -207,6 +207,8 @@ BENCHMARK_ABORT_TIMEOUT_SEC = 300
 
 # チームに所属できる最大人数
 MAX_TEAM_MEMBER_NUM = 3
+# 最大チーム数
+MAX_TEAM_NUM = 600
 
 # チームパスワードとして使う文字群
 PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
