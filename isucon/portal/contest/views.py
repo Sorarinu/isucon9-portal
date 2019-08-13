@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.http import HttpResponseNotAllowed, HttpResponse
+from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
@@ -69,6 +69,31 @@ def job_detail(request, pk):
 
 @team_is_authenticated
 @team_is_now_on_contest
+def job_enqueue(request):
+
+    if not request.is_ajax():
+        return HttpResponse("このエンドポイントはAjax専用です", status=400)
+
+    context = get_base_context(request.user)
+    job = None
+    try:
+        job = Job.objects.enqueue(request.user.team)
+    except Job.DuplicateJobError:
+        return JsonResponse(
+            {"error": "実行中のジョブがあります"}, status = 409
+        )
+
+    data = {
+        "id": job.id,
+    }
+
+    return JsonResponse(
+        data, status = 200
+    )
+
+
+@team_is_authenticated
+@team_is_now_on_contest
 def scores(request):
     context = get_base_context(request.user)
 
@@ -129,7 +154,9 @@ def delete_server(request, pk):
     server.delete()
 
     if request.is_ajax():
-        return HttpResponse("OK")
+        return JsonResponse(
+            {}, status = 200
+        )
 
     messages.success(request, "サーバを削除しました")
     return redirect("servers")
@@ -196,5 +223,7 @@ def update_user_icon(request):
         return HttpResponseNotAllowed(["POST"])
 
     if request.is_ajax():
-        return HttpResponse("OK")
+        return JsonResponse(
+            {}, status = 200
+        )
     return redirect("team_settings")

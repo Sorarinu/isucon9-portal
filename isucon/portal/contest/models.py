@@ -136,7 +136,7 @@ class JobManager(models.Manager):
         job = self.model(team=team)
         job.save(using=self._db)
 
-        return job.id
+        return job
 
     def dequeue(self, benchmarker=None):
         if benchmarker is not None:
@@ -216,6 +216,8 @@ class Job(models.Model):
     updated_at = models.DateTimeField("最終更新日時", auto_now=True)
 
     objects = JobManager()
+
+    DuplicateJobError = exceptions.DuplicateJobError
 
     @property
     def is_finished(self):

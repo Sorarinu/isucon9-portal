@@ -13,35 +13,7 @@
 
     {% include "include/team_header.html" %}
 
-    <section class="enqueue-job">
-        <article class="message is-warning">
-            <div class="message-header">
-                <p>
-                    <span class="icon">
-                        <i class="fas fa-paper-plane"></i>
-                    </span>
-                    <span>Enqueue Job</span>
-                </p>
-            </div>
-            <div class="message-body">
-                <div class="field has-addons">
-                    <div class="control">
-                        <a class="button is-static">Target {{ target_server.global_ip }}</a>
-                    </div>
-                    <div class="control">
-                        <button type="submit" class="button is-warning" id="btn-enqueue">Enqueue</button>
-                    </div>
-                </div>
-                <div class="modal" id="enqueue-modal">
-                    <div class="modal-background"></div>
-                    <div class="modal-content">
-                        <div class="notification">...</div>
-                    </div>
-                    <button class="modal-close is-large" aria-label="close"></button>
-                </div>
-            </div>
-        </article>
-    </section>
+    {% include "include/job_enqueue.html" %}
 
     <section class="table-list">
         <div class="card events-card">
@@ -153,40 +125,7 @@
 
 
 {% block script %}
-<script>
-"use strict";
-(function() {
-    var modalId = "#enqueue-modal";
-    $(modalId).find(".modal-background, .modal-close").click(function() {
-        $(modalId).removeClass("is-active");
-        $(modalId).find(".notification").text("...");
-    })
-
-    $("#btn-enqueue").click(function(e) {
-        this.disabled = true;
-        var sendData = {
-            'XSRF-TOKEN': $('input[name="XSRF-TOKEN"]').val(),
-        };
-        $.post("/api/job/enqueue", sendData).done(function(data) {
-            console.log(data);
-            if (data.success) {
-                $(modalId).find(".notification").addClass("is-success");
-                $(modalId).find(".notification").text("Enqueue successfully!!");
-                window.setTimeout(() => {
-                    location.href = "/jobs/"+data.job_id;
-                }, 1000);
-            } else {
-                $(modalId).find(".notification").addClass("is-danger");
-                $(modalId).find(".notification").text(data.error || 'Error!!!');
-            }
-            $(modalId).addClass("is-active");
-        }).fail(function(data) {
-            $(modalId).find(".notification").text("エラーが発生しました！！！！？！！？！");
-            $(modalId).find(".notification").addClass("is-danger");
-            $(modalId).addClass("is-active");
-        });
-    });
-})();
-</script>
+{% comment %}
 <script src="{% static "js/graph.js" %}"></script>
+{% endcomment %}
 {% endblock script %}

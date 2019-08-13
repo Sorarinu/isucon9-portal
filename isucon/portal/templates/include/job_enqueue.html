@@ -1,0 +1,63 @@
+<section class="enqueue-job">
+    <article class="message is-warning">
+        <div class="message-header">
+            <p>
+                <span class="icon">
+                    <i class="fas fa-paper-plane"></i>
+                </span>
+                <span>Enqueue Job</span>
+            </p>
+        </div>
+        <div class="message-body">
+            <div class="field has-addons">
+                <div class="control">
+                    <a class="button is-static">Target {{ target_server.global_ip }}</a>
+                </div>
+                <div class="control">
+                    <button type="submit" class="button is-warning" id="btn-enqueue">Enqueue</button>
+                </div>
+            </div>
+            <div class="modal" id="enqueue-modal">
+                <div class="modal-background"></div>
+                <div class="modal-content">
+                    <div class="notification">...</div>
+                </div>
+                <button class="modal-close is-large" aria-label="close"></button>
+            </div>
+        </div>
+    </article>
+</section>
+
+<script type="application/javascript">
+$(function(){
+    var modalId = "#enqueue-modal";
+    $(modalId).find(".modal-background, .modal-close").click(function() {
+        $(modalId).removeClass("is-active");
+        $(modalId).find(".notification").text("...");
+    });
+
+    $("#btn-enqueue").click(function(e) {
+      var button = this;
+      button.disabled = true;
+      $.post("{% url "job_enqueue" %}", {}).done(function(data) {
+        console.log(data);
+        $(modalId).find(".notification").addClass("is-success");
+        $(modalId).find(".notification").text("Enqueue successfully!!");
+        window.setTimeout(() => {
+          location.href = "{% url "jobs" %}" + data.id;
+        }, 1000);
+        $(modalId).addClass("is-active");
+        button.disabled = false;
+      }).fail(function(data) {
+        console.log(data);
+        if(data.responseJSON && data.responseJSON.error){
+          $(modalId).find(".notification").text(data.responseJSON.error);
+          button.disabled = false;
+        }
+        $(modalId).find(".notification").addClass("is-danger");
+        $(modalId).addClass("is-active");
+      });
+    });
+
+});
+</script>
