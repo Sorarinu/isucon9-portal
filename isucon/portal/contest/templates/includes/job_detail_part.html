@@ -1,0 +1,73 @@
+{% load humanize %}
+<div class="card-table">
+    <div class="content">
+        <table class="table is-fullwidth is-striped">
+            <tbody>
+                <tr>
+                    <th width="10%">JobId</th>
+                    <td>{{ job.id }}</td>
+                </tr>
+                <tr>
+                    <th width="10%">Target</th>
+                    <td>{{ job.target_ip }}</td>
+                </tr>
+                <tr>
+                    <th width="10%">Score</th>
+                    <td>
+                      {% if job.is_finished %}
+                        {{ job.score|intcomma }}
+                      {% endif %}
+                    </td>
+                </tr>
+                <tr {% if not job.is_finished %}class="state-running"{% endif %}>
+                    <th width="10%">Status</th>
+                    <td>
+                      {% if job.status == job.DONE %}
+                        <span class="tag is-success">Done</span>
+                      {% endif %}
+                      {% if job.status == job.ABORTED %}
+                        <span class="tag is-danger">Aborted</span>
+                      {% endif %}
+                      {% if job.status == job.CANCELED %}
+                        <span class="tag is-warning">Canceled</span>
+                      {% endif %}
+                      {% if job.status == job.WAITING %}
+                        <span class="tag is-info">Waiting</span>
+                      {% endif %}
+                      {% if job.status == job.RUNNING %}
+                        <span class="tag is-info">Running</span>
+                      {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th width="10%">Result</th>
+                    <td>
+                      {% if job.is_finished %}
+                        {% if job.is_passed %}
+                          <span class="tag is-success">Passed</span>
+                        {% else %}
+                          <span class="tag is-danger">Failed</span>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th width="10%">UpdatedAt</th>
+                    <td>{{ job.updated_at|date:"H:i:s" }}</td>
+                </tr>
+                <tr>
+                    <th width="10%">Message</th>
+                    <td style="font-size: 0.85rem">
+                        {{ job.reason|linebreaksbr }}
+                    </td>
+                </tr>
+                <tr>
+                    <th width="10%">Log</th>
+                    <td style="font-size: 0.85rem">
+                      <pre id="logs" style="white-space: pre-wrap;">{{ job.stdout }}</pre>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
