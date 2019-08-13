@@ -30,20 +30,48 @@
                                 <th>JobId</th>
                                 <th>Score</th>
                                 <th>Status</th>
-                                <th>State</th>
+                                <th>Result</th>
                                 <th>UpdatedAt</th>
                                 <th>Detail</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for job in jobs %}
-                                <tr>
+                                <tr {% if not job.is_finished %}class="state-running"{% endif %}>
                                     <td class="has-text-right">{{ job.id }}</td>
-                                    <td class="has-text-right">{{ job.result_score|intcomma }}</td>
-                                    <td>{{ job.result_status }}</td>
-                                    <td>{{ job.state }}</td>
+                                    <td class="has-text-right">
+                                      {% if job.is_finished %}
+                                        {{ job.result_score|intcomma }}
+                                      {% endif %}
+                                    </td>
+                                    <td>
+                                      {% if job.status == job.DONE %}
+                                        <span class="tag is-success">Done</span>
+                                      {% endif %}
+                                      {% if job.status == job.ABORTED %}
+                                        <span class="tag is-danger">Aborted</span>
+                                      {% endif %}
+                                      {% if job.status == job.CANCELED %}
+                                        <span class="tag is-warning">Canceled</span>
+                                      {% endif %}
+                                      {% if job.status == job.WAITING %}
+                                        <span class="tag is-info">Waiting</span>
+                                      {% endif %}
+                                      {% if job.status == job.RUNNING %}
+                                        <span class="tag is-info">Running</span>
+                                      {% endif %}
+                                    </td>
+                                    <td>
+                                      {% if job.is_finished %}
+                                        {% if job.is_passed %}
+                                          <span class="tag is-success">Passed</span>
+                                        {% else %}
+                                          <span class="tag is-danger">Failed</span>
+                                        {% endif %}
+                                      {% endif %}
+                                    </td>
                                     <td>{{ job.updated_at|date:"H:i:s" }}</td>
-                                    <td><a class="button is-small is-link" href="/jobs/{{ job.id }}">show</a></td>
+                                    <td><a class="button is-small is-link" href="{% url "job_detail" job.id %}">show</a></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -53,4 +81,13 @@
         </div>
     </section>
 </div>
+{% endblock %}
+
+
+{% block script %}
+<script type="application/javascript">
+  $(function(){
+    setTimeout(function(){location.reload();}, 60000);
+  });
+</script>
 {% endblock %}
