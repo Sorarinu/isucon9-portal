@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core import files
 from django.http import HttpResponse
+from django.contrib.auth.views import LoginView as DjangoLoginView
 import requests
 import csv
 
@@ -11,9 +12,21 @@ from isucon.portal.authentication.forms import TeamRegisterForm, JoinToTeamForm
 from isucon.portal.authentication.decorators import team_is_authenticated, check_registration
 from isucon.portal.authentication.notify import notify_registration
 
+
+class LoginView(DjangoLoginView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["create_team_limited"] = Team.objects.count() >= settings.MAX_TEAM_NUM
+        return context
+
+
 @check_registration
 @login_required
 def create_team(request):
+
+    if Team.objects.count() >= settings.MAX_TEAM_NUM:
+        return render(request, "create_team_max.html")
+
     user = request.user
     initial = {
         "email": user.email,
