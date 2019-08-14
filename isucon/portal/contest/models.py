@@ -204,7 +204,7 @@ class Job(models.Model):
     status = models.CharField("進捗", max_length=100, choices=STATUS_CHOICES, default=WAITING)
     is_passed = models.BooleanField("正答フラグ", default=False)
 
-    reason = models.CharField("失敗原因", max_length=255, blank=True)
+    reason = models.TextField("結果メッセージ", blank=True)
     score = models.IntegerField("獲得スコア", default=0, null=False)
 
     # ベタテキスト
