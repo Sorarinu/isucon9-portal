@@ -111,7 +111,7 @@
           </div>
           {% endif %}
 
-          {% if form.is_registration_available %}
+          {% if is_registration_available and not is_now_on_contest %}
             {{ form.alibaba_account.as_hidden }}
           {% else %}
           <div class="field is-horizontal">

@@ -65,7 +65,14 @@ def ModifyImageSharePermission(image_id, add_accounts=[], remove_accounts=[]):
 def SyncImageSharePermission(image_id, accounts=[]):
 
     accounts = set(accounts)
-    current_accounts = set(DescribeImageSharePermission(image_id))
+    current_accounts = set()
+
+    try:
+        current_accounts = set(DescribeImageSharePermission(image_id))
+    except:
+        logger.error("DescribeImageSharePermission %s faild", image_id)
+        return
+
 
     remove_accounts = list(current_accounts - accounts)
     add_accounts = list(accounts - current_accounts)
