@@ -7,6 +7,10 @@ from aliyunsdkcore.acs_exception.exceptions import ClientException
 from aliyunsdkcore.acs_exception.exceptions import ServerException
 from aliyunsdkecs.request.v20140526 import DescribeImagesRequest, DescribeImageSharePermissionRequest, ModifyImageSharePermissionRequest
 
+
+import logging
+logger = logging.getLogger("isucon.portal.contest.alibaba")
+
 def get_client():
     client = AcsClient(
         settings.ALIBABA_ACCESS_KEY_ID,
@@ -58,6 +62,24 @@ def ModifyImageSharePermission(image_id, add_accounts=[], remove_accounts=[]):
     return data
 
 
+def SyncImageSharePermission(image_id, accounts=[]):
+
+    accounts = set(accounts)
+    current_accounts = set(DescribeImageSharePermission(image_id))
+
+    remove_accounts = list(current_accounts - accounts)
+    add_accounts = list(accounts - current_accounts)
+
+    for a in add_accounts:
+        try:
+            ModifyImageSharePermission(image_id, [a])
+        except:
+            logger.error("ModifyImageSharePermission %s to %s faild", image_id, a)
+
+    for a in remove_accounts:
+        ModifyImageSharePermission(image_id, remove_accounts=[a])
+
+
 if __name__ == "__main__":
     import os
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'isucon.portal.settings')
@@ -66,11 +88,7 @@ if __name__ == "__main__":
     accounts = DescribeImageSharePermission("m-6wefxax67uhdunlue8u6")
     print("Before: ", accounts)
 
-    ModifyImageSharePermission("m-6wefxax67uhdunlue8u6", ["5695564992560398"])
+    SyncImageSharePermission("m-6wefxax67uhdunlue8u6", ["5695564992560398"])
 
     accounts = DescribeImageSharePermission("m-6wefxax67uhdunlue8u6")
     print("After: ", accounts)
-
-    ModifyImageSharePermission("m-6wefxax67uhdunlue8u6", [], ["5695564992560398"])
-    accounts = DescribeImageSharePermission("m-6wefxax67uhdunlue8u6")
-    print("After2: ", accounts)
