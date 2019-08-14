@@ -261,12 +261,6 @@
       var fd = new FormData();
       fd.append("icon", blob, "icon-cropped.png");
 
-      $.ajaxSetup({
-          crossDomain: false,
-          beforeSend: function(xhr, settings) {
-              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-          }
-      });
       $.ajax('{% url "update_user_icon" %}',{
         type: 'post',
         processData: false,

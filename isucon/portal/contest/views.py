@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.http import HttpResponseNotAllowed, HttpResponse
+from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
@@ -20,7 +20,7 @@ def get_base_context(user):
         target_server = None
     # FIXME: ラストスパート判定
     # ラスト１時間であるかを判定すれば良いので、競技の開始、終了時刻をsettings.pyなどに突っ込んでおく
-    # https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON8/Portal/Web.pm#L92
+    # https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON9/Portal/Web.pm#L92
     is_last_spurt = False
 
     return {
@@ -66,6 +66,31 @@ def job_detail(request, pk):
     })
 
     return render(request, "job_detail.html", context)
+
+@team_is_authenticated
+@team_is_now_on_contest
+def job_enqueue(request):
+
+    if not request.is_ajax():
+        return HttpResponse("このエンドポイントはAjax専用です", status=400)
+
+    context = get_base_context(request.user)
+    job = None
+    try:
+        job = Job.objects.enqueue(request.user.team)
+    except Job.DuplicateJobError:
+        return JsonResponse(
+            {"error": "実行中のジョブがあります"}, status = 409
+        )
+
+    data = {
+        "id": job.id,
+    }
+
+    return JsonResponse(
+        data, status = 200
+    )
+
 
 @team_is_authenticated
 @team_is_now_on_contest
@@ -129,7 +154,9 @@ def delete_server(request, pk):
     server.delete()
 
     if request.is_ajax():
-        return HttpResponse("OK")
+        return JsonResponse(
+            {}, status = 200
+        )
 
     messages.success(request, "サーバを削除しました")
     return redirect("servers")
@@ -196,5 +223,7 @@ def update_user_icon(request):
         return HttpResponseNotAllowed(["POST"])
 
     if request.is_ajax():
-        return HttpResponse("OK")
+        return JsonResponse(
+            {}, status = 200
+        )
     return redirect("team_settings")

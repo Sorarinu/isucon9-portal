@@ -5,8 +5,8 @@
 <div class="column is-9">
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="/">ISUCON8</a></li>
-            <li><a href="/jobs">Show All Jobs</a></li>
+            <li><a href="/">ISUCON9</a></li>
+            <li><a href="{% url "jobs" %}">Show All Jobs</a></li>
             <li class="is-active"><a href="#" aria-current="page">Job Details</a></li>
         </ul>
     </nav>
@@ -23,80 +23,18 @@
                     <span>Job</span>
                 </p>
             </header>
-            <div class="card-table">
-                <div class="content">
-                    <table class="table is-fullwidth is-striped">
-                        <tbody>
-                            <tr>
-                                <th width="10%">JobId</th>
-                                <td>{{ job.id }}</td>
-                            </tr>
-                            <tr>
-                                <th width="10%">Target</th>
-                                <td>{{ job.target_ip }}</td>
-                            </tr>
-                            <tr>
-                                <th width="10%">Score</th>
-                                <td>{{ job.result_score|intcomma }}</td>
-                            </tr>
-                            <tr>
-                                <th width="10%">Status</th>
-                                <td>{{ job.result_status }}</td>
-                            </tr>
-                            <tr id="state-line">
-                                <th width="10%">State</th>
-                                <td id="job-state">{{ job.state }}</td>
-                            </tr>
-                            <tr>
-                                <th width="10%">UpdatedAt</th>
-                                <td>{{ job.updated_at|date:"H:i:s" }}</td>
-                            </tr>
-                            <tr>
-                                <th width="10%">Message</th>
-                                <td style="font-size: 0.85rem">
-                                    {{ job.reason|linebreaksbr }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th width="10%">Log</th>
-                                <td style="font-size: 0.85rem">
-                                  <pre id="logs" style="white-space: pre-wrap;">
-{% comment %}
-: for $job.result_json.log -> $log {
-<: $log | html }}
-: }
-{% endcomment %}
-</pre>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {% include "includes/job_detail_part.html" %}
         </div>
     </section>
 </div>
 {% endblock %}
 
 {% block script %}
-{% if job.state == 'running' or job.state == 'waiting' }}
-<script>
-$(() => {
-    $('#state-line').addClass('state-running');
-    const c = new WebSocket('wss://{{ job.bench_hostname }}/ws?job={{ job.id }}');
-    c.onopen = () => {
-        c.onclose = () => {
-            $('#state-line').removeClass('state-running');
-            window.setTimeout(() => {
-                location.reload();
-            }, 100);
-        };
-        c.onmessage = (ev) => {
-            $('#job-state').text('running')
-            const logs = $('#logs')
-            logs.text(logs.text() + ev.data + "\n")
-        };
-    };
-});
+{% if not job.is_finished %}
+<script type="application/javascript">
+  $(function(){
+    setTimeout(function(){location.reload();}, 5000);
+  });
 </script>
+{% endif %}
 {% endblock %}

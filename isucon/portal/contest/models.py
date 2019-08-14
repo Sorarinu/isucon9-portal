@@ -11,7 +11,7 @@ from isucon.portal.models import LogicalDeleteMixin
 from isucon.portal.contest import exceptions
 
 # FIXME: ベンチマーク対象のサーバを変更する機能
-# https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON8/Portal/Web/Controller/API.pm#L32
+# https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON9/Portal/Web/Controller/API.pm#L32
 
 
 class Information(LogicalDeleteMixin, models.Model):
@@ -136,7 +136,7 @@ class JobManager(models.Manager):
         job = self.model(team=team)
         job.save(using=self._db)
 
-        return job.id
+        return job
 
     def dequeue(self, benchmarker=None):
         if benchmarker is not None:
@@ -204,7 +204,7 @@ class Job(models.Model):
     status = models.CharField("進捗", max_length=100, choices=STATUS_CHOICES, default=WAITING)
     is_passed = models.BooleanField("正答フラグ", default=False)
 
-    reason = models.CharField("失敗原因", max_length=255, blank=True)
+    reason = models.TextField("結果メッセージ", blank=True)
     score = models.IntegerField("獲得スコア", default=0, null=False)
 
     # ベタテキスト
@@ -216,6 +216,8 @@ class Job(models.Model):
     updated_at = models.DateTimeField("最終更新日時", auto_now=True)
 
     objects = JobManager()
+
+    DuplicateJobError = exceptions.DuplicateJobError
 
     @property
     def is_finished(self):

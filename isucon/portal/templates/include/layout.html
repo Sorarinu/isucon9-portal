@@ -11,6 +11,9 @@
   <link href="{% static "css/bulma.min.css" %}" rel="stylesheet" type="text/css">
   <link href="{% static "css/fontawesome.css" %}" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+  <script type="application/javascript">
+    var csrftoken = "{{ csrf_token }}";
+  </script>
   <script src="{% static "js/jquery.min.js" %}"></script>
   <script src="{% static "js/xsrf-token.js" %}"></script>
   <link href="{% static "css/main.css" %}" rel="stylesheet" type="text/css" media="screen">
@@ -74,10 +77,18 @@
         : }
         {% endcomment %}
 
-        {% if not user.team.alibaba_account and not form.is_registration_available %}
+        {% if not user.team.alibaba_account and not is_registration_available %}
         <article class="message is-warning">
           <div class="message-body">
             Alibaba CloudのAccount IDが設定されていません。<a href="{% url "team_settings" %}">Team Settings</a>から設定してください。
+          </div>
+        </article>
+        {% endif %}
+
+        {% if is_now_on_contest and servers.count == 0 %}
+        <article class="message is-warning">
+          <div class="message-body">
+            ベンチマーク対象のサーバが設定されていません。<a href="{% url "servers" %}">Server Settings</a>から設定してください。
           </div>
         </article>
         {% endif %}
