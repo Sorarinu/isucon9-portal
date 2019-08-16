@@ -15,3 +15,8 @@ docker-compose up
 ```bash
 python manage.py manufacture -t 300
 ```
+
+## リポジトリを公開にする前にするべきこと
+
+* Slackトークンの失効
+* Alibabaクラウドアカウントトークンの失効
