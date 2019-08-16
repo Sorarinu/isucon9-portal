@@ -13,6 +13,7 @@ services:
       - DJANGO_ALLOWED_HOST
       - DJANGO_DEBUG
       - SLACK_ENDPOINT_URL
+      - CONTEST
     volumes:
       - "staticdata:/opt/app/static/"
       - "mediadata:/opt/app/media/"
