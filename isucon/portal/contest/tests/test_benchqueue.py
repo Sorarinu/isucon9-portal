@@ -22,9 +22,8 @@ class JobTest(TestCase):
     def test_done(self):
         # 利用者がジョブ登録
         # NOTE: チームから、サーバやベンチマーカーが特定できるので、走行に必要な情報は一通り揃う
-        job_id = Job.objects.enqueue(self.team)
+        job = Job.objects.enqueue(self.team)
         # ジョブはまだ待ち状態のはず
-        job = Job.objects.get(pk=job_id)
         self.assertEqual(Job.WAITING, job.status)
 
         # ベンチマーカーがジョブの走行を開始
@@ -33,8 +32,8 @@ class JobTest(TestCase):
         self.assertEqual(Job.RUNNING, job2.status)
 
         # ベンチマーカーがジョブの完了を通知
-        job3 = Job.objects.get(pk=job_id)
-        job3.done(score=100, is_passed=True, stdout="blah\nblah\nblah", stderr="blah\nblah\nblah")
+        job3 = Job.objects.get(pk=job.id)
+        job3.done(score=100, is_passed=True, reason="成功", stdout="blah\nblah\nblah", stderr="blah\nblah\nblah")
         job3.refresh_from_db()
         self.assertEqual(Job.DONE, job3.status)
         self.assertEqual(100, job3.score)
@@ -42,21 +41,20 @@ class JobTest(TestCase):
 
     def test_abort(self):
         # 利用者がジョブ登録
-        job_id = Job.objects.enqueue(self.team)
+        job = Job.objects.enqueue(self.team)
 
         # ベンチマーカーがジョブの走行を開始
         Job.objects.dequeue()
 
         # ベンチマーカーが中断を通知
         # NOTE: resultのJSONになんか含めたほうがいい？
-        job2 = Job.objects.get(pk=job_id)
+        job2 = Job.objects.get(pk=job.id)
         job2.abort(reason="Benchmark Timeout", stdout="blah\nblah\nblah", stderr="blah\nblah\nblah")
         job2.refresh_from_db()
         self.assertEqual(Job.ABORTED, job2.status)
 
     def test_duplicate_enqueue(self):
-        job_id = Job.objects.enqueue(self.team)
-        job = Job.objects.get(pk=job_id)
+        job = Job.objects.enqueue(self.team)
 
         # 同じチームのジョブを連続で登録すると例外発生
         self.assertRaises(exceptions.DuplicateJobError, lambda: Job.objects.enqueue(self.team))
@@ -72,8 +70,8 @@ class JobTest(TestCase):
         self.assertRaises(exceptions.DuplicateJobError, lambda: Job.objects.enqueue(self.team))
 
         # 成功すれば、再度ジョブ登録が可能
-        job.done(score=100, is_passed=True, stdout="", stderr="")
-        job_id2 = Job.objects.enqueue(self.team)
+        job.done(score=100, is_passed=True, reason="成功しました", stdout="", stderr="")
+        job2 = Job.objects.enqueue(self.team)
 
         # enqueueしてから同じチームのジョブを連続で登録すると例外発生
         self.assertRaises(exceptions.DuplicateJobError, lambda: Job.objects.enqueue(self.team))
@@ -81,12 +79,11 @@ class JobTest(TestCase):
         self.assertRaises(exceptions.DuplicateJobError, lambda: Job.objects.enqueue(self.team))
 
         # 失敗しても、再度のジョブ登録が可能になる
-        job2 = Job.objects.get(pk=job_id2)
         job2.abort(reason="Benchmark Timeout", stdout="", stderr="")
         Job.objects.enqueue(self.team)
 
     def test_abort_timeout(self):
-        job_id = Job.objects.enqueue(self.team)
+        job = Job.objects.enqueue(self.team)
 
         Job.objects.dequeue()
 
@@ -95,16 +92,15 @@ class JobTest(TestCase):
 
         Job.objects.discard_timeout_jobs(timeout_sec=1)
 
-        aborted_job = Job.objects.get(pk=job_id)
+        aborted_job = Job.objects.get(pk=job.id)
         self.assertEqual(Job.ABORTED, aborted_job.status)
 
     def test_of_team(self):
         """特定チームのジョブ取得テスト"""
         # ジョブをいくつか走行させる
         for idx in range(11):
-            job_id = Job.objects.enqueue(self.team)
-            job = Job.objects.get(pk=job_id)
-            job.done(score=idx, is_passed=True, stdout="logloglog", stderr="logloglog")
+            job = Job.objects.enqueue(self.team)
+            job.done(score=idx, is_passed=True, reason="成功しました", stdout="logloglog", stderr="logloglog")
 
         # それらのジョブが取得できるか
         jobs = Job.objects.of_team(self.team)
