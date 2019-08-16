@@ -87,24 +87,10 @@ class ScoreHistoryManager(models.Manager):
         return self.get_queryset()\
                    .filter(team=team, team__is_active=True, is_passed=True)
 
-    def get_best_score(self, team):
-        """指定チームのベストスコアを取得"""
-        return self.of_team(team)\
-                   .annotate(best_score=Max('score'))[0]
-
     def get_latest_score(self, team):
         """指定チームの最新スコアを取得"""
         # NOTE: orderingにより最新順に並んでいるので、LIMITで取れば良い
         return self.of_team(team).order_by('-created_at').first()
-
-    def get_top_teams(self, limit=30):
-        """トップ30チームの取得"""
-        histories = self.get_queryset().filter(team__is_active=True)\
-                        .annotate(best_score=Max('score'))\
-                        .order_by('-best_score', '-created_at')[:limit]\
-                        .select_related('team', 'team__aggregated_score')
-
-        return [history.team for history in histories]
 
 class ScoreHistory(models.Model):
     class Meta:
@@ -261,13 +247,44 @@ class Job(models.Model):
             is_passed=self.is_passed,
         )
 
-# NOTE: AggregatedScoreは、Django signals を用いることで、チーム登録時に作成され、得点履歴が追加されるごとに更新されます
-class AggregatedScore(models.Model):
-    class Meta:
-        verbose_name = verbose_name_plural = "集計スコア"
 
+class ScoreManager(models.Manager):
+
+    def passed(self):
+        return self.get_queryset().filter(latest_is_passed=True)
+
+    def failed(self):
+        return self.get_queryset().filter(latest_is_passed=False)
+
+
+# NOTE: Scoreは、Django signals を用いることで、チーム登録時に作成され、得点履歴が追加されるごとに更新されます
+class Score(LogicalDeleteMixin, models.Model):
+    class Meta:
+        verbose_name = verbose_name_plural = "チームスコア"
+        ordering = ("-latest_score", "team")
+
+    team = models.OneToOneField("authentication.Team", on_delete=models.CASCADE)
     best_score = models.IntegerField('ベストスコア', default=0)
-    latest_score = models.IntegerField('最新獲得スコア', default=0)
-    # latest_is_passed = is_passed (True | False)
-    # NOTE: 旧 latest_status
+    latest_score = models.IntegerField('最新スコア', default=0)
+    latest_scored_at = models.DateTimeField('最新スコア日時', blank=True, null=True)
     latest_is_passed = models.BooleanField('最新のベンチマーク成否フラグ', default=False, blank=True)
+
+    objects = ScoreManager()
+
+    def update(self):
+        """ScoreHistoryから再計算します"""
+        try:
+            latest_score_history = ScoreHistory.objects.filter(team=self.team).order_by("-created_at")[0]
+            self.latest_score = latest_score_history.score
+            self.latest_scored_at = latest_score_history.created_at
+            self.latest_is_passed = latest_score_history.is_passed
+        except IndexError:
+            pass
+
+        try:
+            best_score_history = ScoreHistory.objects.filter(team=self.team, is_passed=True).order_by("-score")[0]
+            self.best_score = best_score_history.score
+        except IndexError:
+            pass
+
+        self.save()

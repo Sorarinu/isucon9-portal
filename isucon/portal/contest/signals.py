@@ -1,37 +1,33 @@
+import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from isucon.portal.authentication.models import Team
-from isucon.portal.contest.models import Server, ScoreHistory, AggregatedScore
+from isucon.portal.contest.models import Server, ScoreHistory, Score
 
+__all__ = ("create_score", "update_score", "set_default_benchmark_target_server")
+
+logger = logging.getLogger('isucon.portal.contest.signals')
 
 @receiver(post_save, sender=Team)
-def create_aggregated_score(sender, instance, created, **kwargs):
-    """チームが作成されたら、デフォルトの `AggregatedScore` を作成する"""
-    if created:
-        # 集計スコア作成
-        aggregated_score = AggregatedScore.objects.create()
-
-        # 集計スコアとチームを紐付け
-        instance.aggregated_score = aggregated_score
-        instance.save()
+def create_score(sender, instance, created, **kwargs):
+    """チームが変更されたら、デフォルトの `Score` を作成する"""
+    if not Score.objects.filter(team=instance).exists():
+        # スコア作成
+        score = Score.objects.create(team=instance)
 
 @receiver(post_save, sender=ScoreHistory)
-def update_aggregated_score(sender, instance, created, **kwargs):
+def update_score(sender, instance, created, **kwargs):
     """スコア履歴が追加されたら、集計スコアを更新する"""
-    if created:
-        aggregated_score = instance.team.aggregated_score
 
-        if instance.is_passed:
-            # ベンチマークが通ったら、スコアとステータスを更新
-            aggregated_score.best_score = max(aggregated_score.best_score, instance.score)
-            aggregated_score.latest_score = instance.score
-            aggregated_score.latest_is_passed = instance.is_passed
-        else:
-            # ベンチマークが通らなかったら、ステータスのみ更新
-            aggregated_score.latest_is_passed = instance.is_passed
+    if not Score.objects.filter(team=instance.team).exists():
+        # 念のためなかったら作る
+        score = Score.objects.create(team=instance)
+    else:
+        score = instance.team.score
 
-        aggregated_score.save()
+    score.update()
 
 @receiver(post_save, sender=Server)
 def set_default_benchmark_target_server(sender, instance, created, **kwargs):

@@ -40,9 +40,6 @@ class Team(LogicalDeleteMixin, models.Model):
 
     alibaba_account = models.CharField("Alibaba Cloud Account ID", max_length=20, blank=True)
 
-    # ベンチマーク結果に関連する情報(チームと一蓮托生なのでCASCADE)
-    aggregated_score = models.ForeignKey('contest.AggregatedScore', on_delete=models.CASCADE, null=True, blank=True)
-
     def is_playing(self):
         """参加中か(日付が一致し、時刻が範囲内なら)"""
 

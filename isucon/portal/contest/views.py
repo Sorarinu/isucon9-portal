@@ -6,7 +6,7 @@ from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
-from isucon.portal.contest.models import Server, ScoreHistory, Job
+from isucon.portal.contest.models import Server, ScoreHistory, Job, Score
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
 
@@ -34,7 +34,7 @@ def dashboard(request):
     context = get_base_context(request.user)
 
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
-    top_teams = ScoreHistory.objects.get_top_teams()
+    top_teams = Score.objects.passed()[:30]
 
     context.update({
         "recent_jobs": recent_jobs,
@@ -97,9 +97,9 @@ def job_enqueue(request):
 def scores(request):
     context = get_base_context(request.user)
 
-    teams = ScoreHistory.objects.get_top_teams()
     context.update({
-        "teams": teams,
+        "passed": Score.objects.passed(),
+        "failed": Score.objects.failed(),
     })
 
     return render(request, "scores.html", context)

@@ -112,22 +112,20 @@
                                 <th>Rank</th>
                                 <th>Id</th>
                                 <th>Name</th>
-                                <th>Members</th>
                                 <th>LatestScore</th>
                                 <th>BestScore</th>
                                 <th>FinishTime</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for team in top_teams %}
+                            {% for score in top_teams %}
                             <tr {% if team.id == user.team.id %}class="is-selected"{% endif %}>
                                 <td class="has-text-right">{{ forloop.counter }}</td>
-                                <td class="has-text-right">{{ team.id }}</td>
-                                <td><: ellipsis($row.name, 30) :></td>
-                                <td class="has-text-right">{{ team.get_category_display %}</td>
-                                <td class="has-text-right">{{ team.score.latest_score|inctomma %}</td>
-                                <td class="has-text-right">{{ team.score.best_score|inctomma %}</td>
-                                <td>{{ team.score.updated_at|date:"H:i:s" }}</td>
+                                <td class="has-text-right">{{ score.team.id }}</td>
+                                <td>{{ score.team }}</td>
+                                <td class="has-text-right">{{ score.latest_score|intcomma }}</td>
+                                <td class="has-text-right">{{ score.best_score|intcomma }}</td>
+                                <td>{{ score.latest_scored_at|date:"H:i:s" }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
