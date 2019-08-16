@@ -273,11 +273,18 @@ class Score(LogicalDeleteMixin, models.Model):
 
     def update(self):
         """ScoreHistoryから再計算します"""
-        latest_score_history = ScoreHistory.objects.filter(team=self.team).order_by("-created_at")[0]
-        best_score_history = ScoreHistory.objects.filter(team=self.team, is_passed=True).order_by("-score")[0]
+        try:
+            latest_score_history = ScoreHistory.objects.filter(team=self.team).order_by("-created_at")[0]
+            self.latest_score = latest_score_history.score
+            self.latest_scored_at = latest_score_history.created_at
+            self.latest_is_passed = latest_score_history.is_passed
+        except IndexError:
+            pass
 
-        self.best_score = best_score_history.score
-        self.latest_score = latest_score_history.score
-        self.latest_scored_at = latest_score_history.created_at
-        self.latest_is_passed = latest_score_history.is_passed
+        try:
+            best_score_history = ScoreHistory.objects.filter(team=self.team, is_passed=True).order_by("-score")[0]
+            self.best_score = best_score_history.score
+        except IndexError:
+            pass
+
         self.save()
