@@ -13,6 +13,8 @@ services:
       - DJANGO_ALLOWED_HOST
       - DJANGO_DEBUG
       - SLACK_ENDPOINT_URL
+      - ALIBABA_ACCESS_KEY_ID
+      - ALIBABA_ACCESS_KEY_SECRET
       - CONTEST
     volumes:
       - "staticdata:/opt/app/static/"
