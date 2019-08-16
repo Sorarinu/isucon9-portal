@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',
+    'isucon.portal.contest.alibaba',
 ]
 
 MIDDLEWARE = [
@@ -218,6 +219,10 @@ PASSWORD_LENGTH = 20
 # Slack
 SLACK_ENDPOINT_URL = "https://hooks.slack.com/services/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"
 
+
+# Alibaba Cloud
+ALIBABA_ACCESS_KEY_ID = "LTAICojzw6sk7nJV"
+ALIBABA_ACCESS_KEY_SECRET = "UuBcfezGolj9GGoimz9wopcalu9dEG"
 
 # 外部リンク
 MANUAL_URL = '' # TODO:
