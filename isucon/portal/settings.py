@@ -34,6 +34,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'isucon.portal',
+    'isucon.portal.authentication',
+    'isucon.portal.contest',
+    'isucon.portal.contest.alibaba',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,10 +48,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'social_django',
     'widget_tweaks',
-    'isucon.portal',
-    'isucon.portal.authentication',
-    'isucon.portal.contest',
-    'isucon.portal.contest.alibaba',
 ]
 
 MIDDLEWARE = [
