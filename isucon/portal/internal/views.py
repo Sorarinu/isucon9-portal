@@ -65,7 +65,13 @@ class JobResultViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(data=request.data, partial=True)
         try:
             serializer.is_valid(raise_exception=True)
-            instance.done(**serializer.validated_data)
+
+            data = {
+                "is_passed": False,
+            }
+            data.update(serializer.validated_data)
+
+            instance.done(**data)
         except RuntimeError:
             return HttpResponse('ジョブ結果報告の形式が不正です', status.HTTP_400_BAD_REQUEST)
 

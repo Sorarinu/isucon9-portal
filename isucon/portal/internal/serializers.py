@@ -28,7 +28,6 @@ class JobSerializer(serializers.ModelSerializer):
         fields = ('id', 'team', 'status', 'score', 'reason', 'stdout', 'stderr')
         read_only_fields = fields
 
-    # NOTE: ジョブのdequeue時に、チームと紐づける
     team = TeamSerializer(many=False, read_only=True)
 
 
