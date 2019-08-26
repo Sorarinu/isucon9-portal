@@ -34,7 +34,7 @@ def dashboard(request):
     context = get_base_context(request.user)
 
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
-    top_teams = Score.objects.passed()[:30]
+    top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
 
     context.update({
         "recent_jobs": recent_jobs,
@@ -98,8 +98,8 @@ def scores(request):
     context = get_base_context(request.user)
 
     context.update({
-        "passed": Score.objects.passed(),
-        "failed": Score.objects.failed(),
+        "passed": Score.objects.passed().filter(team__participate_at=request.user.team.participate_at),
+        "failed": Score.objects.failed().filter(team__participate_at=request.user.team.participate_at),
     })
 
     return render(request, "scores.html", context)
@@ -166,7 +166,7 @@ def delete_server(request, pk):
 @team_is_now_on_contest
 def teams(request):
 
-    teams = Team.objects.order_by('id').all()
+    teams = Team.objects.filter(participate_at=request.user.team.participate_at).order_by('id').all()
 
     paginator = Paginator(teams, 100)
 
