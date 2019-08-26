@@ -88,6 +88,8 @@
                 </p>
                 {% else %}
                 <p class="control">
+                  <!-- 何を入力しても無視される -->
+                  {{ form.participate_at.as_hidden }}
                   <input class="input is-static" value="{{ user.team.participate_at|date:"Y-m-d (D)" }}" readonly>
                 </p>
                 {% endif %}
