@@ -1,4 +1,8 @@
+import dateutil.parser
+
 from django.contrib import admin
+from django.conf import settings
+from django import forms
 
 from isucon.portal.contest.models import (
     Server,
@@ -17,9 +21,33 @@ class ServerAdmin(admin.ModelAdmin):
 admin.site.register(Server, ServerAdmin)
 
 
+class InformationAdminForm(forms.ModelForm):
+    class Meta:
+        model = Information
+        fields = ["id", "is_enabled", "allowed_participate_at", "title", "description"]
+
+
+    PARTICIPATE_AT_CHOICES = [(d, "{}日目 ({})".format(idx+1, d.strftime("%Y-%m-%d %a"))) for idx, d in enumerate(settings.CONTEST_DATES)]
+
+
+    allowed_participate_at = forms.TypedMultipleChoiceField(
+        label="共有対象参加日",
+        widget=forms.CheckboxSelectMultiple(choices=PARTICIPATE_AT_CHOICES),
+        required=False,
+        choices=PARTICIPATE_AT_CHOICES,
+        coerce=lambda x: dateutil.parser.parse(x).date(),
+    )
+
+    def clean_allowed_participate_at(self):
+        v = self.cleaned_data["allowed_participate_at"]
+        return v
+
+
+
 class InformationAdmin(admin.ModelAdmin):
-    list_display = ["id", "description"]
-    list_filter = ["description"]
+    list_display = ["id", "title", "is_enabled", "allowed_participate_at"]
+    list_filter = ["is_enabled"]
+    form = InformationAdminForm
 
 admin.site.register(Information, InformationAdmin)
 

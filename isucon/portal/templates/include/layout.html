@@ -54,28 +54,17 @@
     <!-- END NAV -->
 
     <div class="container">
-        {% comment %}
-        : if $info.message {
-            <article class="message is-info">
-                <div class="message-header">
-                    <p>運営からのお知らせ</p>
-                </div>
-                <div class="message-body">
-                    <: $info.message | html_line_break :>
-                </div>
-            </article>
-        : }
-        : if $team.message {
-            <article class="message is-danger">
-                <div class="message-header">
-                    <p>このメッセージは個別に送られています！</p>
-                </div>
-                <div class="message-body">
-                    <: $team.message | html_line_break :>
-                </div>
-            </article>
-        : }
-        {% endcomment %}
+        {% for info in informations %}
+        <article class="message is-info">
+            <div class="message-header">
+                <p>{{ info.title }}</p>
+            </div>
+            <div class="message-body">
+                {{ info.description|linebreaks }}
+            </div>
+        </article>
+        {% endfor %}
+
 
         {% if not user.team.alibaba_account and not is_registration_available %}
         <article class="message is-warning">
