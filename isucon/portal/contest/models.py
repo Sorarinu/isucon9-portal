@@ -89,38 +89,15 @@ class Server(LogicalDeleteMixin, models.Model):
     def __str__(self):
         return self.hostname
 
-
-class ScoreHistoryManager(models.Manager):
-
-    def of_team(self, team):
-        return self.get_queryset()\
-                   .filter(team=team, team__is_active=True, is_passed=True)
-
-    def get_latest_score(self, team):
-        """指定チームの最新スコアを取得"""
-        # NOTE: orderingにより最新順に並んでいるので、LIMITで取れば良い
-        return self.of_team(team).order_by('-created_at').first()
-
-class ScoreHistory(models.Model):
-    class Meta:
-        verbose_name = verbose_name_plural = "スコア履歴"
-        ordering = ('-created_at',)
-
-    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, null=True)
-    job = models.ForeignKey('contest.Job', verbose_name="ベンチキュー", on_delete=models.PROTECT, null=True)
-    score = models.IntegerField("得点")
-    is_passed = models.BooleanField("正答フラグ", default=False)
-
-    created_at = models.DateTimeField("作成日時", auto_now_add=True)
-    updated_at = models.DateTimeField("最終更新日時", auto_now=True)
-
-    objects = ScoreHistoryManager()
-
-
 class JobManager(models.Manager):
 
     def of_team(self, team):
         return self.get_queryset().filter(team=team)
+
+    def get_latest_score(self, team):
+        """指定チームの最新スコアを取得"""
+        # NOTE: orderingにより最新順に並んでいるので、LIMITで取れば良い
+        return self.of_team(team).filter(status=Job.DONE).order_by('-finished_at').first()
 
     def enqueue(self, team):
         # 重複チェック
@@ -209,6 +186,7 @@ class Job(models.Model):
     # 日時
     created_at = models.DateTimeField("作成日時", auto_now_add=True)
     updated_at = models.DateTimeField("最終更新日時", auto_now=True)
+    finished_at = models.DateTimeField("確定時刻", blank=True, null=True)
 
     objects = JobManager()
 
@@ -232,30 +210,17 @@ class Job(models.Model):
         self.status = Job.DONE
 
         self.reason = reason
-
+        self.finished_at = timezone.now()
         self.save()
-
-        ScoreHistory.objects.create(
-            team=self.team,
-            job=self,
-            score=self.score,
-            is_passed=self.is_passed,
-        )
 
     def abort(self, reason, stdout, stderr):
         self.status = Job.ABORTED
         self.reason = reason
         self.stdout = stdout
         self.stderr = stderr
+        self.score = 0
+        self.is_passed = False
         self.save()
-
-        ScoreHistory.objects.create(
-            team=self.team,
-            job=self,
-            score=0,
-            is_passed=self.is_passed,
-        )
-
 
 class ScoreManager(models.Manager):
 
@@ -281,18 +246,18 @@ class Score(LogicalDeleteMixin, models.Model):
     objects = ScoreManager()
 
     def update(self):
-        """ScoreHistoryから再計算します"""
+        """Jobから再計算します"""
         try:
-            latest_score_history = ScoreHistory.objects.filter(team=self.team).order_by("-created_at")[0]
-            self.latest_score = latest_score_history.score
-            self.latest_scored_at = latest_score_history.created_at
-            self.latest_is_passed = latest_score_history.is_passed
+            latest_job = Job.objects.filter(team=self.team, status=Job.DONE).order_by("-finished_at")[0]
+            self.latest_score = latest_job.score
+            self.latest_scored_at = latest_job.finished_at
+            self.latest_is_passed = latest_job.is_passed
         except IndexError:
             pass
 
         try:
-            best_score_history = ScoreHistory.objects.filter(team=self.team, is_passed=True).order_by("-score")[0]
-            self.best_score = best_score_history.score
+            best_score_job = Job.objects.filter(team=self.team, status=Job.DONE, is_passed=True).order_by("-score")[0]
+            self.best_score = best_score_job.score
         except IndexError:
             pass
 
