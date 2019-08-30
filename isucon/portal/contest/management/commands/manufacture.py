@@ -2,7 +2,7 @@ import random
 from django.core.management.base import BaseCommand
 
 from isucon.portal.authentication.factories import TeamFactory, UserFactory
-from isucon.portal.contest.factories import ServerFactory, ScoreHistoryFactory, InformationFactory
+from isucon.portal.contest.factories import ServerFactory, JobFactory, InformationFactory
 
 class Command(BaseCommand):
 
@@ -28,10 +28,10 @@ class Command(BaseCommand):
         for _ in range(server_num):
             ServerFactory.create(team=team)
 
-    def generate_score_histories(self, team):
+    def generate_jobs(self, team):
         history_num = random.randint(0, 10) # 履歴は0 ~ 10
         for _ in range(history_num):
-            ScoreHistoryFactory.create(team=team)
+            JobFactory.create(team=team)
 
     def add_arguments(self, parser):
         parser.add_argument('-t', '--teams', default=10, type=int, help='Number of servers')
@@ -47,4 +47,4 @@ class Command(BaseCommand):
         for team in self.generate_teams(team_num):
             self.generate_team_users(team)
             self.generate_servers(team, server_num)
-            self.generate_score_histories(team)
+            self.generate_jobs(team)

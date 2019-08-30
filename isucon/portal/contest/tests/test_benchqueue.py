@@ -3,7 +3,7 @@ import time
 from django.test import TestCase
 
 from isucon.portal.authentication.models import User, Team
-from isucon.portal.contest.models import Server, Benchmarker, ScoreHistory, Job
+from isucon.portal.contest.models import Server, Benchmarker, Job
 from isucon.portal.authentication import factories as auth_factories
 from isucon.portal.contest import factories as contest_factories
 from isucon.portal.contest import exceptions

@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from isucon.portal.authentication.models import Team
-from isucon.portal.contest.models import Server, ScoreHistory, Score
+from isucon.portal.contest.models import Server, Job, Score
 
 __all__ = ("create_score", "update_score", "set_default_benchmark_target_server")
 
@@ -17,9 +17,9 @@ def create_score(sender, instance, created, **kwargs):
         # スコア作成
         score = Score.objects.create(team=instance)
 
-@receiver(post_save, sender=ScoreHistory)
+@receiver(post_save, sender=Job)
 def update_score(sender, instance, created, **kwargs):
-    """スコア履歴が追加されたら、集計スコアを更新する"""
+    """Jobが更新されたら、集計スコアを更新する"""
 
     if not Score.objects.filter(team=instance.team).exists():
         # 念のためなかったら作る

@@ -58,25 +58,21 @@ class JobFactory(factory.DjangoModelFactory):
         end_date=timezone.now()-datetime.timedelta(days=1),
     )
 
+
+    is_passed = factory.fuzzy.FuzzyChoice([True, False])
+    status = factory.fuzzy.FuzzyChoice([Job.DONE])
+
     @factory.lazy_attribute
     def reason(self):
         if self.status == models.Job.ABORTED:
             return "Benchmark timeout"
         return ""
 
-
-class ScoreHistoryFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = models.ScoreHistory
-
-    # NOTE: 紐づくチームは contest.management.commands.manufacture にて設定
-    job = factory.LazyAttribute(lambda o: JobFactory(
-        team=o.team,
-        score=o.score,
-        is_passed=o.is_passed,
-        status=models.Job.DONE)
-    )
-    is_passed = factory.fuzzy.FuzzyChoice([True, False])
+    @factory.lazy_attribute
+    def finished_at(self):
+        if self.status == models.Job.DONE:
+            return self.updated_at
+        return None
 
     @factory.lazy_attribute
     def score(self):

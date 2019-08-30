@@ -8,7 +8,6 @@ from isucon.portal.contest.models import (
     Server,
     Information,
     Benchmarker,
-    ScoreHistory,
     Score,
     Job
 )
@@ -58,12 +57,6 @@ class BenchmarkerAdmin(admin.ModelAdmin):
 
 admin.site.register(Benchmarker, BenchmarkerAdmin)
 
-
-class ScoreHistoryAdmin(admin.ModelAdmin):
-    list_display = ["id", "team", "score"]
-    list_filter = ["team"]
-
-admin.site.register(ScoreHistory, ScoreHistoryAdmin)
 
 class ScoreAdmin(admin.ModelAdmin):
     list_display = ["id", "team", "best_score", "latest_score", "latest_is_passed"]

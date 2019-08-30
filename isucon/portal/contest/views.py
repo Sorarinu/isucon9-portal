@@ -6,7 +6,7 @@ from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
-from isucon.portal.contest.models import Server, ScoreHistory, Job, Score
+from isucon.portal.contest.models import Server, Job, Score
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
 
