@@ -22,6 +22,7 @@ class InformationFactory(factory.DjangoModelFactory):
         model = models.Information
 
     description = factory.fuzzy.FuzzyText(length=50)
+    is_enabled = True
 
 
 class BenchmarkerFactory(factory.DjangoModelFactory):
@@ -49,15 +50,8 @@ class JobFactory(factory.DjangoModelFactory):
     stdout = factory.Faker('sentence')
     stderr = factory.Faker('sentence')
 
-    created_at = factory.fuzzy.FuzzyDate(
-        start_date=timezone.now()-datetime.timedelta(days=5),
-        end_date=timezone.now()-datetime.timedelta(days=3),
-    )
-    updated_at = factory.fuzzy.FuzzyDate(
-        start_date=timezone.now()-datetime.timedelta(days=2),
-        end_date=timezone.now()-datetime.timedelta(days=1),
-    )
-
+    created_at = factory.Sequence(lambda idx: timezone.now()-datetime.timedelta(seconds=idx))
+    updated_at = factory.Sequence(lambda idx: timezone.now()-datetime.timedelta(seconds=idx))
 
     is_passed = factory.fuzzy.FuzzyChoice([True, False])
     status = factory.fuzzy.FuzzyChoice([Job.DONE])

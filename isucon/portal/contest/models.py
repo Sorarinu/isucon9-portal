@@ -1,6 +1,7 @@
 import datetime
 import json
 
+from django.core import serializers
 from django.db import models
 from django.db.models import Max, Sum
 from django.forms.models import model_to_dict
@@ -238,12 +239,17 @@ class Score(LogicalDeleteMixin, models.Model):
         ordering = ("-latest_score", "team")
 
     team = models.OneToOneField("authentication.Team", on_delete=models.CASCADE)
+    score_history_json = models.TextField('スコア履歴のJSONダンプ', blank=True, null=True)
     best_score = models.IntegerField('ベストスコア', default=0)
     latest_score = models.IntegerField('最新スコア', default=0)
     latest_scored_at = models.DateTimeField('最新スコア日時', blank=True, null=True)
     latest_is_passed = models.BooleanField('最新のベンチマーク成否フラグ', default=False, blank=True)
 
     objects = ScoreManager()
+
+    @property
+    def score_history(self):
+        return json.loads(self.score_history_json)
 
     def update(self):
         """Jobから再計算します"""

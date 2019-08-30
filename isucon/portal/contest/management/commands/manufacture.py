@@ -29,7 +29,7 @@ class Command(BaseCommand):
             ServerFactory.create(team=team)
 
     def generate_jobs(self, team):
-        history_num = random.randint(0, 10) # 履歴は0 ~ 10
+        history_num = random.randint(0, 100) # 履歴は0 ~ 10
         for _ in range(history_num):
             JobFactory.create(team=team)
 
