@@ -65,7 +65,13 @@ class ScoreAdmin(admin.ModelAdmin):
 admin.site.register(Score, ScoreAdmin)
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ["id", "team", "status", "is_passed", "score", "stdout", "stderr"]
-    list_filter = ["team", "status", "is_passed"]
+    list_display = ["id", "team", "status", "is_passed", "score", "reason_short"]
+    list_filter = ["status", "is_passed", "team"]
+
+    def reason_short(self, instance):
+        line = instance.reason.split("\n")[0]
+        return line
+    reason_short.short_description = "結果 (抜粋)"
+
 
 admin.site.register(Job, JobAdmin)
