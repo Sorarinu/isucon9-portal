@@ -60,6 +60,7 @@ class JobFactory(factory.DjangoModelFactory):
 
 
     is_passed = factory.fuzzy.FuzzyChoice([True, False])
+    status = factory.fuzzy.FuzzyChoice([Job.DONE])
 
     @factory.lazy_attribute
     def reason(self):
