@@ -31,7 +31,8 @@ class JobViewSet(viewsets.GenericViewSet):
         try:
             benchmarker = Benchmarker.objects.get(ip=client_ip)
         except Benchmarker.DoesNotExist:
-            return HttpResponse('Unknown IP Address', status.HTTP_400_BAD_REQUEST)
+            return Response({"error":'Unknown IP Address'}, status=status.HTTP_400_BAD_REQUEST)
+
 
         # チームとベンチマーカーが紐づくと仮定して、ジョブを取ってくる
         try:
@@ -66,6 +67,9 @@ class JobResultViewSet(viewsets.GenericViewSet):
         try:
             serializer.is_valid(raise_exception=True)
 
+            if not "score" in serializer.validated_data:
+                raise RuntimeError()
+
             data = {
                 "is_passed": False,
             }
@@ -73,7 +77,7 @@ class JobResultViewSet(viewsets.GenericViewSet):
 
             instance.done(**data)
         except RuntimeError:
-            return HttpResponse('ジョブ結果報告の形式が不正です', status.HTTP_400_BAD_REQUEST)
+            return Response({"error":'Invalid format'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.data)
 
