@@ -6,6 +6,7 @@ services:
     build: ./
     depends_on:
       - postgres
+      - redis
     environment:
       - DJANGO_DATABASE_TYPE=postgres
       - GITHUB_KEY
@@ -61,3 +62,4 @@ volumes:
   dbdata:
   staticdata:
   mediadata:
+  cachedata:
