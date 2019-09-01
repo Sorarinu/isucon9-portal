@@ -186,13 +186,13 @@ LOGGING = {
 
 # 登録期間
 REGISTRATION_START_AT = portal_utils.get_utc_datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 8, 25, 9, 0, 0)
+REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 10, 25, 9, 0, 0)
 
 # コンテスト開催期間
 # 日付
 CONTEST_DATES = [
-    datetime.date(2019, 9, 7),
-    datetime.date(2019, 9, 8)
+    datetime.date(2019, 9, 1),
+    datetime.date(2019, 9, 1)
 ]
 
 # 時刻
@@ -215,6 +215,9 @@ MAX_TEAM_NUM = 600
 PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
 # チームパスワードの文字数
 PASSWORD_LENGTH = 20
+
+# Redis
+REDIS_HOST = '127.0.0.1'
 
 # Slack
 SLACK_ENDPOINT_URL = "https://hooks.slack.com/services/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"

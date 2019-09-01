@@ -1,5 +1,8 @@
+import json
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 from django.utils import timezone
@@ -10,6 +13,7 @@ from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, Job, Score
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
+from isucon.portal.redis.client import RedisClient
 
 
 def get_base_context(user):
@@ -28,7 +32,6 @@ def get_base_context(user):
         "target_server": target_server,
         "is_last_spurt": is_last_spurt,
     }
-
 @team_is_authenticated
 @team_is_now_on_contest
 def dashboard(request):
@@ -38,39 +41,17 @@ def dashboard(request):
     # FIXME: top_teams -> top_scores
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
 
-    # FIXME: リファクタリング
-    def make_graph_data():
-        # x軸の設定
-        labels = set()
-        # labels.add(timezone.now())
-        for score in top_teams:
-            score_labels = map(lambda history: history['fields']['created_at'], score.score_history)
-            labels.update(score_labels)
-        labels = list(sorted(labels))
+    # キャッシュ済みグラフデータの取得
+    client = RedisClient()
+    team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
+    topn = min(settings.RANKING_TOPN, team_cnt)
+    graph_datasets = client.get_graph_data(request.user.team, topn=topn)
 
-        # データセットの設定
-        datasets = []
-        for score in top_teams:
-            data = []
-            for label in labels:
-                # その時刻のデータがない場合、0で埋める
-                data.extend([score_history['fields']['score'] if score_history['fields']['created_at'] == label else "undefined"
-                                for score_history in score.score_history])
-
-            datasets.append(dict(
-                label='{} ({})'.format(score.team.name, score.team.id),
-                data=data,
-            ))
-
-        return dict(
-            labels=labels,
-            datasets=datasets,
-        )
-
+    print(graph_datasets)
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
-        "graph_data": make_graph_data(),
+        "graph_datasets": graph_datasets,
     })
 
     return render(request, "dashboard.html", context)

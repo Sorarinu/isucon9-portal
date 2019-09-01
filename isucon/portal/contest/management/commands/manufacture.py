@@ -10,6 +10,7 @@ class Command(BaseCommand):
         InformationFactory.create_batch(info_num)
 
     def generate_teams(self, team_num):
+        teams = []
         for _ in range(team_num):
             # ユーザ作成 -> チーム登録
             owner = UserFactory.create()
@@ -18,7 +19,10 @@ class Command(BaseCommand):
             # チームがownerに設定される
             owner.team = team
             owner.save()
-            yield team
+
+            teams.append(team)
+
+        return teams
 
     def generate_team_users(self, team):
         user_num = random.randint(0, 2) # 追加メンバは 0 ~ 2
@@ -44,7 +48,8 @@ class Command(BaseCommand):
         info_num = options['informations']
 
         self.generate_informations(info_num)
-        for team in self.generate_teams(team_num):
+        teams = self.generate_teams(team_num)
+        for team in teams:
             self.generate_team_users(team)
             self.generate_servers(team, server_num)
             self.generate_jobs(team)
