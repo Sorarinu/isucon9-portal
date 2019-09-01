@@ -35,4 +35,4 @@ class JobResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ('id', 'score', 'is_passed', 'reason', 'stdout', 'stderr')
+        fields = ('id', 'status', 'score', 'is_passed', 'reason', 'stdout', 'stderr')
