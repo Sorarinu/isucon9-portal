@@ -200,14 +200,14 @@ class Job(models.Model):
             self.CANCELED,
         ]
 
-    def done(self, score, is_passed, stdout, stderr, reason):
+    def done(self, score, is_passed, stdout, stderr, reason, status=DONE):
         # ベンチマークが終了したらログを書き込む
         self.stdout = stdout
         self.stderr = stderr
 
         self.score = score
         self.is_passed = is_passed
-        self.status = Job.DONE
+        self.status = status
 
         self.reason = reason
         self.finished_at = timezone.now()

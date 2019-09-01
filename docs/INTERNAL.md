@@ -90,6 +90,7 @@ JSONですと、以下のようになります
 type Result struct {
 	// ID はジョブのIDです
 	ID       int    `json:"id"`
+	Status   string `json:"status"`
 	Score    int    `json:"score"`
 	IsPassed bool   `json:"is_passed"`
 	Reason   string `json:"reason"`
@@ -103,6 +104,7 @@ JSONですと、以下のようになります
 ```
 {
   "id": 37,
+  "status": "done",
   "score": 120,
   "is_passed": true,
   "reason": "",
@@ -112,4 +114,3 @@ JSONですと、以下のようになります
 ```
 
 JSONでPOSTするため、 `Content-Type: application/json` ヘッダの指定が必要です
-
