@@ -9,3 +9,5 @@ django-ipware==2.1.0
 djangorestframework==3.10.2
 aliyun-python-sdk-core
 aliyun-python-sdk-ecs
+hiredis==1.0.0
+redis==3.3.8
