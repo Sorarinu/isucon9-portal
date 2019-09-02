@@ -191,8 +191,8 @@ REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 10, 25, 9, 0, 0)
 # コンテスト開催期間
 # 日付
 CONTEST_DATES = [
-    datetime.date(2019, 9, 1),
-    datetime.date(2019, 9, 1)
+    datetime.date(2019, 9, 2),
+    datetime.date(2019, 9, 2)
 ]
 
 # 時刻
@@ -218,6 +218,7 @@ PASSWORD_LENGTH = 20
 
 # Redis
 REDIS_HOST = '127.0.0.1'
+RANKING_TOPN = 30
 
 # Slack
 SLACK_ENDPOINT_URL = "https://hooks.slack.com/services/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"

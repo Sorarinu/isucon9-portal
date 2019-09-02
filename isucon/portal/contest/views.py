@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
+from django.conf import settings
 from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 from django.utils import timezone
 
@@ -42,6 +43,7 @@ def dashboard(request):
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
 
     # キャッシュ済みグラフデータの取得
+    team_cnt = Team.objects.count()
     client = RedisClient()
     team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
     topn = min(settings.RANKING_TOPN, team_cnt)
