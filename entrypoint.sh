@@ -10,6 +10,7 @@ fi
 
 python manage.py collectstatic --noinput
 python manage.py migrate
+python manage.py load_cache_from_db # Redisの初期キャッシュをロードする
 gunicorn isucon.portal.wsgi:application \
 -b 0.0.0.0:5000 -w ${NUM_WORKERS} --max-requests ${MAX_REQUESTS} \
 --keep-alive 120 \
