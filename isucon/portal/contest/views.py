@@ -42,11 +42,12 @@ def dashboard(request):
     client = RedisClient()
     team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
     topn = min(settings.RANKING_TOPN, team_cnt)
-    graph_datasets = client.get_graph_data(request.user.team, topn=topn)
+    graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn)
 
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
+        "graph_labels": graph_labels,
         "graph_datasets": graph_datasets,
     })
 

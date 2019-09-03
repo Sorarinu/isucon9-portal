@@ -36,7 +36,7 @@ class RedisClient:
                 lock.acquire(blocking=True)
 
             with self.conn.pipeline() as pipeline:
-                team_dict = dict()
+                team_dict = dict(all_labels=set())
                 for job in Job.objects.filter(status=Job.DONE).order_by('finished_at').select_related('team'):
                     if job.team.id not in team_dict:
                         team_dict[job.team.id] = dict(labels=[], scores=[])
@@ -46,6 +46,8 @@ class RedisClient:
                     team_dict[job.team.id]['participate_at'] = job.team.participate_at
                     team_dict[job.team.id]['labels'].append(finished_at)
                     team_dict[job.team.id]['scores'].append(job.score)
+
+                    team_dict['all_labels'].add(finished_at)
 
                     participate_at = self._normalize_participate_at(job.team.participate_at)
                     pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {job.team.id: job.score})
@@ -61,6 +63,7 @@ class RedisClient:
         team = job.team
 
         # ジョブに紐づくチームの情報を用意
+        all_labels = set()
         target_team_dict = dict(
             name=team.name,
             participate_at=team.participate_at,
@@ -73,6 +76,8 @@ class RedisClient:
                 finished_at = self._normalize_finished_at(job.finished_at)
                 target_team_dict['labels'].append(finished_at)
                 target_team_dict['scores'].append(job.score)
+
+                all_labels.add(finished_at)
 
                 # ランキングの更新
                 pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
@@ -92,6 +97,7 @@ class RedisClient:
             team_dict = pickle.loads(team_dict)
 
             # チームの情報を丸ごと更新
+            team_dict['all_labels'].update(all_labels)
             team_dict[team.id] = target_team_dict
             self.conn.set(self.TEAM_DICT, pickle.dumps(team_dict))
         finally:
@@ -131,4 +137,4 @@ class RedisClient:
                 data=zip(team_dict[target_team_id]['labels'], team_dict[target_team_id]['scores'])
             ))
 
-        return datasets
+        return list(sorted(team_dict['all_labels'])), datasets
