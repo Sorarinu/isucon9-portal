@@ -65,10 +65,16 @@ class RedisClient:
             labels=[],
             scores=[]
         )
-        for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
-            finished_at = self._normalize_finished_at(job.finished_at)
-            target_team_dict['labels'].append(finished_at)
-            target_team_dict['scores'].append(job.score)
+        participate_at = self._normalize_participate_at(team.participate_at)
+        with self.conn.pipeline() as pipeline:
+            for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
+                finished_at = self._normalize_finished_at(job.finished_at)
+                target_team_dict['labels'].append(finished_at)
+                target_team_dict['scores'].append(job.score)
+
+                # ランキングの更新
+                pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
+            pipeline.execute()
 
         with self.conn.lock(self.LOCK):
             # チーム情報を取得
@@ -80,16 +86,9 @@ class RedisClient:
                 team_dict = self.conn.get(self.TEAM_DICT)
             team_dict = pickle.loads(team_dict)
 
-            # 更新
-            with self.conn.pipeline() as pipeline:
-                participate_at = self._normalize_participate_at(team.participate_at)
-                for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
-                    pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
-
-                # チームの情報を丸ごと更新
-                team_dict[team.id] = target_team_dict
-                pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
-                pipeline.execute()
+            # チームの情報を丸ごと更新
+            team_dict[team.id] = target_team_dict
+            self.conn.set(self.TEAM_DICT, pickle.dumps(team_dict))
 
     def get_graph_data(self, target_team, topn=30):
         """Chart.js によるグラフデータをキャッシュから取得します"""
