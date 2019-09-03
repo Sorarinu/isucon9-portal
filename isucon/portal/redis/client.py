@@ -9,6 +9,8 @@ from isucon.portal.contest.models import Job
 
 
 class RedisClient:
+    # `RedisClientによる操作` の排他制御用ロック
+    LOCK = "lock"
     # チーム情報(スコア履歴、ラベル一覧含む)
     TEAM_DICT = "team-dict"
     # ランキング
@@ -26,8 +28,11 @@ class RedisClient:
     def _normalize_finished_at(finished_at):
         return finished_at.strftime('%Y-%m-%d %H:%M:%S')
 
-    def load_cache_from_db(self):
+    def load_cache_from_db(self, use_lock=False):
         """起動時、DBに保存された完了済みジョブをキャッシュにロードします"""
+        if use_lock:
+            lock = self.conn.lock(self.LOCK)
+
         with self.conn.pipeline() as pipeline:
             team_dict = dict()
             for job in Job.objects.filter(status=Job.DONE).order_by('finished_at').select_related('team'):
@@ -46,41 +51,45 @@ class RedisClient:
             pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
             pipeline.execute()
 
-    def add_job(self, job):
+        if use_lock:
+            lock.release()
+
+    def update_team_cache(self, job):
         """ジョブ追加に伴い、キャッシュデータを更新します"""
         team = job.team
 
-        # チーム情報を取得
-        team_dict = self.conn.get(self.TEAM_DICT)
-        if team_dict is None:
-            # NOTE: manufacture でシードデータを投入する場合、ここを通る
-            #       デプロイ先だと、team_dict は必ずentrypoint.shで作成されるのでここを通らない
-            self.load_cache_from_db()
+        # ジョブに紐づくチームの情報を用意
+        target_team_dict = dict(
+            name=team.name,
+            participate_at=team.participate_at,
+            labels=[],
+            scores=[]
+        )
+        for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
+            finished_at = self._normalize_finished_at(job.finished_at)
+            target_team_dict['labels'].append(finished_at)
+            target_team_dict['scores'].append(job.score)
+
+        with self.conn.lock(self.LOCK):
+            # チーム情報を取得
             team_dict = self.conn.get(self.TEAM_DICT)
-        team_dict = pickle.loads(team_dict)
+            if team_dict is None:
+                # NOTE: manufacture でシードデータを投入する場合、ここを通る
+                #       デプロイ先だと、team_dict は必ずentrypoint.shで作成されるのでここを通らない
+                self.load_cache_from_db()
+                team_dict = self.conn.get(self.TEAM_DICT)
+            team_dict = pickle.loads(team_dict)
 
-        with self.conn.pipeline() as pipeline:
-            # NOTE: グラフ表示数ラベルでのparticipate_at は正規化するけど、チーム情報としては正規化せず保持
-            participate_at = self._normalize_participate_at(team.participate_at)
+            # 更新
+            with self.conn.pipeline() as pipeline:
+                participate_at = self._normalize_participate_at(team.participate_at)
+                for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
+                    pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
 
-            labels, scores = [], []
-            for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
-                finished_at = self._normalize_finished_at(job.finished_at)
-                labels.append(finished_at)
-                scores.append(job.score)
-
-                pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
-
-            # チームの情報を丸ごと更新
-            team_dict[team.id] = dict(
-                name=team.name,
-                participate_at=team.participate_at,
-                labels=labels,
-                scores=scores
-            )
-
-            pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
-            pipeline.execute()
+                # チームの情報を丸ごと更新
+                team_dict[team.id] = target_team_dict
+                pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
+                pipeline.execute()
 
     def get_graph_data(self, target_team, topn=30):
         """Chart.js によるグラフデータをキャッシュから取得します"""

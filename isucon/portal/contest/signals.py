@@ -34,7 +34,7 @@ def update_score(sender, instance, created, **kwargs):
 def update_redis_cache(sender, instance, created, **kwargs):
     if instance.status == Job.DONE:
         client = RedisClient()
-        client.add_job(instance)
+        client.update_team_cache(instance)
 
 @receiver(post_save, sender=Server)
 def set_default_benchmark_target_server(sender, instance, created, **kwargs):

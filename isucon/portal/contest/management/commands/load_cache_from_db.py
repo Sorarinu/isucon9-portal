@@ -9,6 +9,6 @@ class Command(BaseCommand):
         print("Loading redis cache from DB ...")
 
         client = RedisClient()
-        client.load_cache_from_db()
+        client.load_cache_from_db(use_lock=True)
 
         print("Completed !")
