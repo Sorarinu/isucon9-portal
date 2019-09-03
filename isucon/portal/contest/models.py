@@ -1,7 +1,6 @@
 import datetime
 import json
 
-from django.core import serializers
 from django.db import models
 from django.db.models import Max, Sum
 from django.forms.models import model_to_dict
