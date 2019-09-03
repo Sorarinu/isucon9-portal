@@ -32,6 +32,7 @@ class RedisClient:
         """起動時、DBに保存された完了済みジョブをキャッシュにロードします"""
         if use_lock:
             lock = self.conn.lock(self.LOCK)
+            lock.acquire(blocking=True)
 
         with self.conn.pipeline() as pipeline:
             team_dict = dict()
