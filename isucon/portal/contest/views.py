@@ -48,7 +48,6 @@ def dashboard(request):
     topn = min(settings.RANKING_TOPN, team_cnt)
     graph_datasets = client.get_graph_data(request.user.team, topn=topn)
 
-    print(graph_datasets)
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
