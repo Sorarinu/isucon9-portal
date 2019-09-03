@@ -34,14 +34,13 @@ class RedisClient:
                 if job.team.id not in team_dict:
                     team_dict[job.team.id] = dict(labels=[], scores=[])
 
-                # NOTE: グラフ表示数ラベルでのparticipate_at は正規化するけど、チーム情報としては正規化せず保持
-                participate_at = self._normalize_participate_at(job.team.participate_at)
-
+                finished_at = self._normalize_finished_at(job.finished_at)
                 team_dict[job.team.id]['name'] = job.team.name
                 team_dict[job.team.id]['participate_at'] = job.team.participate_at
-                team_dict[job.team.id]['labels'].append(participate_at)
+                team_dict[job.team.id]['labels'].append(finished_at)
                 team_dict[job.team.id]['scores'].append(job.score)
 
+                participate_at = self._normalize_participate_at(job.team.participate_at)
                 pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {job.team.id: job.score})
 
             pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
@@ -66,8 +65,10 @@ class RedisClient:
 
             labels, scores = [], []
             for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
-                labels.append(self._normalize_finished_at(job.finished_at))
+                finished_at = self._normalize_finished_at(job.finished_at)
+                labels.append(finished_at)
                 scores.append(job.score)
+
                 pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
 
             # チームの情報を丸ごと更新
