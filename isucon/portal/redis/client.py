@@ -79,7 +79,7 @@ class RedisClient:
             pipeline.execute()
 
         try:
-            lock = self.conn.lock(self.LOCK):
+            lock = self.conn.lock(self.LOCK)
             lock.acquire(blocking=True)
 
             # チーム情報を取得
