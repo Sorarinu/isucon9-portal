@@ -50,8 +50,8 @@ class JobFactory(factory.DjangoModelFactory):
     stdout = factory.Faker('sentence')
     stderr = factory.Faker('sentence')
 
-    created_at = factory.Sequence(lambda idx: timezone.now()-datetime.timedelta(seconds=idx))
-    updated_at = factory.Sequence(lambda idx: timezone.now()-datetime.timedelta(seconds=idx))
+    created_at = factory.Sequence(lambda idx: timezone.now()-timezone.timedelta(seconds=random.randint(5, 180)))
+    updated_at = factory.Sequence(lambda idx: timezone.now()-timezone.timedelta(seconds=random.randint(5, 180)))
 
     is_passed = factory.fuzzy.FuzzyChoice([True, False])
     status = factory.fuzzy.FuzzyChoice([Job.DONE])

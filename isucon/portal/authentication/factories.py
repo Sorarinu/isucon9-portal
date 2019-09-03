@@ -29,7 +29,7 @@ class TeamFactory(factory.DjangoModelFactory):
 
     participate_at = factory.fuzzy.FuzzyChoice([
         timezone.now().date(),
-        timezone.now().date() + timezone.timedelta(days=1),
+        timezone.now().date() + timezone.timedelta(days=1)
     ])
 
     is_active = True

@@ -191,12 +191,12 @@ REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 10, 25, 9, 0, 0)
 # コンテスト開催期間
 # 日付
 CONTEST_DATES = [
-    datetime.date(2019, 9, 2),
-    datetime.date(2019, 9, 2)
+    datetime.date(2019, 9, 3),
+    datetime.date(2019, 9, 3)
 ]
 
 # 時刻
-CONTEST_START_TIME = portal_utils.get_utc_time(9, 0, 0)
+CONTEST_START_TIME = portal_utils.get_utc_time(0, 0, 0)
 CONTEST_END_TIME = portal_utils.get_utc_time(18, 0, 0)
 
 # Github認証に使うトークン
