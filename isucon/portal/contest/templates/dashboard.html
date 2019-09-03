@@ -289,6 +289,8 @@ var config = {
                 type: 'time',
                 time: {
                     parser: timeFormat,
+                    min: "{{ graph_labels.0 | safe }}",
+                    max: "{{ graph_labels | last | safe }}"
                 }
             }],
             yAxes: [{
