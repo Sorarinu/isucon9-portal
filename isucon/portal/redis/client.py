@@ -125,7 +125,7 @@ class RedisClient:
             ))
 
         # 自分がランキングに含まれない場合、自分のdataも追加
-        if target_team_id not in ranking:
+        if target_team_id not in ranking and target_team_id in team_dict:
             datasets.append(dict(
                 label='{} ({})'.format(target_team_name, target_team_id),
                 data=zip(team_dict[target_team_id]['labels'], team_dict[target_team_id]['scores'])
