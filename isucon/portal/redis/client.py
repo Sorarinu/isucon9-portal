@@ -30,30 +30,31 @@ class RedisClient:
 
     def load_cache_from_db(self, use_lock=False):
         """起動時、DBに保存された完了済みジョブをキャッシュにロードします"""
-        if use_lock:
-            lock = self.conn.lock(self.LOCK)
-            lock.acquire(blocking=True)
+        try:
+            if use_lock:
+                lock = self.conn.lock(self.LOCK)
+                lock.acquire(blocking=True)
 
-        with self.conn.pipeline() as pipeline:
-            team_dict = dict()
-            for job in Job.objects.filter(status=Job.DONE).order_by('finished_at').select_related('team'):
-                if job.team.id not in team_dict:
-                    team_dict[job.team.id] = dict(labels=[], scores=[])
+            with self.conn.pipeline() as pipeline:
+                team_dict = dict()
+                for job in Job.objects.filter(status=Job.DONE).order_by('finished_at').select_related('team'):
+                    if job.team.id not in team_dict:
+                        team_dict[job.team.id] = dict(labels=[], scores=[])
 
-                finished_at = self._normalize_finished_at(job.finished_at)
-                team_dict[job.team.id]['name'] = job.team.name
-                team_dict[job.team.id]['participate_at'] = job.team.participate_at
-                team_dict[job.team.id]['labels'].append(finished_at)
-                team_dict[job.team.id]['scores'].append(job.score)
+                    finished_at = self._normalize_finished_at(job.finished_at)
+                    team_dict[job.team.id]['name'] = job.team.name
+                    team_dict[job.team.id]['participate_at'] = job.team.participate_at
+                    team_dict[job.team.id]['labels'].append(finished_at)
+                    team_dict[job.team.id]['scores'].append(job.score)
 
-                participate_at = self._normalize_participate_at(job.team.participate_at)
-                pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {job.team.id: job.score})
+                    participate_at = self._normalize_participate_at(job.team.participate_at)
+                    pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {job.team.id: job.score})
 
-            pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
-            pipeline.execute()
-
-        if use_lock:
-            lock.release()
+                pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
+                pipeline.execute()
+        finally:
+            if use_lock:
+                lock.release()
 
     def update_team_cache(self, job):
         """ジョブ追加に伴い、キャッシュデータを更新します"""
@@ -77,7 +78,10 @@ class RedisClient:
                 pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
             pipeline.execute()
 
-        with self.conn.lock(self.LOCK):
+        try:
+            lock = self.conn.lock(self.LOCK):
+            lock.acquire(blocking=True)
+
             # チーム情報を取得
             team_dict = self.conn.get(self.TEAM_DICT)
             if team_dict is None:
@@ -90,6 +94,8 @@ class RedisClient:
             # チームの情報を丸ごと更新
             team_dict[team.id] = target_team_dict
             self.conn.set(self.TEAM_DICT, pickle.dumps(team_dict))
+        finally:
+            lock.release()
 
     def get_graph_data(self, target_team, topn=30):
         """Chart.js によるグラフデータをキャッシュから取得します"""
