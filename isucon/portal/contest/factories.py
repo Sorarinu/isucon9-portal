@@ -54,7 +54,7 @@ class JobFactory(factory.DjangoModelFactory):
     updated_at = factory.Sequence(lambda idx: timezone.now()-timezone.timedelta(seconds=random.randint(5, 180)))
 
     is_passed = factory.fuzzy.FuzzyChoice([True, False])
-    status = factory.fuzzy.FuzzyChoice([Job.DONE])
+    status = factory.fuzzy.FuzzyChoice([models.Job.DONE])
 
     @factory.lazy_attribute
     def reason(self):
