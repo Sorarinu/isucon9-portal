@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
+from django.utils import timezone
 
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
@@ -9,6 +11,7 @@ from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, Job, Score
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
+from isucon.portal.redis.client import RedisClient
 
 
 def get_base_context(user):
@@ -27,7 +30,6 @@ def get_base_context(user):
         "target_server": target_server,
         "is_last_spurt": is_last_spurt,
     }
-
 @team_is_authenticated
 @team_is_now_on_contest
 def dashboard(request):
@@ -36,9 +38,17 @@ def dashboard(request):
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
 
+    # キャッシュ済みグラフデータの取得
+    client = RedisClient()
+    team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
+    topn = min(settings.RANKING_TOPN, team_cnt)
+    graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn)
+
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
+        "graph_labels": graph_labels,
+        "graph_datasets": graph_datasets,
     })
 
     return render(request, "dashboard.html", context)

@@ -216,6 +216,10 @@ PASSWORD_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567
 # チームパスワードの文字数
 PASSWORD_LENGTH = 20
 
+# Redis
+REDIS_HOST = '127.0.0.1'
+RANKING_TOPN = 30
+
 # Slack
 SLACK_ENDPOINT_URL = "https://hooks.slack.com/services/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"
 

@@ -18,9 +18,18 @@
   <script src="{% static "js/xsrf-token.js" %}"></script>
   <link href="{% static "css/main.css" %}" rel="stylesheet" type="text/css" media="screen">
   <script src="{% static "js/main.js" %}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.6/chartjs-plugin-zoom.min.js"></script>
   <link rel="stylesheet" href="{% static "croppie/croppie.css" %}" />
   <script src="{% static "croppie/croppie.js" %}"></script>
+  <style>
+    canvas {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+  </style>
 </head>
 <body>
     <!-- START NAV -->

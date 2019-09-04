@@ -54,6 +54,9 @@ elif DATABASE_TYPE == "postgres":
 else:
     raise ValueError("Invalid DJANGO_DATABASE_TYPE '{}'".format(DATABASE_TYPE))
 
+REDIS_HOST = 'redis'
+REDIS_RANKING_TOPN = os.getenv('REDIS_RANKING_TOPN', 30)
+
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get("GITHUB_KEY", "")
 SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("GITHUB_SECRET", "")
 
