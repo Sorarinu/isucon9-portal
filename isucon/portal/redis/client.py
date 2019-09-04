@@ -106,11 +106,18 @@ class RedisClient:
         team_dict = pickle.loads(team_bytes)
 
         # ラストスパートに入ったならば、自チームのみグラフに表示する
-        if is_last_spurt and target_team_id in team_dict:
-            return list(sorted(team_dict['all_labels'])), [dict(
-                label='{} ({})'.format(target_team_name, target_team_id),
-                data=zip(team_dict[target_team_id]['labels'], team_dict[target_team_id]['scores'])
-            )]
+        if is_last_spurt:
+            if target_team_id in team_dict:
+                return list(sorted(team_dict['all_labels'])), [dict(
+                    label='{} ({})'.format(target_team_name, target_team_id),
+                    data=zip(team_dict[target_team_id]['labels'], team_dict[target_team_id]['scores'])
+                )]
+            else:
+                # ラストスパート時、未得点者はグラフに何も描画されない
+                return list(sorted(team_dict['all_labels'])), [dict(
+                    label='{} ({})'.format(target_team_name, target_team_id),
+                    data=zip([], [])
+                )]
 
         # ラストスパート前は、topNのチームについてグラフ描画を行う
         datasets = []
