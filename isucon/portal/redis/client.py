@@ -95,25 +95,24 @@ class RedisClient:
         finally:
             lock.release()
 
-    def get_graph_data(self, target_team, topn=30, is_last_spurt=False):
+    def get_graph_data(self, target_team, ranking, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
         target_team_id, target_team_name = target_team.id, target_team.name
 
+        # pickleで保存してあるRedisキャッシュを取得
         team_bytes = self.conn.get(self.TEAM_DICT)
         if team_bytes is None:
             return [], []
         team_dict = pickle.loads(team_bytes)
 
+        # ラストスパートに入ったならば、自チームのみグラフに表示する
         if is_last_spurt and target_team_id in team_dict:
             return list(sorted(team_dict['all_labels'])), [dict(
                 label='{} ({})'.format(target_team_name, target_team_id),
                 data=zip(team_dict[target_team_id]['labels'], team_dict[target_team_id]['scores'])
             )]
 
-        # topNランキング取得 (team_id の一覧を取得)
-        ranking = [row["team__id"] for row in
-                    Score.objects.passed().filter(team__participate_at=target_team.participate_at).values("team__id")[:30]]
-
+        # ラストスパート前は、topNのチームについてグラフ描画を行う
         datasets = []
         for team_id, team in team_dict.items():
             if team_id not in ranking:

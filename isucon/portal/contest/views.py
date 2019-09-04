@@ -41,11 +41,13 @@ def dashboard(request):
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
 
-    # キャッシュ済みグラフデータの取得
+    # topN チームID配列を用意
+    ranking = [row["team__id"] for row in
+                Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).values("team__id")[:settings.RANKING_TOPN]]
+
+    # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
     client = RedisClient()
-    team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
-    topn = min(settings.RANKING_TOPN, team_cnt)
-    graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn, is_last_spurt=context['is_last_spurt'])
+    graph_labels, graph_datasets = client.get_graph_data(request.user.team, ranking, is_last_spurt=context['is_last_spurt'])
 
     # チームのスコアを取得
     try:
