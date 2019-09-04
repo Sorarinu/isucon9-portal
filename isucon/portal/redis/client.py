@@ -1,11 +1,15 @@
 import datetime
 import pickle
+from pytz import timezone
 
 from django.conf import settings
 import redis
 
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job
+
+
+jst = timezone('Asia/Tokyo')
 
 
 class RedisClient:
@@ -41,7 +45,7 @@ class RedisClient:
                     if job.team.id not in team_dict:
                         team_dict[job.team.id] = dict(labels=[], scores=[])
 
-                    finished_at = self._normalize_finished_at(job.finished_at)
+                    finished_at = self._normalize_finished_at(job.finished_at.astimezone(jst))
                     team_dict[job.team.id]['name'] = job.team.name
                     team_dict[job.team.id]['participate_at'] = job.team.participate_at
                     team_dict[job.team.id]['labels'].append(finished_at)
@@ -73,7 +77,7 @@ class RedisClient:
         participate_at = self._normalize_participate_at(team.participate_at)
         with self.conn.pipeline() as pipeline:
             for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
-                finished_at = self._normalize_finished_at(job.finished_at)
+                finished_at = self._normalize_finished_at(job.finished_at.astimezone(jst))
                 target_team_dict['labels'].append(finished_at)
                 target_team_dict['scores'].append(job.score)
 

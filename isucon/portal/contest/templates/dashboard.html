@@ -141,6 +141,7 @@
 
     <section class="graph">
         <canvas id="myChart" width="400" height="200"></canvas>
+        <button class="button" onclick="window.myChart.resetZoom();">グラフ表示をリセット</button>
         <p>※ 凡例をクリックすると、グラフデータが強調表示されます</p>
     </section>
 </div>
@@ -279,6 +280,14 @@ var config = {
                 window.myChart.update();
             }
         },
+        zoom: {
+            enabled: true,
+            mode: ""
+        },
+        pan: {
+            enabled: true,
+            mode: 'x',
+        },
         scales: {
             xAxes: [{
                 scaleLabel: {
@@ -291,9 +300,6 @@ var config = {
                     parser: timeFormat,
                     min: "{{ graph_labels.0 | safe }}",
                     max: "{{ graph_labels | last | safe }}"
-                },
-                ticks: {
-                    autoSkip: false
                 }
             }],
             yAxes: [{
