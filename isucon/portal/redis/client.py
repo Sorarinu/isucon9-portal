@@ -107,18 +107,31 @@ class RedisClient:
         finally:
             lock.release()
 
-    def get_graph_data(self, target_team, topn=30):
+    def get_team_score(self, team):
+        """特定チームのスコアを取得します"""
+        target_team_id = team.id
+        target_team_participate_at = self._normalize_participate_at(team.participate_at)
+
+        return int(self.conn.zscore(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), target_team_id))
+
+    def get_graph_data(self, target_team, topn=30, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
         target_team_id, target_team_name = target_team.id, target_team.name
         target_team_participate_at = self._normalize_participate_at(target_team.participate_at)
-
-        # topNランキング取得 (team_id の一覧を取得)
-        ranking = list(map(int, self.conn.zrange(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), 0, topn-1, desc=True)))
 
         team_bytes = self.conn.get(self.TEAM_DICT)
         if team_bytes is None:
             return [], []
         team_dict = pickle.loads(team_bytes)
+
+        if is_last_spurt and target_team_id in team_dict:
+            return list(sorted(team_dict['all_labels'])), [dict(
+                label='{} ({})'.format(target_team_name, target_team_id),
+                data=zip(team_dict[target_team_id]['labels'], team_dict[target_team_id]['scores'])
+            )]
+
+        # topNランキング取得 (team_id の一覧を取得)
+        ranking = list(map(int, self.conn.zrange(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), 0, topn-1, desc=True)))
 
         datasets = []
         for team_id, team in team_dict.items():

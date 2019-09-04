@@ -98,11 +98,11 @@
                 </p>
             </header>
             {% if is_last_spurt %}
-                <article class="message is-danger">
-                    <div class="message-body">
-                        <strong class="buruburu">残り1時間切ったのでみせられませぬぞ〜</strong>
-                    </div>
-                </article>
+            <article class="message is-danger">
+                <div class="message-body">
+                    <strong class="buruburu">残り1時間切ったのでみせられませぬぞ〜</strong>
+                </div>
+            </article>
             {% else %}
             <div class="card-table">
                 <div class="content">
@@ -135,9 +135,22 @@
             <footer class="card-footer">
                 <a href="{% url "scores" %}" class="card-footer-item">View All</a>
             </footer>
+            {% endif %}
         </div>
-        {% endif %}
     </section>
+
+    {% if is_last_spurt %}
+    <section>
+        <article class="message is-success">
+            <div class="message-header">
+                <span>Your score</span>
+            </div>
+            <div class="message-body">
+                <span>{{ team_score }}</span>
+            </div>
+        </article>
+    </section>
+    {% endif %}
 
     <section class="graph">
         <canvas id="myChart" width="400" height="200"></canvas>

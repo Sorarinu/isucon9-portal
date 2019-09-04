@@ -21,14 +21,16 @@ def get_base_context(user):
         # FIXME: チーム作成直後、チームのサーバは存在しないため、ここでDoesNotExistが投げられるのを回避するためのコード
         # チームにサーバを割り当てる時どうするか決める
         target_server = None
-    # FIXME: ラストスパート判定
-    # ラスト１時間であるかを判定すれば良いので、競技の開始、終了時刻をsettings.pyなどに突っ込んでおく
-    # https://github.com/isucon/isucon8-final/blob/d1480128c917f3fe4d87cb84c83fa2a34ca58d39/portal/lib/ISUCON9/Portal/Web.pm#L92
-    is_last_spurt = False
+
+    t = timezone.now() + timezone.timedelta(hours=1)
+    if t.time() >= settings.CONTEST_END_TIME:
+        is_last_spurt = True
+    else:
+        is_last_spurt = False
 
     return {
         "target_server": target_server,
-        "is_last_spurt": is_last_spurt,
+        "is_last_spurt": is_last_spurt and not user.is_staff,
     }
 @team_is_authenticated
 @team_is_now_on_contest
@@ -42,11 +44,15 @@ def dashboard(request):
     client = RedisClient()
     team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
     topn = min(settings.RANKING_TOPN, team_cnt)
-    graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn)
+    graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn, is_last_spurt=context['is_last_spurt'])
+
+    # チームのスコアを取得
+    team_score = client.get_team_score(request.user.team)
 
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
+        "team_score": team_score,
         "graph_labels": graph_labels,
         "graph_datasets": graph_datasets,
     })
