@@ -9,6 +9,7 @@ from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, Job, Score
+from isucon.portal.contest.exceptions import TeamScoreDoesNotExistError
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
 from isucon.portal.redis.client import RedisClient
@@ -47,7 +48,11 @@ def dashboard(request):
     graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn, is_last_spurt=context['is_last_spurt'])
 
     # チームのスコアを取得
-    team_score = client.get_team_score(request.user.team)
+    try:
+        team = Score.objects.passed().get(team=request.user.team)
+        team_score = team.latest_score
+    except:
+        raise TeamScoreDoesNotExistError
 
     context.update({
         "recent_jobs": recent_jobs,

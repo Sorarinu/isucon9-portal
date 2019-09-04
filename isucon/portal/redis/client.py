@@ -6,7 +6,7 @@ from django.conf import settings
 import redis
 
 from isucon.portal.authentication.models import Team
-from isucon.portal.contest.models import Job
+from isucon.portal.contest.models import Job, Score
 
 
 jst = timezone('Asia/Tokyo')
@@ -17,16 +17,10 @@ class RedisClient:
     LOCK = "lock"
     # チーム情報(スコア履歴、ラベル一覧含む)
     TEAM_DICT = "team-dict"
-    # ランキング
-    RANKING_ZRANK = "participate_at:{participate_at}:ranking"
 
 
     def __init__(self):
         self.conn = redis.StrictRedis(host=settings.REDIS_HOST)
-
-    @staticmethod
-    def _normalize_participate_at(participate_at):
-        return participate_at.strftime('%Y%m%d')
 
     @staticmethod
     def _normalize_finished_at(finished_at):
@@ -53,9 +47,6 @@ class RedisClient:
 
                     team_dict['all_labels'].add(finished_at)
 
-                    participate_at = self._normalize_participate_at(job.team.participate_at)
-                    pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {job.team.id: job.score})
-
                 pipeline.set(self.TEAM_DICT, pickle.dumps(team_dict))
                 pipeline.execute()
         finally:
@@ -74,7 +65,6 @@ class RedisClient:
             labels=[],
             scores=[]
         )
-        participate_at = self._normalize_participate_at(team.participate_at)
         with self.conn.pipeline() as pipeline:
             for job in Job.objects.filter(status=Job.DONE, team=team).order_by('finished_at'):
                 finished_at = self._normalize_finished_at(job.finished_at.astimezone(jst))
@@ -83,8 +73,6 @@ class RedisClient:
 
                 all_labels.add(finished_at)
 
-                # ランキングの更新
-                pipeline.zadd(self.RANKING_ZRANK.format(participate_at=participate_at), {team.id: job.score})
             pipeline.execute()
 
         try:
@@ -107,17 +95,9 @@ class RedisClient:
         finally:
             lock.release()
 
-    def get_team_score(self, team):
-        """特定チームのスコアを取得します"""
-        target_team_id = team.id
-        target_team_participate_at = self._normalize_participate_at(team.participate_at)
-
-        return int(self.conn.zscore(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), target_team_id))
-
     def get_graph_data(self, target_team, topn=30, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
         target_team_id, target_team_name = target_team.id, target_team.name
-        target_team_participate_at = self._normalize_participate_at(target_team.participate_at)
 
         team_bytes = self.conn.get(self.TEAM_DICT)
         if team_bytes is None:
@@ -131,7 +111,8 @@ class RedisClient:
             )]
 
         # topNランキング取得 (team_id の一覧を取得)
-        ranking = list(map(int, self.conn.zrange(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), 0, topn-1, desc=True)))
+        ranking = [row["team__id"] for row in
+                    Score.objects.passed().filter(team__participate_at=target_team.participate_at).values("team__id")[:30]]
 
         datasets = []
         for team_id, team in team_dict.items():
