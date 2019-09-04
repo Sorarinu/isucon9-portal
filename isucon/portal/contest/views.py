@@ -9,6 +9,7 @@ from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
 from isucon.portal.contest.models import Server, Job, Score
+from isucon.portal.contest.exceptions import TeamScoreDoesNotExistError
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
 from isucon.portal.redis.client import RedisClient
@@ -40,14 +41,20 @@ def dashboard(request):
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
 
-    # キャッシュ済みグラフデータの取得
+    # topN チームID配列を用意
+    ranking = [row["team__id"] for row in
+                Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).values("team__id")[:settings.RANKING_TOPN]]
+
+    # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
     client = RedisClient()
-    team_cnt = Team.objects.filter(participate_at=request.user.team.participate_at).count()
-    topn = min(settings.RANKING_TOPN, team_cnt)
-    graph_labels, graph_datasets = client.get_graph_data(request.user.team, topn=topn, is_last_spurt=context['is_last_spurt'])
+    graph_labels, graph_datasets = client.get_graph_data(request.user.team, ranking, is_last_spurt=context['is_last_spurt'])
 
     # チームのスコアを取得
-    team_score = client.get_team_score(request.user.team)
+    try:
+        team = Score.objects.get(team=request.user.team)
+        team_score = team.latest_score
+    except:
+        raise TeamScoreDoesNotExistError
 
     context.update({
         "recent_jobs": recent_jobs,
