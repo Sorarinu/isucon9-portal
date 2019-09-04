@@ -49,8 +49,10 @@ class JobViewSet(viewsets.GenericViewSet):
             serializer = self.get_serializer_class()(instance=job)
             return Response(serializer.data)
         except contest_exceptions.JobDoesNotExistError:
-            # 結局ジョブが見つからなかった
-            raise exceptions.NotFound()
+            pass
+
+        # 結局ジョブが見つからなかった
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 router.register("job", JobViewSet, base_name="job")
