@@ -28,6 +28,10 @@ def settings_url(request):
             'informations': Information.objects.of_team(team),
         }
 
+        if request.user.is_staff:
+            team_context["is_now_on_contest"] = True
+
         context.update(team_context)
+
 
     return context
