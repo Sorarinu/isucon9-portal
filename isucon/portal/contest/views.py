@@ -51,7 +51,7 @@ def dashboard(request):
 
     # チームのスコアを取得
     try:
-        team = Score.objects.passed().get(team=request.user.team)
+        team = Score.objects.get(team=request.user.team)
         team_score = team.latest_score
     except:
         raise TeamScoreDoesNotExistError
