@@ -112,7 +112,11 @@ class RedisClient:
         target_team_id = team.id
         target_team_participate_at = self._normalize_participate_at(team.participate_at)
 
-        return int(self.conn.zscore(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), target_team_id))
+        ret = self.conn.zscore(self.RANKING_ZRANK.format(participate_at=target_team_participate_at), target_team_id)
+        if not ret:
+            return 0
+
+        return int(ret)
 
     def get_graph_data(self, target_team, topn=30, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
