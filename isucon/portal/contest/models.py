@@ -125,6 +125,8 @@ class JobManager(models.Manager):
 
         # 状態を処理中にする
         job.status = Job.RUNNING
+        job.target = Server.objects.get(team=job.team, is_bench_target=True)
+        job.target_ip = job.target.global_ip
         job.save(using=self._db)
 
         return job
@@ -169,8 +171,11 @@ class Job(models.Model):
         (CANCELED, CANCELED), # 意図的なキャンセル
     )
 
-    # FIXME: SET_NULLされたレコードを、ジョブ取得時に考慮
-    team = models.ForeignKey('authentication.Team', verbose_name="チーム", null=True, on_delete=models.SET_NULL)
+    # 対象情報
+    team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.CASCADE)
+    target = models.ForeignKey('Server', verbose_name="対象サーバ", blank=True, null=True, on_delete=models.SET_NULL)
+    target_ip = models.CharField("対象サーバIPアドレス", blank=True, max_length=100)
+    benchmarker = models.ForeignKey('Benchmarker', verbose_name="ベンチマーカ", blank=True, null=True, on_delete=models.SET_NULL)
 
     # Choice系
     status = models.CharField("進捗", max_length=100, choices=STATUS_CHOICES, default=WAITING)

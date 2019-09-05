@@ -65,7 +65,7 @@ class ScoreAdmin(admin.ModelAdmin):
 admin.site.register(Score, ScoreAdmin)
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ["id", "team", "status", "is_passed", "score", "reason_short"]
+    list_display = ["id", "team", "status", "target", "benchmarker", "is_passed", "score", "reason_short"]
     list_filter = ["status", "is_passed", "team"]
 
     def reason_short(self, instance):
