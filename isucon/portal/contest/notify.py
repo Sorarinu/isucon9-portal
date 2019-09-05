@@ -36,14 +36,12 @@ def notify_abort(job):
                 },
                 {
                     "title": "ベンチマーカ",
-                    # FIXME: contest.models.Jobにbenchmarkerフィールドを設けたら、クウォート外す
-                    "value": "str(job.benchmarker)",
+                    "value": str(job.benchmarker),
                     "short": True,
                 },
                 {
                     "title": "ターゲットサーバ",
-                    # FIXME: contest.models.Jobにbenchmarkerフィールドを設けたら、クウォート外す
-                    "value": "str(job.target_ip)",
+                    "value": str(job.target_ip),
                     "short": True,
                 },
                 {

@@ -2,6 +2,7 @@ import random
 from django.core.management.base import BaseCommand
 
 from isucon.portal.authentication.factories import TeamFactory, UserFactory
+from isucon.portal.contest.models import Server
 from isucon.portal.contest.factories import ServerFactory, JobFactory, InformationFactory
 
 class Command(BaseCommand):
@@ -35,7 +36,11 @@ class Command(BaseCommand):
     def generate_jobs(self, team):
         history_num = random.randint(10, 100) # 履歴は0 ~ 10
         for _ in range(history_num):
-            JobFactory.create(team=team)
+            job = JobFactory.create(team=team)
+            job.target = Server.objects.get_bench_target(team)
+            job.target_ip = job.target.global_ip
+            job.benchmarker = team.benchmarker
+            job.save()
 
     def add_arguments(self, parser):
         parser.add_argument('-t', '--teams', default=10, type=int, help='Number of servers')
