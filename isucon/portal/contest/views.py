@@ -98,6 +98,13 @@ def job_enqueue(request):
         return HttpResponse("このエンドポイントはAjax専用です", status=400)
 
     context = get_base_context(request.user)
+
+    # サーバの設定チェック
+    if not Server.objects.of_team(request.user.team).exists():
+        return JsonResponse(
+            {"error": "サーバが設定されていません"}, status = 409
+        )
+
     job = None
     try:
         job = Job.objects.enqueue(request.user.team)
