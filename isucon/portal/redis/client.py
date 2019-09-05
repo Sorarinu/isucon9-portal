@@ -142,3 +142,30 @@ class RedisClient:
             ))
 
         return list(sorted(team_dict['all_labels'])), datasets
+
+
+    def get_graph_data_for_staff(self, participate_at, ranking):
+        """Chart.js によるグラフデータをキャッシュから取得します"""
+
+        # pickleで保存してあるRedisキャッシュを取得
+        team_bytes = self.conn.get(self.TEAM_DICT)
+        if team_bytes is None:
+            return [], []
+        team_dict = pickle.loads(team_bytes)
+
+        # topNのチームについてグラフ描画を行う
+        datasets = []
+        for team_id, team in team_dict.items():
+            if team_id not in ranking:
+                #  グラフにはtopNに含まれる参加者情報しか出さない
+                continue
+            if team['participate_at'] != participate_at:
+                # グラフには指定した日にちの参加者情報しか出さない
+                continue
+
+            datasets.append(dict(
+                label='{} ({})'.format(team['name'], team_id),
+                data=zip(team['labels'], team['scores'])
+            ))
+
+        return list(sorted(team_dict['all_labels'])), datasets

@@ -11,81 +11,11 @@
         </ul>
     </nav>
 
-    {% include "include/team_header.html" %}
-
-    {% include "includes/job_enqueue.html" %}
-
-    <section class="table-list">
-        <div class="card events-card">
-            <header class="card-header is-dark">
-                <p class="card-header-title">
-                    <span class="icon">
-                        <i class="fas fa-list-alt"></i>
-                    </span>
-                    <span>Recent Jobs</span>
-                </p>
-            </header>
-            <div class="card-table">
-                <div class="content">
-                    <table class="table is-fullwidth is-striped">
-                        <thead>
-                            <tr>
-                                <th>JobId</th>
-                                <th>Total transaction [ISUCOIN]</th>
-                                <th>Status</th>
-                                <th>Result</th>
-                                <th>UpdatedAt</th>
-                                <th>Detail</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for job in recent_jobs %}
-                                <tr {% if not job.is_finished %}class="state-running"{% endif %}>
-                                    <td class="has-text-right">{{ job.id }}</td>
-                                    <td class="has-text-right">
-                                      {% if job.is_finished %}
-                                        {{ job.score|intcomma }} ｲｽｺｲﾝ
-                                      {% endif %}
-                                    </td>
-                                    <td>
-                                      {% if job.status == job.DONE %}
-                                        <span class="tag is-success">Done</span>
-                                      {% endif %}
-                                      {% if job.status == job.ABORTED %}
-                                        <span class="tag is-danger">Aborted</span>
-                                      {% endif %}
-                                      {% if job.status == job.CANCELED %}
-                                        <span class="tag is-warning">Canceled</span>
-                                      {% endif %}
-                                      {% if job.status == job.WAITING %}
-                                        <span class="tag is-info">Waiting</span>
-                                      {% endif %}
-                                      {% if job.status == job.RUNNING %}
-                                        <span class="tag is-info">Running</span>
-                                      {% endif %}
-                                    </td>
-                                    <td>
-                                      {% if job.is_finished %}
-                                        {% if job.is_passed %}
-                                          <span class="tag is-success">Passed</span>
-                                        {% else %}
-                                          <span class="tag is-danger">Failed</span>
-                                        {% endif %}
-                                      {% endif %}
-                                    </td>
-                                    <td>{{ job.updated_at|date:"H:i:s" }}</td>
-                                    <td><a class="button is-small is-link" href="{% url "job_detail" job.id %}">show</a></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <footer class="card-footer">
-                <a href="{% url "jobs" %}" class="card-footer-item">View All</a>
-            </footer>
-        </div>
-    </section>
+    {% if not staff %}
+      {% include "include/team_header.html" %}
+      {% include "include/job_enqueue.html" %}
+      {% include "include/recent_jobs.html" %}
+    {% endif %}
 
     <section class="table-list">
         <div class="card events-card">
@@ -133,7 +63,11 @@
                 </div>
             </div>
             <footer class="card-footer">
-                <a href="{% url "scores" %}" class="card-footer-item">View All</a>
+                {% if staff %}
+                  <a href="{% url "scores" %}" class="card-footer-item">View All</a>
+                {% else %}
+                  <a href="{% url "staff_scores" %}" class="card-footer-item">View All</a>
+                {% endif %}
             </footer>
             {% endif %}
         </div>

@@ -205,6 +205,15 @@ class Job(models.Model):
             self.CANCELED,
         ]
 
+    @property
+    def pretty_stdout(self):
+        try:
+            d = json.loads(self.stdout)
+            return json.dumps(d, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+        except:
+            pass
+        return self.stdout
+
     def done(self, score, is_passed, stdout, stderr, reason, status=DONE):
         # ベンチマークが終了したらログを書き込む
         self.stdout = stdout

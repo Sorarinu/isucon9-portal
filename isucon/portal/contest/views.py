@@ -30,9 +30,11 @@ def get_base_context(user):
         is_last_spurt = False
 
     return {
+        "staff": False,
         "target_server": target_server,
         "is_last_spurt": is_last_spurt and not user.is_staff,
     }
+
 @team_is_authenticated
 @team_is_now_on_contest
 def dashboard(request):

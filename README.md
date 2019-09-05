@@ -2,6 +2,18 @@
 ISUCON9 Portal
 
 
+## Getting Started
+
+```bash
+git clone git@github.com:chibiegg/isucon9-portal.git
+cd isucon9-portal
+pip install -r requirements.txt
+python manage.py migrate
+docker run -d -p 6379:6379 redis
+python manage.py runserver
+```
+
+
 ## docker-compose
 
 ```bash
