@@ -7,7 +7,10 @@ from isucon.portal.authentication.models import *
 
 
 def notify_abort(job):
-    """Slackに登録状況を出力する"""
+    """SlackにAbortを出力する"""
+
+    if job.status != job.ABORTED:
+        return
 
     attachments =  [
 
