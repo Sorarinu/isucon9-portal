@@ -42,9 +42,6 @@ def dashboard(request):
     except ValueError:
         top_n = settings.RANKING_TOPN
 
-    try:
-        participate_at_str = request.GET.get("participate_at")
-
     top_teams = Score.objects.passed().filter(team__participate_at=participate_at)[:30]
 
     # topN チームID配列を用意
