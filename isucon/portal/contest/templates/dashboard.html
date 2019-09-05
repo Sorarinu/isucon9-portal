@@ -31,7 +31,7 @@
                         <thead>
                             <tr>
                                 <th>JobId</th>
-                                <th>Score</th>
+                                <th>Total transaction [ISUCOIN]</th>
                                 <th>Status</th>
                                 <th>Result</th>
                                 <th>UpdatedAt</th>
@@ -44,7 +44,7 @@
                                     <td class="has-text-right">{{ job.id }}</td>
                                     <td class="has-text-right">
                                       {% if job.is_finished %}
-                                        {{ job.score|intcomma }}
+                                        {{ job.score|intcomma }} ｲｽｺｲﾝ
                                       {% endif %}
                                     </td>
                                     <td>
@@ -112,8 +112,8 @@
                                 <th>Rank</th>
                                 <th>Id</th>
                                 <th>Name</th>
-                                <th>LatestScore</th>
-                                <th>BestScore</th>
+                                <th>Latest Total transaction [ISUCOIN]</th>
+                                <th>Best Total transaction [ISUCOIN]</th>
                                 <th>FinishTime</th>
                             </tr>
                         </thead>
@@ -123,8 +123,8 @@
                                 <td class="has-text-right">{{ forloop.counter }}</td>
                                 <td class="has-text-right">{{ score.team.id }}</td>
                                 <td>{{ score.team }}</td>
-                                <td class="has-text-right">{{ score.latest_score|intcomma }}</td>
-                                <td class="has-text-right">{{ score.best_score|intcomma }}</td>
+                                <td class="has-text-right">{{ score.latest_score|intcomma }} ｲｽｺｲﾝ</td>
+                                <td class="has-text-right">{{ score.best_score|intcomma }} ｲｽｺｲﾝ</td>
                                 <td>{{ score.latest_scored_at|date:"H:i:s" }}</td>
                             </tr>
                             {% endfor %}
