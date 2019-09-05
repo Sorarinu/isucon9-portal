@@ -39,7 +39,6 @@ def update_score(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Job)
 def update_redis_cache(sender, instance, created, **kwargs):
     if instance.status == Job.DONE:
-        print("update cache")
         client = RedisClient()
         client.update_team_cache(instance)
 

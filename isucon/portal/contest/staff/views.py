@@ -18,12 +18,17 @@ def get_base_context(user):
     }
 
 def get_participate_at(request):
-    participate_at_str = request.session.get('participate_at', '')
+    if request.session.has_key('participate_at'):
+        participate_at_str = request.session.get('participate_at', '')
+    else:
+        participate_at_str = request.GET.get('participate_at', '')
 
     try:
         participate_at = parse_datetime(participate_at_str).date()
     except ValueError:
         participate_at = datetime.date.today()
+
+    request.session['participate_at'] = participate_at_str
 
     return participate_at
 
@@ -36,6 +41,9 @@ def dashboard(request):
         top_n = int(request.GET.get("graph_teams", settings.RANKING_TOPN))
     except ValueError:
         top_n = settings.RANKING_TOPN
+
+    try:
+        participate_at_str = request.GET.get("participate_at")
 
     top_teams = Score.objects.passed().filter(team__participate_at=participate_at)[:30]
 
