@@ -63,6 +63,53 @@ class TeamDict:
         return TeamDict(team=self._team, labels=labels, scores=scores)
 
 
+class TeamDictLoadCacheSet:
+    """TeamDictに全データをロードし直す際用いるクラス"""
+
+    def __init__(self):
+        self.teams_dict = dict()
+        self.lastspurt_teams_dict = dict()
+
+        self.labels = set()
+
+    def append_job(self, job):
+        """ラストスパート判定をしつつ、TeamDictにappend_jobする"""
+        is_last_spurt = portal_utils.is_last_spurt(job.finished_at)
+
+        if not is_last_spurt:
+            if job.team.id not in self.teams_dict:
+                self.teams_dict[job.team.id] = TeamDict(job.team)
+            self.teams_dict[job.team.id].append_job(job)
+            self.labels.add(self.teams_dict[job.team.id].last_label)
+        else:
+            if job.team.id not in self.lastspurt_teams_dict:
+                self.lastspurt_teams_dict[job.team.id] = TeamDict(job.team)
+            self.lastspurt_teams_dict[job.team.id].append_job(job)
+            self.labels.add(self.lastspurt_teams_dict[job.team.id].last_label)
+
+
+class TeamDictUpdateSet:
+    """逐次更新でTeamDictを更新する際に用いるクラス"""
+
+    def __init__(self, job):
+        self.team_dict = TeamDict(job.team)
+        self.lastspurt_team_dict = TeamDict(job.team)
+
+    @property
+    def labels(self):
+        labels = set()
+        labels.update(self.team_dict.unique_labels)
+        labels.update(self.lastspurt_team_dict.unique_labels)
+        return labels
+
+    def append_job(self, job):
+        is_last_spurt = portal_utils.is_last_spurt(job)
+
+        if not is_last_spurt:
+            self.team_dict.append_job(job)
+        else:
+            self.lastspurt_team_dict.append_job(job)
+
 @contextmanager
 def lock_with_redis(conn, lock_name, use_lock=True):
     if use_lock:
@@ -75,7 +122,6 @@ def lock_with_redis(conn, lock_name, use_lock=True):
     else:
         yield None
 
-# FIXME: teams_dict -> team_dicts
 
 class RedisClient:
     # `RedisClientによる操作` の排他制御用ロック
@@ -87,19 +133,32 @@ class RedisClient:
     LASTSPURT_TEAMS_DICT = "lastspurt-teams-dict"
     # グラフ描画の際に用いるラベル (finished_at を正規化した文字列)
     LABELS = "labels"
-    LASTSPURT_LABELS = "lastspurt-labels"
 
 
     def __init__(self):
         self.conn = redis.StrictRedis(host=settings.REDIS_HOST)
 
-    def get_teams_dict(self, retry=False):
-        team_bytes = self.conn.get(self.TEAMS_DICT)
+    def get_labels(self):
+        """Redisから LABELS pickleを取得するヘルパ"""
+        labels_bytes = self.conn.get(self.LABELS)
+        if labels_bytes is None:
+            return None
+
+        return pickle.loads(labels_bytes)
+
+    def get_teams_dict(self, retry=False, is_last_spurt=False):
+        """Redisから TEAMS_DICT pickleを取得するヘルパ"""
+        if not is_last_spurt:
+            key_name = self.TEAMS_DICT
+        else:
+            key_name = self.LASTSPURT_TEAMS_DICT
+
+        team_bytes = self.conn.get(key_name)
         if team_bytes is None and retry:
             # NOTE: manufacture でシードデータを投入する場合、ここを通る
             #       デプロイ先だと、team_dict は必ずentrypoint.shで作成されるのでここを通らない
             self.load_cache_from_db()
-            team_bytes = self.conn.get(self.TEAMS_DICT)
+            team_bytes = self.conn.get(key_name)
 
         if team_bytes is None:
             return None
@@ -110,93 +169,125 @@ class RedisClient:
         """起動時、DBに保存された完了済みジョブをキャッシュにロードします"""
         with lock_with_redis(self.conn, self.LOCK, use_lock=use_lock):
             # 全てのpassedなジョブデータを元にteam_dictを再構成する
-            teams_dict, lastspurt_teams_dict = dict(), dict()
-            labels, lastspurt_labels = set(), set()
+            load_cache_set = TeamDictLoadCacheSet()
             for job in Job.objects.filter(status=Job.DONE).order_by('finished_at').select_related('team'):
-
-                if not portal_utils.is_last_spurt(job.finished_at):
-                    if job.team.id not in teams_dict:
-                        teams_dict[job.team.id] = TeamDict(job.team)
-                    teams_dict[job.team.id].append_job(job)
-                    labels.add(teams_dict[job.team.id].last_label)
-                else:
-                    if job.team.id not in lastspurt_teams_dict:
-                        lastspurt_teams_dict[job.team.id] = TeamDict(job.team)
-                    lastspurt_teams_dict[job.team.id].append_job(job)
-                    lastspurt_labels.add(lastspurt_teams_dict[job.team.id].last_label)
+                load_cache_set.append_job(job)
 
             with self.conn.pipeline() as pipeline:
-                pipeline.set(self.LABELS, pickle.dumps(labels))
-                pipeline.set(self.LASTSPURT_LABELS, pickle.dumps(lastspurt_labels))
+                pipeline.set(self.LABELS, pickle.dumps(load_cache_set.labels))
 
-                for team_id, team_dict in teams_dict.items():
+                for team_id, team_dict in load_cache_set.teams_dict.items():
                     pipeline.set(self.TEAM_DICT.format(team_id=team_id), pickle.dumps(team_dict))
 
-                pipeline.set(self.TEAMS_DICT, pickle.dumps(teams_dict))
-                pipeline.set(self.LASTSPURT_TEAMS_DICT, pickle.dumps(lastspurt_teams_dict))
+                pipeline.set(self.TEAMS_DICT, pickle.dumps(load_cache_set.teams_dict))
+                pipeline.set(self.LASTSPURT_TEAMS_DICT, pickle.dumps(load_cache_set.lastspurt_teams_dict))
 
                 pipeline.execute()
 
     def update_team_cache(self, job):
         """ジョブ追加に伴い、キャッシュデータを更新します"""
-        # ジョブに紐づくチームの情報を用意
-        target_team_dict = TeamDict(job.team)
+        # ジョブに紐づくチームの全ジョブについて、キャッシュを読み込み直す
+        update_set = TeamDictUpdateSet(job)
         for job in Job.objects.filter(status=Job.DONE, team=job.team).order_by('finished_at'):
-            target_team_dict.append_job(job)
+            update_set.append_job(job)
 
         with lock_with_redis(self.conn, self.LOCK):
+            # ラベルを取得
+            labels = self.get_labels()
+            if labels is None:
+                return
+
             # チーム情報を取得
-            teams_dict = self.get_teams_dict(retry=True)
+            teams_dict = self.get_teams_dict(retry=True, is_last_spurt=False)
             if teams_dict is None:
                 return
 
+            lastspurt_teams_dict = self.get_teams_dict(retry=True, is_last_spurt=True)
+            if lastspurt_teams_dict is None:
+                return
+
             # チームの情報を丸ごと更新
-            teams_dict['all_labels'].update(target_team_dict.unique_labels)
-            teams_dict[job.team.id] = target_team_dict
+            labels.update(update_set.labels)
+            teams_dict[job.team.id] = update_set.team_dict
+            lastspurt_teams_dict[job.team.id] = update_set.lastspurt_team_dict
 
-            self.conn.set(self.TEAM_DICT.format(team_id=job.team.id), pickle.dumps(target_team_dict))
-            self.conn.set(self.TEAMS_DICT, pickle.dumps(teams_dict))
+            with self.conn.pipeline() as pipeline:
+                # 対象チームごとのteam_dictを更新
+                pipeline.set(self.TEAM_DICT.format(team_id=job.team.id), pickle.dumps(update_set.team_dict))
 
-    def get_graph_data(self, target_team, ranking, is_last_spurt=False):
+                pipeline.set(self.LABELS, pickle.dumps(labels))
+                pipeline.set(self.TEAMS_DICT, pickle.dumps(teams_dict))
+
+                pipeline.set(self.LASTSPURT_TEAMS_DICT, pickle.dumps(lastspurt_teams_dict))
+
+                pipeline.execute()
+
+    def get_graph_data(self, request_user, target_team, ranking, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
-        # pickleで保存してあるRedisキャッシュを取得
-        teams_dict = self.get_teams_dict()
-        if teams_dict is None:
-            return [], []
+        # teams_dictとteam_dict、labelsを用意
+        if is_last_spurt and not request_user.is_staff:
+            # スタッフでないユーザに対し、ラストスパートでは、自分以外のチームのグラフ更新が止まったように見える
 
-        # ラストスパート前は、topNのチームについてグラフ描画を行う
-        all_labels = list(sorted(team_dict['all_labels']))
-
-        # ラストスパートに入ったならば、自チームのみグラフに表示する
-        if is_last_spurt:
-            if target_team.id in team_dict:
-                return all_labels, [dict(
-                    label=team_dict[target_team.id].labels,
-                    data=team_dict[target_team.id].data
-                )]
+            # team_dictを用意
+            team_dict = self.conn.get(self.TEAM_DICT.format(team_id=target_team.id))
+            if team_dict is None:
+                team_dict = None
             else:
-                # ラストスパート時、未得点者はグラフに何も描画されない
-                return all_labels, [dict(
-                    label='{} ({})'.format(target_team.name, target_team.id),
-                    data=zip([], [])
-                )]
+                team_dict = pickle.loads(team_dict)
 
+            lastspurt_teams_dict = self.get_teams_dict(is_last_spurt=True)
+            if lastspurt_teams_dict is None:
+                return [], []
+            lastspurt_teams_dict = pickle.loads(lastspurt_teams_dict)
+
+            team_dict = team_dict + lastspurt_teams_dict[team_dict.id]
+
+            # teams_dictを用意
+            teams_dict = self.get_teams_dict(is_last_spurt=False)
+            if teams_dict is None:
+                return [], []
+            teams_dict[team_dict.id] = team_dict
+
+            # labelsを用意
+            labels = self.get_labels()
+            if labels is None:
+                labels = []
+        else:
+            # 通常のグラフ描画
+
+            # teams_dict を用意
+            teams_dict = self.get_teams_dict(is_last_spurt=False)
+            if teams_dict is None:
+                teams_dict = dict()
+
+            # team_dict を用意
+            if target_team.id in teams_dict:
+                team_dict = teams_dict[target_team.id]
+            else:
+                team_dict = TeamDict(target_team)
+
+            # labels を用意
+            labels = self.get_labels()
+            if labels is None:
+                labels = []
+
+        # teams_dict, team_dict, labels に基づき、ラベルとデータセットを作成して返す
         datasets = []
-        for team_id, target_team_dict in teams_dict.items():
+        for team_id, team_dict in teams_dict.items():
             if team_id not in ranking:
                 #  グラフにはtopNに含まれる参加者情報しか出さない
                 continue
-            if target_team_dict.participate_at != target_team.participate_at:
+            if team_dict.participate_at != target_team.participate_at:
                 # グラフには同じ日にちの参加者情報しか出さない
                 continue
 
-            datasets.append(dict(label=target_team_dict.label, data=target_team_dict.data))
+            datasets.append(dict(label=team_dict.label, data=team_dict.data))
 
         # 自分がランキングに含まれない場合、自分のdataも追加
-        if target_team.id not in ranking and target_team.id in teams_dict:
-            datasets.append(dict(label=teams_dict[target_team.id].label, data=teams_dict[target_team.id].data))
+        if target_team.id not in ranking and team_dict is not None:
+            datasets.append(dict(label=team_dict.label, data=team_dict.data))
 
-        return all_labels, datasets
+        return labels, datasets
 
     def get_graph_data_for_staff(self, participate_at, ranking):
         """Chart.js によるグラフデータをキャッシュから取得します"""
