@@ -37,6 +37,8 @@ class JobViewSet(viewsets.GenericViewSet):
         # チームとベンチマーカーが紐づくと仮定して、ジョブを取ってくる
         try:
             job = Job.objects.dequeue(benchmarker)
+            job.benchmarker = benchmarker
+            job.save()
             serializer = self.get_serializer_class()(instance=job)
             return Response(serializer.data)
         except contest_exceptions.JobDoesNotExistError:
@@ -46,6 +48,8 @@ class JobViewSet(viewsets.GenericViewSet):
         # TODO: ポータルが、チームとベンチマーカーの紐付けがない状況かどうか判断できる何かしらを用意し、それを根拠に分岐する
         try:
             job = Job.objects.dequeue()
+            job.benchmarker = benchmarker
+            job.save()
             serializer = self.get_serializer_class()(instance=job)
             return Response(serializer.data)
         except contest_exceptions.JobDoesNotExistError:
