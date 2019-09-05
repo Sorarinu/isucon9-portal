@@ -38,7 +38,7 @@ def dashboard(request):
     # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
     client = RedisClient()
 
-    graph_labels, graph_datasets = client.get_graph_data_for_staff(datetime.date(2019,9,7), ranking)
+    graph_labels, graph_datasets = client.get_graph_data_for_staff(participate_at, ranking)
 
     context.update({
         "top_teams": top_teams,

@@ -275,7 +275,7 @@ class RedisClient:
 
         return teams_dict, team_dict, labels
 
-    def _prepare_for_staff(self, target_team):
+    def _prepare_for_staff(self):
         """staff向けの teams_dict, team_dict, labels を用意します"""
         # teams_dict を用意
         teams_dict = self.get_teams_dict(is_last_spurt=False)
@@ -301,14 +301,10 @@ class RedisClient:
 
         return new_teams_dict, None, labels
 
-    def get_graph_data(self, request_user, ranking, is_last_spurt=False):
+    def get_graph_data(self, target_team, ranking, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
-        target_team = request_user.team
         # teams_dictとteam_dict、labelsを用意
-        if request_user.is_staff:
-            # スタッフなら常にグラフデータを観れる
-            teams_dict, target_team_dict, labels = self._prepare_for_staff(target_team)
-        elif is_last_spurt:
+        if is_last_spurt:
             # ラストスパートでは、自分以外のチームのグラフ更新が止まったように見える
             teams_dict, target_team_dict, labels = self._prepare_for_lastspurt(target_team)
         else:
@@ -322,40 +318,34 @@ class RedisClient:
                 #  グラフにはtopNに含まれる参加者情報しか出さない
                 continue
             if team_dict.participate_at != target_team.participate_at:
-                # グラフには同じ日にちの参加者情報しか出さない
+                # グラフには同じ日にちの参加者情報しか出さない(スタッフである場合は除く)
                 continue
 
             datasets.append(dict(label=team_dict.label, data=team_dict.data))
 
-        # 自分がランキングに含まれない場合、自分のdataも追加
+        # 自分がランキングに含まれない場合、自分のdataも追加(スタッフである場合は除く)
         if target_team.id not in ranking and target_team_dict is not None:
             datasets.append(dict(label=target_team_dict.label, data=target_team_dict.data))
 
         return labels, datasets
 
-    def get_graph_data_for_staff(self, participate_at, ranking):
+    def get_graph_data_for_staff(self, force_participate_at, ranking):
         """Chart.js によるグラフデータをキャッシュから取得します"""
-        # FIXME: 現在の仕様に合わせる(TEAMS_DICTなど)
+        # NOTE: prepare_for_staff の返値の２つ目(team_dict)はNoneが返ってくる
+        #       (=スタッフについて、チームを考慮したグラフデータの特別な加工が必要ないので)
+        teams_dict, _, labels = self._prepare_for_staff()
 
-        # pickleで保存してあるRedisキャッシュを取得
-        team_bytes = self.conn.get(self.TEAM_DICT)
-        if team_bytes is None:
-            return [], []
-        team_dict = pickle.loads(team_bytes)
-
-        # topNのチームについてグラフ描画を行う
+        # teams_dict, labels に基づき、ラベルとデータセットを作成して返す
         datasets = []
-        for team_id, team in team_dict.items():
+        for team_id, team_dict in teams_dict.items():
             if team_id not in ranking:
                 #  グラフにはtopNに含まれる参加者情報しか出さない
                 continue
-            if team['participate_at'] != participate_at:
-                # グラフには指定した日にちの参加者情報しか出さない
+            if team_dict.participate_at != force_participate_at:
+                # スタッフは、指定の日の参加者しか出さない
                 continue
 
-            datasets.append(dict(
-                label='{} ({})'.format(team['name'], team_id),
-                data=zip(team['labels'], team['scores'])
-            ))
+            datasets.append(dict(label=team_dict.label, data=team_dict.data))
 
-        return list(sorted(team_dict['all_labels'])), datasets
+        return labels, datasets
+
