@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Server, Job, Score
 from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.notify import notify_abort
 
 __all__ = ("create_score", "update_score", "set_default_benchmark_target_server")
 
@@ -21,6 +22,11 @@ def create_score(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Job)
 def update_score(sender, instance, created, **kwargs):
     """Jobが更新されたら、集計スコアを更新する"""
+
+    try:
+        notify_abort(instance)
+    except:
+        pass
 
     if not Score.objects.filter(team=instance.team).exists():
         # 念のためなかったら作る
