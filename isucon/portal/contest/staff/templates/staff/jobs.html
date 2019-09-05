@@ -1,1 +1,42 @@
 {% extends "jobs.html" %}
+
+
+{% block pagenation %}
+
+<nav class="pagination" role="navigation" aria-label="pagination">
+  {% if page_obj.has_previous %}
+    <a class="pagination-previous" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+  {% else %}
+    <a class="pagination-previous" href="#" disabled>Previous</a>
+  {% endif %}
+
+  {% if page_obj.has_next %}
+    <a class="pagination-next" href="?page={{ page_obj.next_page_number }}">Next</a>
+  {% else %}
+    <a class="pagination-next" href="#" disabled>Next</a>
+  {% endif %}
+
+  <ul class="pagination-list">
+
+    {% for link_page in page_obj.paginator.page_range %}
+        {% if link_page %}
+            {% if link_page == page_obj.number %}
+                <li class="disabled">
+                  <div class="pagination-link is-current disabled" href="#">{{ link_page }}</div>
+                </li>
+            {% else %}
+                <li>
+                  <a class="pagination-link" href="?page={{ link_page }}">{{ link_page }}</a>
+                </li>
+            {% endif %}
+        {% else %}
+            <li class="disabled">
+              <span class="pagination-ellipsis">&hellip;</span>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+  </ul>
+</nav>
+
+{% endblock %}
