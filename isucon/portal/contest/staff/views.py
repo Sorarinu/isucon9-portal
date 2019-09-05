@@ -1,4 +1,5 @@
 import datetime
+from dateutil.parser import parse as parse_datetime
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
@@ -17,7 +18,14 @@ def get_base_context(user):
     }
 
 def get_participate_at(request):
-    return datetime.date.today()
+    participate_at_str = request.session.get('participate_at', '')
+
+    try:
+        participate_at = parse_datetime(participate_at_str).date()
+    except ValueError:
+        participate_at = datetime.date.today()
+
+    return participate_at
 
 @staff_member_required
 def dashboard(request):
@@ -37,7 +45,6 @@ def dashboard(request):
 
     # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
     client = RedisClient()
-
     graph_labels, graph_datasets = client.get_graph_data_for_staff(participate_at, ranking)
 
     context.update({

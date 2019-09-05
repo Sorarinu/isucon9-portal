@@ -329,7 +329,7 @@ class RedisClient:
 
         return labels, datasets
 
-    def get_graph_data_for_staff(self, force_participate_at, ranking):
+    def get_graph_data_for_staff(self, participate_at, ranking):
         """Chart.js によるグラフデータをキャッシュから取得します"""
         # NOTE: prepare_for_staff の返値の２つ目(team_dict)はNoneが返ってくる
         #       (=スタッフについて、チームを考慮したグラフデータの特別な加工が必要ないので)
@@ -341,7 +341,7 @@ class RedisClient:
             if team_id not in ranking:
                 #  グラフにはtopNに含まれる参加者情報しか出さない
                 continue
-            if team_dict.participate_at != force_participate_at:
+            if team_dict.participate_at != participate_at:
                 # スタッフは、指定の日の参加者しか出さない
                 continue
 
