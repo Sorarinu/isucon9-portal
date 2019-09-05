@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from isucon.portal.contest.models import Server, Job, Score
 from isucon.portal.redis.client import RedisClient
@@ -80,9 +82,23 @@ def jobs(request):
     context = get_base_context(request.user)
     participate_at = get_participate_at(request)
 
-    jobs = Job.objects.of_team(request.user.team)
+    def paginate_query(request, queryset, count):
+        paginator = Paginator(queryset, count)
+        page = request.GET.get('page', "1")
+        try:
+            page_obj = paginator.page(page)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = paginatot.page(paginator.num_pages)
+
+        return page_obj
+
+    page = paginate_query(request, Job.objects.order_by("-id"), 50)
+
     context.update({
-        "jobs": jobs,
+        "jobs": page,
+        "page_obj": page,
     })
 
     return render(request, "staff/jobs.html", context)
