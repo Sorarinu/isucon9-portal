@@ -18,10 +18,10 @@ def get_base_context(user):
     }
 
 def get_participate_at(request):
-    if request.session.has_key('participate_at'):
-        participate_at_str = request.session.get('participate_at', '')
-    else:
+    if 'participate_at' in request.GET:
         participate_at_str = request.GET.get('participate_at', '')
+    else:
+        participate_at_str = request.session.get('participate_at', '')
 
     try:
         participate_at = parse_datetime(participate_at_str).date()
