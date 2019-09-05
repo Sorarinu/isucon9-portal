@@ -6,6 +6,7 @@ from pytz import timezone
 from django.conf import settings
 import redis
 
+from isucon.portal import utils as portal_utils
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
 
@@ -22,6 +23,8 @@ class TeamDict:
         self.participate_at = team.participate_at
         self.labels = [] if labels is None else labels
         self.scores = [] if scores is None else scores
+
+        self._team = team
 
     @property
     def label(self):
@@ -51,6 +54,14 @@ class TeamDict:
         self.labels.append(finished_at)
         self.scores.append(job.score)
 
+    def __add__(self, other):
+        labels = self.labels[:]
+        labels.extend(other.labels)
+        scores = self.scores[:]
+        scores.extend(other.scores)
+
+        return TeamDict(team=self._team, labels=labels, scores=scores)
+
 
 @contextmanager
 def lock_with_redis(conn, lock_name, use_lock=True):
@@ -64,28 +75,31 @@ def lock_with_redis(conn, lock_name, use_lock=True):
     else:
         yield None
 
+# FIXME: teams_dict -> team_dicts
 
 class RedisClient:
     # `RedisClientによる操作` の排他制御用ロック
     LOCK = "lock"
     # チーム情報(スコア履歴、ラベル一覧含む)
     TEAM_DICT = "team-dict"
-    # ラストスパート以後のteam-dict
-    LASTSPURT_TEAM_DICT = "lastspurt-team-dict"
     # チームごとの情報であるteam-dictを、チームIDとの対応表で保持する辞書
     TEAMS_DICT = "teams-dict"
+    LASTSPURT_TEAMS_DICT = "lastspurt-teams-dict"
+    # グラフ描画の際に用いるラベル (finished_at を正規化した文字列)
+    LABELS = "labels"
+    LASTSPURT_LABELS = "lastspurt-labels"
 
 
     def __init__(self):
         self.conn = redis.StrictRedis(host=settings.REDIS_HOST)
 
-    def get_team_dict(self, retry=False):
-        team_bytes = self.conn.get(self.TEAM_DICT)
+    def get_teams_dict(self, retry=False):
+        team_bytes = self.conn.get(self.TEAMS_DICT)
         if team_bytes is None and retry:
             # NOTE: manufacture でシードデータを投入する場合、ここを通る
             #       デプロイ先だと、team_dict は必ずentrypoint.shで作成されるのでここを通らない
             self.load_cache_from_db()
-            team_bytes = self.conn.get(self.TEAM_DICT)
+            team_bytes = self.conn.get(self.TEAMS_DICT)
 
         if team_bytes is None:
             return None
@@ -96,15 +110,32 @@ class RedisClient:
         """起動時、DBに保存された完了済みジョブをキャッシュにロードします"""
         with lock_with_redis(self.conn, self.LOCK, use_lock=use_lock):
             # 全てのpassedなジョブデータを元にteam_dictを再構成する
-            team_dict = dict(all_labels=set())
+            teams_dict, lastspurt_teams_dict = dict(), dict()
+            labels, lastspurt_labels = set(), set()
             for job in Job.objects.filter(status=Job.DONE).order_by('finished_at').select_related('team'):
-                if job.team.id not in team_dict:
-                    team_dict[job.team.id] = TeamDict(job.team)
 
-                team_dict[job.team.id].append_job(job)
-                team_dict['all_labels'].add(team_dict[job.team.id].last_label)
+                if not portal_utils.is_last_spurt(job.finished_at):
+                    if job.team.id not in teams_dict:
+                        teams_dict[job.team.id] = TeamDict(job.team)
+                    teams_dict[job.team.id].append_job(job)
+                    labels.add(teams_dict[job.team.id].last_label)
+                else:
+                    if job.team.id not in lastspurt_teams_dict:
+                        lastspurt_teams_dict[job.team.id] = TeamDict(job.team)
+                    lastspurt_teams_dict[job.team.id].append_job(job)
+                    lastspurt_labels.add(lastspurt_teams_dict[job.team.id].last_label)
 
-            self.conn.set(self.TEAM_DICT, pickle.dumps(team_dict))
+            with self.conn.pipeline() as pipeline:
+                pipeline.set(self.LABELS, pickle.dumps(labels))
+                pipeline.set(self.LASTSPURT_LABELS, pickle.dumps(lastspurt_labels))
+
+                for team_id, team_dict in teams_dict.items():
+                    pipeline.set(self.TEAM_DICT.format(team_id=team_id), pickle.dumps(team_dict))
+
+                pipeline.set(self.TEAMS_DICT, pickle.dumps(teams_dict))
+                pipeline.set(self.LASTSPURT_TEAMS_DICT, pickle.dumps(lastspurt_teams_dict))
+
+                pipeline.execute()
 
     def update_team_cache(self, job):
         """ジョブ追加に伴い、キャッシュデータを更新します"""
@@ -115,20 +146,22 @@ class RedisClient:
 
         with lock_with_redis(self.conn, self.LOCK):
             # チーム情報を取得
-            team_dict = self.get_team_dict(retry=True)
-            if team_dict is None:
+            teams_dict = self.get_teams_dict(retry=True)
+            if teams_dict is None:
                 return
 
             # チームの情報を丸ごと更新
-            team_dict['all_labels'].update(target_team_dict.unique_labels)
-            team_dict[job.team.id] = target_team_dict
-            self.conn.set(self.TEAM_DICT, pickle.dumps(team_dict))
+            teams_dict['all_labels'].update(target_team_dict.unique_labels)
+            teams_dict[job.team.id] = target_team_dict
+
+            self.conn.set(self.TEAM_DICT.format(team_id=job.team.id), pickle.dumps(target_team_dict))
+            self.conn.set(self.TEAMS_DICT, pickle.dumps(teams_dict))
 
     def get_graph_data(self, target_team, ranking, is_last_spurt=False):
         """Chart.js によるグラフデータをキャッシュから取得します"""
         # pickleで保存してあるRedisキャッシュを取得
-        team_dict = self.get_team_dict()
-        if team_dict is None:
+        teams_dict = self.get_teams_dict()
+        if teams_dict is None:
             return [], []
 
         # ラストスパート前は、topNのチームについてグラフ描画を行う
@@ -149,7 +182,7 @@ class RedisClient:
                 )]
 
         datasets = []
-        for team_id, target_team_dict in team_dict.items():
+        for team_id, target_team_dict in teams_dict.items():
             if team_id not in ranking:
                 #  グラフにはtopNに含まれる参加者情報しか出さない
                 continue
@@ -160,8 +193,8 @@ class RedisClient:
             datasets.append(dict(label=target_team_dict.label, data=target_team_dict.data))
 
         # 自分がランキングに含まれない場合、自分のdataも追加
-        if target_team.id not in ranking and target_team.id in team_dict:
-            datasets.append(dict(label=team_dict[target_team.id].label, data=team_dict[target_team.id].data))
+        if target_team.id not in ranking and target_team.id in teams_dict:
+            datasets.append(dict(label=teams_dict[target_team.id].label, data=teams_dict[target_team.id].data))
 
         return all_labels, datasets
 

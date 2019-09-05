@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 from django.utils import timezone
 
+from isucon.portal import utils as portal_utils
 from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.decorators import team_is_now_on_contest
@@ -23,13 +24,7 @@ def get_base_context(user):
         # チームにサーバを割り当てる時どうするか決める
         target_server = None
 
-    t = timezone.now() + timezone.timedelta(hours=1)
-    if t.time() >= settings.CONTEST_END_TIME:
-        is_last_spurt = True
-    else:
-        is_last_spurt = False
-
-    is_last_spurt = False
+    is_last_spurt = portal_utils.is_last_spurt(timezone.now())
 
     return {
         "staff": False,
