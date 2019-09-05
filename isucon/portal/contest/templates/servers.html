@@ -9,10 +9,6 @@
         </ul>
     </nav>
 
-    {% if not staff %}
-      {% include "include/team_header.html" %}
-    {% endif %}
-
     {# サーバの一覧 #}
     <form method="post">
       <input type="hidden" name="action" value="target"/>
