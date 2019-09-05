@@ -29,6 +29,8 @@ def get_base_context(user):
     else:
         is_last_spurt = False
 
+    is_last_spurt = False
+
     return {
         "staff": False,
         "target_server": target_server,

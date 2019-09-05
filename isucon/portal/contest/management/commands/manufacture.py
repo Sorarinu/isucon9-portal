@@ -34,7 +34,7 @@ class Command(BaseCommand):
             ServerFactory.create(team=team)
 
     def generate_jobs(self, team):
-        history_num = random.randint(10, 100) # 履歴は0 ~ 10
+        history_num = random.randint(5, 10) # 履歴は0 ~ 10
         for _ in range(history_num):
             job = JobFactory.create(team=team)
             job.target = Server.objects.get_bench_target(team)
