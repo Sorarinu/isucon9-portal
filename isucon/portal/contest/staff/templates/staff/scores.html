@@ -1,13 +1,11 @@
-{% extends "dashboard.html" %}
-
-
+{% extends "scores.html" %}
 
 {% block breadcrumb %}
 <nav class="breadcrumb" aria-label="breadcrumbs">
     <ul>
         <li><a href="/">ISUCON9</a></li>
         <li><a href="{% url "staff_dashboard" %}">Staff</a></li>
-        <li class="is-active"><a href="#" aria-current="page">Dashboard</a></li>
+        <li class="is-active"><a href="#" aria-current="page">Show All Scores</a></li>
     </ul>
 </nav>
 {% endblock %}

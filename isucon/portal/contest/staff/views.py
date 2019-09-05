@@ -74,7 +74,7 @@ def scores(request):
         "failed": Score.objects.failed().filter(team__participate_at=participate_at),
     })
 
-    return render(request, "scores.html", context)
+    return render(request, "staff/scores.html", context)
 
 
 @staff_member_required
