@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'isucon.portal',
     'isucon.portal.authentication',
     'isucon.portal.contest',
+    'isucon.portal.contest.staff',
     'isucon.portal.contest.alibaba',
     'django.contrib.admin',
     'django.contrib.auth',

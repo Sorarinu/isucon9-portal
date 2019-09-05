@@ -3,6 +3,16 @@
     <div class="content">
         <table class="table is-fullwidth is-striped">
             <tbody>
+                {% if staff %}
+                  <tr>
+                      <th width="10%">Team</th>
+                      <td>{{ job.team }} ({{ job.team.id }})</td>
+                  </tr>
+                  <tr>
+                      <th width="10%">Benchmarker</th>
+                      <td>{{ job.benchmarker }}</td>
+                  </tr>
+                {% endif %}
                 <tr>
                     <th width="10%">JobId</th>
                     <td>{{ job.id }}</td>
@@ -57,10 +67,24 @@
                 </tr>
                 <tr>
                     <th width="10%">Message</th>
-                    <td style="font-size: 0.85rem">
+                    <td>
                         {{ job.reason|linebreaksbr }}
                     </td>
                 </tr>
+                {% if staff %}
+                <tr>
+                    <th width="10%">Stdout</th>
+                    <td style="font-size: 0.7rem">
+                        <textarea style="width:100%; height: 100px;" wrap="off">{{ job.pretty_stdout }}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th width="10%">Stderr</th>
+                    <td style="font-size: 0.7rem">
+                        <textarea style="width:100%; height: 300px;" wrap="off">{{ job.stderr }}</textarea>
+                    </td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

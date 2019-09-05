@@ -10,8 +10,10 @@
             <li class="is-active"><a href="#" aria-current="page">Job Details</a></li>
         </ul>
     </nav>
-
-    {% include "include/team_header.html" %}
+    
+    {% if not staff %}
+      {% include "include/team_header.html" %}
+    {% endif %}
 
     <section class="table-list">
         <div class="card events-card">

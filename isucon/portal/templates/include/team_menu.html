@@ -1,0 +1,56 @@
+{% if is_now_on_contest %}
+<p class="menu-label">
+    General
+</p>
+<ul class="menu-list">
+    <li>
+        <a class="{% if page == "dashboard" %}active{% endif %}" href="{% url "dashboard" %}">
+            <span class="icon">
+                <i class="fas fa-chart-line"></i>
+            </span>
+            <span>Dashboard</span>
+        </a>
+    </li>
+    <li>
+        <a class="{% if page == "jobs" %}active{% endif %}" href="{% url "jobs" %}">
+            <span class="icon">
+                <i class="fas fa-list-alt"></i>
+            </span>
+            <span>Show All Jobs</span>
+        </a>
+    </li>
+    <li>
+        <a class="{% if page == "scores" %}active{% endif %}" href="{% url "scores" %}">
+            <span class="icon">
+                <i class="fas fa-chart-area"></i>
+            </span>
+            <span>Show All Team Scores</span>
+        </a>
+    </li>
+</ul>
+{% endif %}
+
+
+<p class="menu-label">
+    Settings
+</p>
+<ul class="menu-list">
+    <li>
+        <a class="{% if page == "team_settings" %}active{% endif %}" href="{% url "team_settings" %}">
+            <span class="icon">
+                <i class="fas fa-cogs"></i>
+            </span>
+            <span>Team Settings</span>
+        </a>
+    </li>
+    {% if is_now_on_contest %}
+    <li>
+        <a class="{% if page == "servers" %}active{% endif %}" href="{% url "servers" %}">
+            <span class="icon">
+                <i class="fas fa-server"></i>
+            </span>
+            <span>Servers</span>
+        </a>
+    </li>
+    {% endif %}
+</ul>
