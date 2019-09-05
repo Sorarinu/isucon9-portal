@@ -38,7 +38,7 @@ def dashboard(request):
     context = get_base_context(request.user)
 
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
-    top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at)[:30]
+    top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).select_related("team")[:30]
 
     # topN チームID配列を用意
     ranking = [row["team__id"] for row in
