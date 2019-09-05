@@ -3,6 +3,7 @@
 
 {% block content %}
 <div class="column is-9">
+    {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="/">ISUCON9</a></li>
@@ -10,7 +11,8 @@
             <li class="is-active"><a href="#" aria-current="page">Job Details</a></li>
         </ul>
     </nav>
-    
+    {% endblock %}
+
     <section class="table-list">
         <div class="card events-card">
             <header class="card-header is-dark">
