@@ -127,7 +127,6 @@ def scores(request):
     context = get_base_context(request.user)
 
     context.update({
-        "team_id": request.user.team.id,
         "passed": Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).select_related("team"),
         "failed": Score.objects.failed().filter(team__participate_at=request.user.team.participate_at).select_related("team"),
     })
