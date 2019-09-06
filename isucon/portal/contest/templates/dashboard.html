@@ -65,9 +65,9 @@
             </div>
             <footer class="card-footer">
                 {% if staff %}
-                  <a href="{% url "scores" %}" class="card-footer-item">View All</a>
-                {% else %}
                   <a href="{% url "staff_scores" %}" class="card-footer-item">View All</a>
+                {% else %}
+                  <a href="{% url "scores" %}" class="card-footer-item">View All</a>
                 {% endif %}
             </footer>
             {% endif %}
