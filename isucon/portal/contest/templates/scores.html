@@ -74,7 +74,7 @@
 {% endblock %}
 
 {% block script %}
-{% if not user.is_staff %}
+{% if not staff %}
 <script>
 window.onload = function() {
     let selected = document.getElementsByClassName('is-selected');
