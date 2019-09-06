@@ -44,7 +44,7 @@
                         </thead>
                         <tbody>
                             {% for score in passed %}
-                            <tr {% if team.id == user.team.id %}class="is-selected"{% endif %}>
+                            <tr {% if score.team.id == user.team.id %}class="is-selected"{% endif %}>
                                 <td class="has-text-right">{{ forloop.counter }}</td>
                                 <td class="has-text-right">{{ score.team.id }}</td>
                                 <td>{{ score.team }}</td>
@@ -54,7 +54,7 @@
                             </tr>
                             {% endfor %}
                             {% for score in failed %}
-                            <tr {% if team.id == user.team.id %}class="is-selected"{% endif %}>
+                            <tr {% if score.team.id == user.team.id %}class="is-selected"{% endif %}>
                                 <td class="has-text-right">-</td>
                                 <td class="has-text-right">{{ score.team.id }}</td>
                                 <td>{{ score.team }}</td>
@@ -72,3 +72,16 @@
     </section>
 </div>
 {% endblock %}
+
+{% block script %}
+{% if not staff %}
+<script>
+window.onload = function() {
+    let selected = document.getElementsByClassName('is-selected');
+    if (selected.length > 0) {
+        selected[0].scrollIntoView(true);
+    }
+}
+</script>
+{% endif %}
+{% endblock script %}
