@@ -293,10 +293,16 @@ class RedisClient:
         team_ids = list(teams_dict.keys())
         team_ids.extend(lastspurt_teams_dict.keys())
         for team_id in team_ids:
+            ret = None
             if team_id in teams_dict:
-                new_teams_dict[team_id] = teams_dict[team_id]
+                ret = teams_dict[team_id]
             if team_id in lastspurt_teams_dict:
-                new_teams_dict[team_id] = teams_dict[team_id] + lastspurt_teams_dict[team_id]
+                if ret:
+                    ret = ret + lastspurt_teams_dict[team_id]
+                else:
+                    ret = lastspurt_teams_dict[team_id]
+
+            new_teams_dict[team_id] = ret
 
         # labels を用意
         labels = self.get_labels()
