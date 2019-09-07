@@ -31,6 +31,7 @@
                             <tr>
                                 {% if staff %}
                                 <th>Team</th>
+                                <th>Lang</th>
                                 {% endif %}
                                 <th>JobId</th>
                                 <th>Total transaction [ISUCOIN]</th>
@@ -46,6 +47,7 @@
 
                                     {% if staff %}
                                     <td>{{ job.team }} ({{ job.team.id }})</td>
+                                    <td>{{ job.stdout_dict.language }}</td>
                                     {% endif %}
 
                                     <td class="has-text-right">{{ job.id }}</td>
