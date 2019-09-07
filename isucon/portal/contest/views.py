@@ -41,8 +41,12 @@ def dashboard(request):
 
     # FIXME: team.participate_at の日付の、CONTEST_START_TIME-10minutes ~ CONTEST_END_TIME+10minutes にするようにmin, maxを渡す
     participate_at = request.user.team.participate_at
+
     graph_start_at = datetime.datetime.combine(participate_at, settings.CONTEST_START_TIME) - datetime.timedelta(minutes=10)
+    graph_start_at = graph_start_at.replace(tzinfo=portal_utils.jst)
+
     graph_end_at = datetime.datetime.combine(participate_at, settings.CONTEST_END_TIME) + datetime.timedelta(minutes=10)
+    graph_end_at = graph_end_at.replace(tzinfo=portal_utils.jst)
 
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).select_related("team")[:30]
