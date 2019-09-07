@@ -10,8 +10,6 @@ from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
 from isucon.portal import utils as portal_utils
 
-jst = datetime.timezone(datetime.timedelta(hours=9))
-
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 

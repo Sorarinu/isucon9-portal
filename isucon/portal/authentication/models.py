@@ -2,8 +2,6 @@ import os
 import datetime
 import locale
 
-jst = datetime.timezone(datetime.timedelta(hours=9))
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -12,6 +10,7 @@ from django.conf import settings
 from stdimage.models import StdImageField
 
 from isucon.portal.models import LogicalDeleteMixin
+from isucon.portal import utils as portal_utils
 
 locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
 
@@ -51,8 +50,8 @@ class Team(LogicalDeleteMixin, models.Model):
             return True
 
         now = timezone.now()
-        start_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_START_TIME).replace(tzinfo=jst)
-        end_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_END_TIME).replace(tzinfo=jst)
+        start_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_START_TIME).replace(tzinfo=portal_utils.jst)
+        end_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_END_TIME).replace(tzinfo=portal_utils.jst)
 
         return start_time <= now <= end_time
 
