@@ -58,7 +58,8 @@ class Team(LogicalDeleteMixin, models.Model):
         end_time = datetime.datetime.combine(datetime.date.today(), settings.CONTEST_END_TIME)
 
         in_time = (start_time.time() <= now.time() <= end_time.time())
-        return in_date
+        print(start_time.time(), now.time(), end_time.time())
+        return in_time
 
     def __str__(self):
         return self.name
