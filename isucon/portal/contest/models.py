@@ -249,10 +249,11 @@ class ScoreManager(models.Manager):
 class Score(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "チームスコア"
-        ordering = ("-latest_score", "team")
+        ordering = ("-latest_score", "-best_score", "-best_scored_at", "team")
 
     team = models.OneToOneField("authentication.Team", on_delete=models.CASCADE)
     best_score = models.IntegerField('ベストスコア', default=0)
+    best_scored_at = models.DateTimeField('ベストスコア日時', blank=True, null=True)
     latest_score = models.IntegerField('最新スコア', default=0)
     latest_scored_at = models.DateTimeField('最新スコア日時', blank=True, null=True)
     latest_is_passed = models.BooleanField('最新のベンチマーク成否フラグ', default=False, blank=True)
@@ -272,6 +273,7 @@ class Score(LogicalDeleteMixin, models.Model):
         try:
             best_score_job = Job.objects.filter(team=self.team, status=Job.DONE, is_passed=True).order_by("-score")[0]
             self.best_score = best_score_job.score
+            self.best_scored_at = best_score_job.finished_at
         except IndexError:
             pass
 
