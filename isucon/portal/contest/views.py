@@ -39,9 +39,9 @@ def get_base_context(user):
 def dashboard(request):
     context = get_base_context(request.user)
 
-    # FIXME: team.participate_at の日付の、CONTEST_START_TIME-10minutes ~ CONTEST_END_TIME+10minutes にするようにmin, maxを渡す
     participate_at = request.user.team.participate_at
 
+    # NOTE: team.participate_at の日付の、CONTEST_START_TIME-10minutes ~ CONTEST_END_TIME+10minutes にするようにmin, maxを渡す
     graph_start_at = datetime.datetime.combine(participate_at, settings.CONTEST_START_TIME) - datetime.timedelta(minutes=10)
     graph_start_at = graph_start_at.replace(tzinfo=portal_utils.jst)
 
