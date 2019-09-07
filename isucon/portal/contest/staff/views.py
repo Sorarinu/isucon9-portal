@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from isucon.portal.contest.models import Server, Job, Score
 from isucon.portal.redis.client import RedisClient
+from isucon.portal import utils as portal_utils
 
 def get_base_context(user):
     return {
@@ -39,6 +40,13 @@ def dashboard(request):
     context = get_base_context(request.user)
     participate_at = get_participate_at(request)
 
+    # NOTE: team.participate_at の日付の、CONTEST_START_TIME-10minutes ~ CONTEST_END_TIME+10minutes にするようにmin, maxを渡す
+    graph_start_at = datetime.datetime.combine(participate_at, settings.CONTEST_START_TIME) - datetime.timedelta(minutes=10)
+    graph_start_at = graph_start_at.replace(tzinfo=portal_utils.jst)
+
+    graph_end_at = datetime.datetime.combine(participate_at, settings.CONTEST_END_TIME) + datetime.timedelta(minutes=10)
+    graph_end_at = graph_end_at.replace(tzinfo=portal_utils.jst)
+
     try:
         top_n = int(request.GET.get("graph_teams", settings.RANKING_TOPN))
     except ValueError:
@@ -56,6 +64,8 @@ def dashboard(request):
 
     context.update({
         "top_teams": top_teams,
+        "graph_min_label": portal_utils.normalize_for_graph_label(graph_start_at),
+        "graph_max_label": portal_utils.normalize_for_graph_label(graph_end_at),
         "graph_labels": graph_labels,
         "graph_datasets": graph_datasets,
     })
