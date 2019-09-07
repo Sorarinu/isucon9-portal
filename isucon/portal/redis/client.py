@@ -16,14 +16,20 @@ TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 class TeamDict:
     """チーム情報を格納するデータ構造"""
 
-    def __init__(self, team, labels=None, scores=None):
-        self.id = team.id
-        self.name = team.name
-        self.participate_at = team.participate_at
+    def __init__(self, team=None, labels=None, scores=None):
+        if team is not None:
+            self.id = team.id
+            self.name = team.name
+            self.participate_at = team.participate_at
+            self.team = team
         self.labels = [] if labels is None else labels
         self.scores = [] if scores is None else scores
 
-        self._team = team
+    def set_team(self, team):
+        self.id = team.id
+        self.name = team.name
+        self.participate_at = team.participate_at
+        self.team = team
 
     @property
     def label(self):
@@ -56,7 +62,7 @@ class TeamDict:
         scores = self.scores[:]
         scores.extend(other.scores)
 
-        return TeamDict(team=self._team, labels=labels, scores=scores)
+        return TeamDict(team=self.team, labels=labels, scores=scores)
 
     def __str__(self):
         return "<TeamDict: labels={}, scores={}".format(self.labels, self.scores)
@@ -78,13 +84,13 @@ class TeamDictLoadCacheSet:
         if not is_last_spurt:
             # teams_dict, labelsに格納
             if job.team.id not in self.teams_dict:
-                self.teams_dict[job.team.id] = TeamDict(job.team)
+                self.teams_dict[job.team.id] = TeamDict(team=job.team)
             self.teams_dict[job.team.id].append_job(job)
             self.labels.add(self.teams_dict[job.team.id].last_label)
         else:
             # lastspurt_teams_dict, labelsに格納
             if job.team.id not in self.lastspurt_teams_dict:
-                self.lastspurt_teams_dict[job.team.id] = TeamDict(job.team)
+                self.lastspurt_teams_dict[job.team.id] = TeamDict(team=job.team)
             self.lastspurt_teams_dict[job.team.id].append_job(job)
             self.labels.add(self.lastspurt_teams_dict[job.team.id].last_label)
 
@@ -93,8 +99,8 @@ class TeamDictUpdateSet:
     """逐次更新でTeamDictを更新する際に用いるクラス"""
 
     def __init__(self, job):
-        self.team_dict = TeamDict(job.team)
-        self.lastspurt_team_dict = TeamDict(job.team)
+        self.team_dict = TeamDict(team=job.team)
+        self.lastspurt_team_dict = TeamDict(team=job.team)
 
     @property
     def labels(self):
@@ -293,16 +299,16 @@ class RedisClient:
         team_ids = list(teams_dict.keys())
         team_ids.extend(lastspurt_teams_dict.keys())
         for team_id in team_ids:
-            ret = None
+            new_team_dict = TeamDict()
             if team_id in teams_dict:
-                ret = teams_dict[team_id]
+                team_dict = teams_dict[team_id]
+                new_team_dict.set_team(team_dict.team)
+                new_team_dict = new_team_dict + team_dict
             if team_id in lastspurt_teams_dict:
-                if ret:
-                    ret = ret + lastspurt_teams_dict[team_id]
-                else:
-                    ret = lastspurt_teams_dict[team_id]
-
-            new_teams_dict[team_id] = ret
+                team_dict = lastspurt_teams_dict[team_id]
+                new_team_dict.set_team(team_dict.team)
+                new_team_dict = new_team_dict + team_dict
+            new_teams_dict[team_id] = new_team_dict
 
         # labels を用意
         labels = self.get_labels()
