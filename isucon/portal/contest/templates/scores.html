@@ -38,8 +38,9 @@
                                 <th>Id</th>
                                 <th>Name</th>
                                 <th>Latest Total transaction [ISUCOIN]</th>
+                                <th>Time</th>
                                 <th>Best Total transaction [ISUCOIN]</th>
-                                <th>FinishTime</th>
+                                <th>Time</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,8 +50,9 @@
                                 <td class="has-text-right">{{ score.team.id }}</td>
                                 <td>{{ score.team }}</td>
                                 <td class="has-text-right">{{ score.latest_score|intcomma }} ｲｽｺｲﾝ</td>
-                                <td class="has-text-right">{{ score.best_score|intcomma }} ｲｽｺｲﾝ</td>
                                 <td>{{ score.latest_scored_at|date:"H:i:s" }}</td>
+                                <td class="has-text-right">{{ score.best_score|intcomma }} ｲｽｺｲﾝ</td>
+                                <td>{{ score.best_scored_at|date:"H:i:s" }}</td>
                             </tr>
                             {% endfor %}
                             {% for score in failed %}
@@ -59,8 +61,9 @@
                                 <td class="has-text-right">{{ score.team.id }}</td>
                                 <td>{{ score.team }}</td>
                                 <td class="has-text-right">{{ score.latest_score|intcomma }} ｲｽｺｲﾝ</td>
-                                <td class="has-text-right">{{ score.best_score|intcomma }} ｲｽｺｲﾝ</td>
                                 <td>{{ score.latest_scored_at|date:"H:i:s" }}</td>
+                                <td class="has-text-right">{{ score.best_score|intcomma }} ｲｽｺｲﾝ</td>
+                                <td>{{ score.best_scored_at|date:"H:i:s" }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
