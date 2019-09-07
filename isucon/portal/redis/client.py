@@ -13,6 +13,8 @@ from isucon.portal.contest.models import Job, Score
 
 jst = timezone('Asia/Tokyo')
 
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 
 class TeamDict:
     """チーム情報を格納するデータ構造"""
@@ -46,7 +48,7 @@ class TeamDict:
 
     @staticmethod
     def _normalize_finished_at(finished_at):
-        return finished_at.strftime('%Y-%m-%d %H:%M:%S')
+        return finished_at.strftime(TIME_FORMAT)
 
     def append_job(self, job):
         finished_at = self._normalize_finished_at(job.finished_at.astimezone(jst))
@@ -62,6 +64,9 @@ class TeamDict:
         scores.extend(other.scores)
 
         return TeamDict(team=self._team, labels=labels, scores=scores)
+
+    def __str__(self):
+        return "<TeamDict: labels={}, scores={}".format(self.labels, self.scores)
 
 
 class TeamDictLoadCacheSet:
@@ -210,6 +215,7 @@ class RedisClient:
                 return
 
             # チームの情報を丸ごと更新
+            # NOTE: labelsになんども同一チームのラベルが追加されるが、重複除去で一応問題にはならない
             labels.update(update_set.labels)
             teams_dict[job.team.id] = update_set.team_dict
             lastspurt_teams_dict[job.team.id] = update_set.lastspurt_team_dict
@@ -238,7 +244,9 @@ class RedisClient:
         if lastspurt_teams_dict is None:
             return dict(), None, []
 
-        team_dict = team_dict + lastspurt_teams_dict[team_dict.id]
+        # NOTE: ラストスパートの特点がある場合には足し合わせる
+        if team_dict.id in lastspurt_teams_dict:
+            team_dict = team_dict + lastspurt_teams_dict[team_dict.id]
 
         # teams_dictを用意
         teams_dict = self.get_teams_dict(is_last_spurt=False)
@@ -250,7 +258,7 @@ class RedisClient:
         labels = self.get_labels()
         if labels is None:
             labels = []
-        labels = list(sorted(labels))
+        labels = list(sorted(labels, key=lambda d_str: datetime.datetime.strptime(d_str, TIME_FORMAT)))
 
         return teams_dict, team_dict, labels
 
@@ -260,6 +268,7 @@ class RedisClient:
         teams_dict = self.get_teams_dict(is_last_spurt=False)
         if teams_dict is None:
             teams_dict = dict()
+
 
         # team_dict を用意
         if target_team.id in teams_dict:
@@ -271,7 +280,7 @@ class RedisClient:
         labels = self.get_labels()
         if labels is None:
             labels = []
-        labels = list(sorted(labels))
+        labels = list(sorted(labels, key=lambda d_str: datetime.datetime.strptime(d_str, TIME_FORMAT)))
 
         return teams_dict, team_dict, labels
 
@@ -282,22 +291,25 @@ class RedisClient:
         if teams_dict is None:
             teams_dict = dict()
 
+
         lastspurt_teams_dict = self.get_teams_dict(is_last_spurt=True)
         if lastspurt_teams_dict is None:
             lastspurt_teams_dict = dict()
 
         new_teams_dict = dict()
-        for team_id, team_dict in teams_dict.items():
+        team_ids = list(teams_dict.keys())
+        team_ids.extend(lastspurt_teams_dict.keys())
+        for team_id in team_ids:
+            if team_id in teams_dict:
+                new_teams_dict[team_id] = teams_dict[team_id]
             if team_id in lastspurt_teams_dict:
-                new_teams_dict[team_id] = team_dict + lastspurt_teams_dict[team_id]
-            else:
-                new_teams_dict[team_id] = team_dict
+                new_teams_dict[team_id] = new_teams_dict[team_id] + lastspurt_teams_dict[team_id]
 
         # labels を用意
         labels = self.get_labels()
         if labels is None:
             labels = []
-        labels = list(sorted(labels))
+        labels = list(sorted(labels, key=lambda d_str: datetime.datetime.strptime(d_str, TIME_FORMAT)))
 
         return new_teams_dict, None, labels
 

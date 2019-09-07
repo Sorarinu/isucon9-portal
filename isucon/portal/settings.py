@@ -198,8 +198,8 @@ CONTEST_DATES = [
 ]
 
 # 時刻
-CONTEST_START_TIME = portal_utils.get_utc_time(9, 0, 0)
-CONTEST_END_TIME = portal_utils.get_utc_time(18, 0, 0)
+CONTEST_START_TIME = portal_utils.get_utc_time(10, 10, 0)
+CONTEST_END_TIME = portal_utils.get_utc_time(18, 10, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える

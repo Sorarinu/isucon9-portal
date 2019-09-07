@@ -29,7 +29,7 @@ def get_base_context(user):
     return {
         "staff": False,
         "target_server": target_server,
-        "is_last_spurt": is_last_spurt and not user.is_staff,
+        "is_last_spurt": is_last_spurt
     }
 
 @team_is_authenticated
@@ -53,7 +53,9 @@ def dashboard(request):
         team = Score.objects.get(team=request.user.team)
         team_score = team.latest_score
     except:
-        raise TeamScoreDoesNotExistError
+        Score.objects.create(team=request.user.team)
+        team = Score.objects.get(team=request.user.team)
+        team_score = team.latest_score
 
     context.update({
         "recent_jobs": recent_jobs,
