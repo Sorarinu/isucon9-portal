@@ -17,7 +17,7 @@ class TeamDict:
     """チーム情報を格納するデータ構造"""
 
     def __init__(self, team=None, labels=None, scores=None):
-        if team is None:
+        if team is not None:
             self.id = team.id
             self.name = team.name
             self.participate_at = team.participate_at
