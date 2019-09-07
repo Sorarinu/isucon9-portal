@@ -2,10 +2,7 @@ import os
 import datetime
 import locale
 
-import pytz
-
-jst = pytz.timezone('Asia/Tokyo')
-
+jst = datetime.timezone(datetime.timedelta(hours=9))
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -53,13 +50,11 @@ class Team(LogicalDeleteMixin, models.Model):
             # 強制的にコンテスト開催中にする (開発用)
             return True
 
-        now = timezone.now().astimezone(jst)
-        start_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_START_TIME)
-        end_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_END_TIME)
+        now = timezone.now()
+        start_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_START_TIME).replace(tzinfo=jst)
+        end_time = datetime.datetime.combine(self.participate_at, settings.CONTEST_END_TIME).replace(tzinfo=jst)
 
-        in_time = (start_time.time() <= now.time() <= end_time.time())
-        in_date = (start_time.date() == now.date())
-        return in_time and in_date
+        return start_time <= now <= end_time
 
     def __str__(self):
         return self.name
