@@ -214,6 +214,15 @@ class Job(models.Model):
             pass
         return self.stdout
 
+    @property
+    def stdout_dict(self):
+        try:
+            d = json.loads(self.stdout)
+            return d
+        except:
+            pass
+        return {}
+
     def done(self, score, is_passed, stdout, stderr, reason, status=DONE):
         # ベンチマークが終了したらログを書き込む
         self.stdout = stdout
