@@ -23,7 +23,7 @@ def is_last_spurt(t):
     t = t.astimezone(jst) # UTCに保証
     lookahead = t + timezone.timedelta(hours=1)
 
-    contest_end_time = settings.CONTEST_END_DATE + datetime.timedelta(hours=9)
+    contest_end_time = settings.CONTEST_END_TIME + datetime.timedelta(hours=9)
 
     if lookahead.time() >= contest_end_time:
         return True
