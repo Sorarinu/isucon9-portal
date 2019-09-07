@@ -67,7 +67,7 @@ class Server(LogicalDeleteMixin, models.Model):
     # FIXME: デフォルトのベンチマーク対象を設定
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, related_name="servers")
-    hostname = models.CharField("ホスト名", max_length=100, unique=True)
+    hostname = models.CharField("ホスト名", max_length=100)
 
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
     private_ip = models.CharField("プライベートIPアドレス", max_length=100)
