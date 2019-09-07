@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 if [ -z "${NUM_WORKERS}" ]; then
-  NUM_WORKERS=2
+  NUM_WORKERS=$[$(grep processor /proc/cpuinfo | sort -u | sed 's/[^0-9]//g' | tail -n 1) + 1]
 fi
 
 if [ -z "${MAX_REQUESTS}" ]; then
