@@ -243,7 +243,7 @@ class RedisClient:
             return dict(), None, []
 
         # NOTE: ラストスパートの特点がある場合には足し合わせる
-        if team_dict.id in lastspurt_teams_dict:
+        if target_team.id in lastspurt_teams_dict:
             team_dict = team_dict + lastspurt_teams_dict[team_dict.id]
 
         # teams_dictを用意
