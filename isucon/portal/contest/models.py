@@ -114,10 +114,10 @@ class JobManager(models.Manager):
         if benchmarker is not None:
             # ベンチマーカーが自身にひもづくチームのサーバにベンチマークを行う場合
             # 報告したベンチマーカの紐づいているチーム、かつWAITING状態のジョブを取得
-            queryset = self.get_queryset().filter(status=Job.WAITING, team__benchmarker=benchmarker)
+            queryset = self.get_queryset().select_for_update().filter(status=Job.WAITING, team__benchmarker=benchmarker)
         else:
             # ベンチマーカーがチーム気にせずベンチマークを行う場合
-            queryset = self.get_queryset().filter(status=Job.WAITING)
+            queryset = self.get_queryset().select_for_update().filter(status=Job.WAITING)
 
         job = queryset.order_by("created_at").first()
         if job is None:
@@ -213,6 +213,15 @@ class Job(models.Model):
         except:
             pass
         return self.stdout
+
+    @property
+    def stdout_dict(self):
+        try:
+            d = json.loads(self.stdout)
+            return d
+        except:
+            pass
+        return {}
 
     def done(self, score, is_passed, stdout, stderr, reason, status=DONE):
         # ベンチマークが終了したらログを書き込む
