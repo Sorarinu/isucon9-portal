@@ -187,8 +187,8 @@ LOGGING = {
 
 
 # 登録期間
-REGISTRATION_START_AT = portal_utils.get_utc_datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_END_AT = portal_utils.get_utc_datetime(2019, 8, 25, 9, 0, 0)
+REGISTRATION_START_AT = portal_utils.get_jst_datetime(2019, 7, 1, 9, 0, 0)
+REGISTRATION_END_AT = portal_utils.get_jst_datetime(2019, 8, 25, 9, 0, 0)
 
 # コンテスト開催期間
 # 日付
@@ -198,8 +198,8 @@ CONTEST_DATES = [
 ]
 
 # 時刻
-CONTEST_START_TIME = portal_utils.get_utc_time(10, 10, 0)
-CONTEST_END_TIME = portal_utils.get_utc_time(18, 10, 0)
+CONTEST_START_TIME = portal_utils.get_jst_time(10, 0, 0)
+CONTEST_END_TIME = portal_utils.get_jst_time(18, 0, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える

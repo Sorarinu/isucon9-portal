@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 import datetime
 import pickle
-from pytz import timezone
 
 from django.conf import settings
 import redis
@@ -10,8 +9,7 @@ from isucon.portal import utils as portal_utils
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
 
-
-jst = timezone('Asia/Tokyo')
+jst = datetime.timezone(datetime.timedelta(hours=9))
 
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -48,10 +46,10 @@ class TeamDict:
 
     @staticmethod
     def _normalize_finished_at(finished_at):
-        return finished_at.strftime(TIME_FORMAT)
+        return finished_at.astimezone(jst).strftime(TIME_FORMAT)
 
     def append_job(self, job):
-        finished_at = self._normalize_finished_at(job.finished_at.astimezone(jst))
+        finished_at = self._normalize_finished_at(job.finished_at)
 
         self.labels.append(finished_at)
         self.scores.append(job.score)
@@ -360,4 +358,3 @@ class RedisClient:
             datasets.append(dict(label=team_dict.label, data=team_dict.data))
 
         return labels, datasets
-
