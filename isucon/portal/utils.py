@@ -3,9 +3,9 @@ import datetime
 from django.conf import settings
 from django.utils import timezone
 
-from pytz import timezone
+import pytz
 
-utc = timezone('UTC')
+utc = pytz.timezone('UTC')
 
 def get_utc_time(hour, minute, second):
     """指定時刻をUTCとして取得"""
