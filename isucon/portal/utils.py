@@ -5,7 +5,7 @@ from django.utils import timezone
 
 import pytz
 
-utc = pytz.timezone('UTC')
+jst = pytz.timezone('Asia/Tokyo')
 
 def get_utc_time(hour, minute, second):
     """指定時刻をUTCとして取得"""
@@ -20,10 +20,12 @@ def get_utc_datetime(year, month, day, hour, minute, second):
             .astimezone(datetime.timezone.utc)
 
 def is_last_spurt(t):
-    t = t.astimezone(utc) # UTCに保証
+    t = t.astimezone(jst) # UTCに保証
     lookahead = t + timezone.timedelta(hours=1)
 
-    if lookahead.time() >= settings.CONTEST_END_TIME:
+    contest_end_time = settings.CONTEST_END_DATE + datetime.timedelta(hours=9)
+
+    if lookahead.time() >= contest_end_time:
         return True
 
     return False
