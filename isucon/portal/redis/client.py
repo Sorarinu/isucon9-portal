@@ -8,6 +8,7 @@ import redis
 from isucon.portal import utils as portal_utils
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
+from isucon.portal import utils as portal_utils
 
 jst = datetime.timezone(datetime.timedelta(hours=9))
 
@@ -44,12 +45,8 @@ class TeamDict:
             return None
         return self.labels[-1]
 
-    @staticmethod
-    def _normalize_finished_at(finished_at):
-        return finished_at.astimezone(jst).strftime(TIME_FORMAT)
-
     def append_job(self, job):
-        finished_at = self._normalize_finished_at(job.finished_at)
+        finished_at = portal_utils.normalize_for_graph_label(job.finished_at)
 
         self.labels.append(finished_at)
         self.scores.append(job.score)

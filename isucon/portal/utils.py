@@ -5,6 +5,8 @@ from django.utils import timezone
 
 jst = datetime.timezone(datetime.timedelta(hours=9))
 
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 def get_jst_time(hour, minute, second):
     """指定時刻をJSTとして取得"""
     return datetime.time(hour=hour, minute=minute, second=second)
@@ -23,3 +25,6 @@ def is_last_spurt(t):
         return True
 
     return False
+
+def normalize_for_graph_label(t):
+    return t.astimezone(jst).strftime(TIME_FORMAT)
