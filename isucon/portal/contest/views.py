@@ -26,7 +26,7 @@ def get_base_context(user):
         # チームにサーバを割り当てる時どうするか決める
         target_server = None
 
-    is_last_spurt = portal_utils.is_last_spurt(timezone.now())
+    is_last_spurt = portal_utils.is_last_spurt(timezone.now(), user.team.participate_at)
 
     return {
         "staff": False,

@@ -75,7 +75,7 @@ class TeamDictLoadCacheSet:
 
     def append_job(self, job):
         """ラストスパート判定をしつつ、TeamDictにappend_jobする"""
-        is_last_spurt = portal_utils.is_last_spurt(job.finished_at)
+        is_last_spurt = portal_utils.is_last_spurt(job.finished_at, job.team.participate_at)
 
         if not is_last_spurt:
             # teams_dict, labelsに格納
@@ -106,7 +106,7 @@ class TeamDictUpdateSet:
         return labels
 
     def append_job(self, job):
-        is_last_spurt = portal_utils.is_last_spurt(job.finished_at)
+        is_last_spurt = portal_utils.is_last_spurt(job.finished_at, job.team.participate_at)
 
         if not is_last_spurt:
             self.team_dict.append_job(job)
@@ -191,7 +191,7 @@ class RedisClient:
         """ジョブ追加に伴い、キャッシュデータを更新します"""
         # ジョブに紐づくチームの全ジョブについて、キャッシュを読み込み直す
         update_set = TeamDictUpdateSet(job)
-        for job in Job.objects.filter(status=Job.DONE, team=job.team).order_by('finished_at'):
+        for job in Job.objects.filter(status=Job.DONE, team=job.team).order_by('finished_at').select_related("team"):
             update_set.append_job(job)
 
         with lock_with_redis(self.conn, self.LOCK):
