@@ -57,7 +57,7 @@ class Team(LogicalDeleteMixin, models.Model):
         start_time = datetime.datetime.combine(datetime.date.today(), settings.CONTEST_START_TIME)
         end_time = datetime.datetime.combine(datetime.date.today(), settings.CONTEST_END_TIME)
 
-        in_time = (start_time.time() <= now.time() <= end_time.time())
+        in_time = (start_time <= now <= end_time)
         print(start_time.time(), now.time(), end_time.time())
         return in_time
 
