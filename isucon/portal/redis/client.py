@@ -10,8 +10,6 @@ from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
 from isucon.portal import utils as portal_utils
 
-jst = datetime.timezone(datetime.timedelta(hours=9))
-
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
@@ -75,7 +73,7 @@ class TeamDictLoadCacheSet:
 
     def append_job(self, job):
         """ラストスパート判定をしつつ、TeamDictにappend_jobする"""
-        is_last_spurt = portal_utils.is_last_spurt(job.finished_at)
+        is_last_spurt = portal_utils.is_last_spurt(job.finished_at, job.team.participate_at)
 
         if not is_last_spurt:
             # teams_dict, labelsに格納
@@ -106,7 +104,7 @@ class TeamDictUpdateSet:
         return labels
 
     def append_job(self, job):
-        is_last_spurt = portal_utils.is_last_spurt(job.finished_at)
+        is_last_spurt = portal_utils.is_last_spurt(job.finished_at, job.team.participate_at)
 
         if not is_last_spurt:
             self.team_dict.append_job(job)
@@ -191,7 +189,7 @@ class RedisClient:
         """ジョブ追加に伴い、キャッシュデータを更新します"""
         # ジョブに紐づくチームの全ジョブについて、キャッシュを読み込み直す
         update_set = TeamDictUpdateSet(job)
-        for job in Job.objects.filter(status=Job.DONE, team=job.team).order_by('finished_at'):
+        for job in Job.objects.filter(status=Job.DONE, team=job.team).order_by('finished_at').select_related("team"):
             update_set.append_job(job)
 
         with lock_with_redis(self.conn, self.LOCK):
@@ -298,7 +296,7 @@ class RedisClient:
             if team_id in teams_dict:
                 new_teams_dict[team_id] = teams_dict[team_id]
             if team_id in lastspurt_teams_dict:
-                new_teams_dict[team_id] = new_teams_dict[team_id] + lastspurt_teams_dict[team_id]
+                new_teams_dict[team_id] = teams_dict[team_id] + lastspurt_teams_dict[team_id]
 
         # labels を用意
         labels = self.get_labels()
