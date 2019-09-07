@@ -261,6 +261,18 @@ var config = {
                     beginAtZero: true
                 }
             }]
+        },
+        onClick: function(e) {
+            console.log("fired");
+            var activePoints = window.myChart.getElementsAtEvent(e);
+            if (Object.keys(activePoints).length > 0) {
+                var valueIdx = activePoints[0]._datasetIndex;
+                var meta = config.data.datasets[valueIdx];
+                meta.backgroundColor = flipAlpha(meta.backgroundColor);
+                meta.borderColor = flipAlpha(meta.borderColor);
+
+                window.myChart.update();
+            }
         }
     }
 };
