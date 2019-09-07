@@ -24,9 +24,8 @@ def is_last_spurt(t):
     lookahead = t + timezone.timedelta(hours=1)
 
     contest_end_date = datetime.datetime.combine(datetime.date.today(), settings.CONTEST_END_TIME) + datetime.timedelta(hours=9)
-    contest_end_time = contest_end_date.time()
+    contest_end_time = contest_end_date.astimezone(jst).time()
 
-    print(lookahead.time(),  contest_end_time, lookahead.time() >= contest_end_time)
     if lookahead.time() >= contest_end_time:
         return True
 
