@@ -188,7 +188,7 @@ LOGGING = {
 
 # 登録期間
 REGISTRATION_START_AT = portal_utils.get_jst_datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_END_AT = portal_utils.get_jst_datetime(2019, 8, 25, 9, 0, 0)
+REGISTRATION_END_AT = portal_utils.get_jst_datetime(2019, 9, 25, 9, 0, 0)
 
 # コンテスト開催期間
 # 日付
