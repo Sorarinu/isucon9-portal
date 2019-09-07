@@ -119,7 +119,7 @@ class JobManager(models.Manager):
             # ベンチマーカーがチーム気にせずベンチマークを行う場合
             queryset = self.get_queryset().filter(status=Job.WAITING)
 
-        job = queryset.first()
+        job = queryset.order_by("created_at").first()
         if job is None:
             raise exceptions.JobDoesNotExistError
 
