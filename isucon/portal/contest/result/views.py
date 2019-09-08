@@ -10,8 +10,17 @@ def get_base_context(user):
         "staff": False,
     }
 
+@team_is_authenticated
+@show_result_enabled
 def scores(request):
-    pass
+    context = get_base_context(request.user)
+
+    context.update({
+        "passed": Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).select_related("team"),
+        "failed": Score.objects.failed().filter(team__participate_at=request.user.team.participate_at).select_related("team"),
+    })
+
+    return render(request, "scores.html", context)
 
 @team_is_authenticated
 @show_result_enabled
