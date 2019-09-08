@@ -258,7 +258,7 @@ class ScoreManager(models.Manager):
 class Score(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "チームスコア"
-        ordering = ("-latest_score", "-best_score", "-best_scored_at", "team")
+        ordering = ("-latest_score", "-best_score", "best_scored_at", "team")
 
     team = models.OneToOneField("authentication.Team", on_delete=models.CASCADE)
     best_score = models.IntegerField('ベストスコア', default=0)
