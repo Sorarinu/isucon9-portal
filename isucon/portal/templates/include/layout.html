@@ -102,16 +102,16 @@
                 <aside class="menu">
 
 
+                    {% if show_result_enabled %}
+                      {% include "include/result_menu.html" %}
+                    {% endif %}
+
                     {% if user.team %}
                       {% include "include/team_menu.html" %}
                     {% endif %}
 
                     {% if user.is_staff %}
                       {% include "include/staff_menu.html" %}
-                    {% endif %}
-
-                    {% if show_result_enabled %}
-                      {% include "include/result_menu.html" %}
                     {% endif %}
 
                     <p class="menu-label">
