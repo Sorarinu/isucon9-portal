@@ -98,9 +98,22 @@ def jobs(request):
 
     page = paginate_query(request, Job.objects.order_by("-id"), 50)
 
+    show_pages = []
+    for n in page.paginator.page_range:
+        if n <= 3 or (page.paginator.num_pages-3) < n:
+            show_pages.append(n)
+        elif page.number - 2 < n < page.number + 2:
+            show_pages.append(n)
+        elif n == 4:
+            show_pages.append(None)
+        elif page.number - 2 == n or n == page.number + 2:
+            if show_pages[-1]:
+                show_pages.append(None)
+
     context.update({
         "jobs": page,
         "page_obj": page,
+        "show_pages": show_pages,
     })
 
     return render(request, "staff/jobs.html", context)

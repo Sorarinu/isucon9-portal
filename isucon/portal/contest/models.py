@@ -67,7 +67,7 @@ class Server(LogicalDeleteMixin, models.Model):
     # FIXME: デフォルトのベンチマーク対象を設定
 
     team = models.ForeignKey('authentication.Team', verbose_name="チーム", on_delete=models.PROTECT, related_name="servers")
-    hostname = models.CharField("ホスト名", max_length=100, unique=True)
+    hostname = models.CharField("ホスト名", max_length=100)
 
     global_ip = models.CharField("グローバルIPアドレス", max_length=100, unique=True)
     private_ip = models.CharField("プライベートIPアドレス", max_length=100)
@@ -258,7 +258,7 @@ class ScoreManager(models.Manager):
 class Score(LogicalDeleteMixin, models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "チームスコア"
-        ordering = ("-latest_score", "-best_score", "-best_scored_at", "team")
+        ordering = ("-latest_score", "-best_score", "best_scored_at", "team")
 
     team = models.OneToOneField("authentication.Team", on_delete=models.CASCADE)
     best_score = models.IntegerField('ベストスコア', default=0)

@@ -118,6 +118,17 @@ class ServerAddForm(forms.ModelForm):
 
         return cleaned_data
 
+    def clean_hostname(self):
+        hostname = self.cleaned_data.get("hostname", "")
+
+        if len(hostname) == 0:
+            raise forms.ValidationError("ホスト名が空です")
+
+        if Server.objects.filter(team=self.team, hostname=hostname).exists():
+            raise forms.ValidationError("同一ホスト名のサーバが登録済みです")
+
+        return hostname
+
     def save(self):
         instance = super().save(commit=False)
         instance.team = self.team
