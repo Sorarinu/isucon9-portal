@@ -62,7 +62,7 @@ class TeamDict:
         scores = self.scores[:]
         scores.extend(other.scores)
 
-        return TeamDict(team=self.team, labels=labels, scores=scores)
+        return TeamDict(labels=labels, scores=scores)
 
     def __str__(self):
         return "<TeamDict: labels={}, scores={}".format(self.labels, self.scores)
