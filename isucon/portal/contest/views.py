@@ -42,14 +42,6 @@ def dashboard(request):
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).select_related("team")[:30]
 
-    # topN チームID配列を用意
-    ranking = [row["team__id"] for row in
-                Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).values("team__id")[:settings.RANKING_TOPN]]
-
-    # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
-    client = RedisClient()
-    graph_datasets, graph_min, graph_max = client.get_graph_data(request.user.team, ranking, is_last_spurt=context['is_last_spurt'])
-
     # チームのスコアを取得
     try:
         team = Score.objects.get(team=request.user.team)
@@ -62,10 +54,7 @@ def dashboard(request):
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
-        "team_score": team_score,
-        "graph_min": graph_min,
-        "graph_max": graph_max,
-        "graph_datasets": graph_datasets,
+        "team_score": team_score
     })
 
     return render(request, "dashboard.html", context)
