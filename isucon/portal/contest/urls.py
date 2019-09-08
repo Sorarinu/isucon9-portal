@@ -15,5 +15,5 @@ urlpatterns = [
     path('settings/team/', views.team_settings, name="team_settings"),
     path('settings/icon/', views.update_user_icon, name="update_user_icon"),
     path('staff/', include("isucon.portal.contest.staff.urls")),
-
+    path('result/', include("isucon.portal.contest.result.urls")),
 ]

@@ -85,6 +85,8 @@
                                     <td>{{ job.updated_at|date:"H:i:s" }}</td>
                                     {% if staff %}
                                       <td><a class="button is-small is-link" href="{% url "staff_job_detail" job.id %}">show</a></td>
+                                    {% elif result %}
+                                      <td><a class="button is-small is-link" href="{% url "result_job_detail" job.id %}">show</a></td>
                                     {% else %}
                                       <td><a class="button is-small is-link" href="{% url "job_detail" job.id %}">show</a></td>
                                     {% endif %}

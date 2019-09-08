@@ -201,6 +201,9 @@ CONTEST_DATES = [
 CONTEST_START_TIME = portal_utils.get_jst_time(10, 0, 0)
 CONTEST_END_TIME = portal_utils.get_jst_time(18, 0, 0)
 
+# Result
+SHOW_RESULT_AFTER = portal_utils.get_jst_datetime(2019, 9, 8, 22, 0, 0)
+
 # Github認証に使うトークン
 # TODO: 入れ替える
 SOCIAL_AUTH_GITHUB_KEY = '8ad74d7452d59b6d5572'
