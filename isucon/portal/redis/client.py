@@ -8,7 +8,6 @@ import redis
 from isucon.portal import utils as portal_utils
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
-from isucon.portal import utils as portal_utils
 from isucon.portal.redis.color import iter_colors
 
 
@@ -46,13 +45,6 @@ class LineChart:
             x=portal_utils.normalize_for_graph_label(job.finished_at),
             y=job.score
         ))
-
-    def __repr__(self):
-        s = "["
-        for datum in data:
-            s += "{{x: {x}, y: {y}}},".format(**datum)
-        s += "]"
-        return s
 
 
 class TeamGraphData:
@@ -108,13 +100,6 @@ class TeamGraphData:
             d['data'] = self.all_graph.data
 
         return d
-
-    def __repr__(self):
-        s = "{"
-        for key, value in self.items():
-            s += "{}: {}".format(key, value)
-        s += "}"
-        return s
 
 
 class RedisClient:

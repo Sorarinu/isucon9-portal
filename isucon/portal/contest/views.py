@@ -261,3 +261,30 @@ def update_user_icon(request):
             {}, status = 200
         )
     return redirect("team_settings")
+
+
+@team_is_authenticated
+@team_is_now_on_contest
+def graph(request):
+    if not request.is_ajax():
+        return HttpResponse("このエンドポイントはAjax専用です", status=400)
+
+    context = get_base_context(request.user)
+    team = request.user.team
+
+    ranking = [row["team__id"] for row in
+                    Score.objects.passed().filter(team__participate_at=team.participate_at).values("team__id")[:settings.RANKING_TOPN]]
+
+    client = RedisClient()
+    graph_datasets, graph_min, graph_max = client.get_graph_data(team, ranking, is_last_spurt=context['is_last_spurt'])
+
+    data = {
+        'graph_datasets': graph_datasets,
+        'graph_min': graph_min,
+        'graph_max': graph_max,
+    }
+
+    return JsonResponse(
+        data, status = 200
+    )
+

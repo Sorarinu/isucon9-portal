@@ -116,7 +116,7 @@ var config = {
     type: 'line',
     data: {
         labels: [],
-        datasets: {{ graph_datasets|stringformat:'r' }}
+        datasets: [],
     },
     options: {
         responsiveAnimationDuration: 0,
@@ -183,9 +183,21 @@ var config = {
 };
 
 window.onload = function() {
-    var ctx = document.getElementById('myChart').getContext('2d');
-    var myChart = new Chart(ctx, config);
-    window.myChart = myChart;
+    let headers = {
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+    const response = fetch('/contest/graph/', {headers: headers}).then((res) => res.json()).then((json) => {
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        config.datasets = json.graph_datasets
+        config.options.scales.xAxes[0].time.min = json.graph_min
+        config.options.scales.xAxes[0].time.max = json.graph_max
+
+        var myChart = new Chart(ctx, config);
+        window.myChart = myChart
+    }).catch((err) => {
+        throw new Error(err)
+    })
 };
 
 </script>
