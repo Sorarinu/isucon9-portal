@@ -121,6 +121,9 @@ class ServerAddForm(forms.ModelForm):
     def clean_hostname(self):
         hostname = self.cleaned_data['hostname']
 
+        if len(hostname) == 0:
+            raise forms.ValidationError("ホスト名が空です")
+
         if Server.objects.filter(hostname=hostname).exists():
             raise forms.ValidationError("同一ホスト名のサーバが登録済みです")
 
