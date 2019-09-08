@@ -124,7 +124,7 @@ class ServerAddForm(forms.ModelForm):
         if len(hostname) == 0:
             raise forms.ValidationError("ホスト名が空です")
 
-        if Server.objects.filter(hostname=hostname).exists():
+        if Server.objects.filter(team=self.team, hostname=hostname).exists():
             raise forms.ValidationError("同一ホスト名のサーバが登録済みです")
 
         return hostname
