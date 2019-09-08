@@ -111,92 +111,97 @@ function flipAlpha(colorString) {
     return c.rgbaString();
 }
 
-var timeFormat = "YYYY-MM-DD HH:mm:ss";
-
-
 window.onload = function() {
-    let headers = {
+    const timeFormat = "YYYY-MM-DD HH:mm:ss";
+    const headers = {
         'X-Requested-With': 'XMLHttpRequest'
     }
-    const response = fetch('/contest/graph/', {headers: headers}).then((res) => res.json()).then((json) => {
-        var ctx = document.getElementById('myChart').getContext('2d');
+    const response = fetch('/contest/graph/', {headers: headers})
+        .then((res) => {
+            if (res.status !== 200) {
+                throw new Error('グラフデータの取得に失敗しました')
+            }
+            return res.json()
+        })
+        .then((json) => {
+            var ctx = document.getElementById('myChart').getContext('2d');
 
-        console.log(json)
+            console.log(json)
 
-        var config = {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: json.graph_datasets
-            },
-            options: {
-                responsiveAnimationDuration: 0,
-                animation: {
-                    duration: 0
+            var config = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: json.graph_datasets
                 },
-                tooltips: {
-                    mode: 'nearest'
-                },
-                hover: {
-                    mode: 'nearest',
-                    animationDuration: 0
-                },
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 5
+                options: {
+                    responsiveAnimationDuration: 0,
+                    animation: {
+                        duration: 0
                     },
-                    onClick: function(e, legendItem) {
-                        var meta = config.data.datasets[legendItem.datasetIndex];
-                        meta.backgroundColor = flipAlpha(meta.backgroundColor);
-                        meta.borderColor = flipAlpha(meta.borderColor);
-
-                        window.myChart.update();
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        scaleLabel: {
-                            display: true,
-                            labelString: "時間",
-                            fontSize: 10
+                    tooltips: {
+                        mode: 'nearest'
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        animationDuration: 0
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 5
                         },
-                        type: 'time',
-                        time: {
-                            parser: timeFormat,
-                            min: json.graph_min,
-                            max: json.graph_max
-                        }
-                    }],
-                    yAxes: [{
-                        scaleLabel: {
-                            display: true,
-                            labelString: "総取引額",
-                            fontSize: 10
-                        },
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
-                },
-                onClick: function(e) {
-                    var activePoints = window.myChart.getElementAtEvent(e);
-                    if (Object.keys(activePoints).length > 0) {
-                        var valueIdx = activePoints[0]._datasetIndex;
-                        var meta = config.data.datasets[valueIdx];
-                        meta.backgroundColor = flipAlpha(meta.backgroundColor);
-                        meta.borderColor = flipAlpha(meta.borderColor);
+                        onClick: function(e, legendItem) {
+                            var meta = config.data.datasets[legendItem.datasetIndex];
+                            meta.backgroundColor = flipAlpha(meta.backgroundColor);
+                            meta.borderColor = flipAlpha(meta.borderColor);
 
-                        window.myChart.update();
+                            window.myChart.update();
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: "時間",
+                                fontSize: 10
+                            },
+                            type: 'time',
+                            time: {
+                                parser: timeFormat,
+                                min: json.graph_min,
+                                max: json.graph_max
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: "総取引額",
+                                fontSize: 10
+                            },
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    },
+                    onClick: function(e) {
+                        var activePoints = window.myChart.getElementAtEvent(e);
+                        if (Object.keys(activePoints).length > 0) {
+                            var valueIdx = activePoints[0]._datasetIndex;
+                            var meta = config.data.datasets[valueIdx];
+                            meta.backgroundColor = flipAlpha(meta.backgroundColor);
+                            meta.borderColor = flipAlpha(meta.borderColor);
+
+                            window.myChart.update();
+                        }
                     }
                 }
-            }
-        };
-        var myChart = new Chart(ctx, config);
-        window.myChart = myChart
-    }).catch((err) => {
-        throw new Error(err)
-    })
+            };
+            window.myChart = new Chart(ctx, config);
+        })
+        .catch((err) => {
+            throw new Error(err)
+        })
 };
 
 </script>
