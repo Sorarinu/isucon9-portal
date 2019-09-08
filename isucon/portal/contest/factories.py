@@ -50,8 +50,7 @@ class JobFactory(factory.DjangoModelFactory):
     stdout = factory.Faker('sentence')
     stderr = factory.Faker('sentence')
 
-    created_at = factory.Sequence(lambda idx: timezone.now()-timezone.timedelta(minutes=random.randint(10, 180)))
-    updated_at = factory.Sequence(lambda idx: timezone.now()-timezone.timedelta(minutes=random.randint(10, 180)))
+    finished_at = factory.Sequence(lambda idx: timezone.now().replace(hour=1) + timezone.timedelta(minutes=idx%560))
 
     is_passed = factory.fuzzy.FuzzyChoice([True, False])
     status = factory.fuzzy.FuzzyChoice([models.Job.DONE])
@@ -61,12 +60,6 @@ class JobFactory(factory.DjangoModelFactory):
         if self.status == models.Job.ABORTED:
             return "Benchmark timeout"
         return ""
-
-    @factory.lazy_attribute
-    def finished_at(self):
-        if self.status == models.Job.DONE:
-            return self.updated_at
-        return None
 
     @factory.lazy_attribute
     def score(self):

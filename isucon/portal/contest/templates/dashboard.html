@@ -112,75 +112,7 @@ function flipAlpha(colorString) {
 }
 
 var timeFormat = "YYYY-MM-DD HH:mm:ss";
-var config = {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [],
-    },
-    options: {
-        responsiveAnimationDuration: 0,
-        animation: {
-            duration: 0
-        },
-        tooltips: {
-            mode: 'nearest'
-        },
-        hover: {
-            mode: 'nearest',
-            animationDuration: 0
-        },
-        legend: {
-            position: 'bottom',
-            labels: {
-                boxWidth: 5
-            },
-            onClick: function(e, legendItem) {
-                var meta = config.data.datasets[legendItem.datasetIndex];
-                meta.backgroundColor = flipAlpha(meta.backgroundColor);
-                meta.borderColor = flipAlpha(meta.borderColor);
 
-                window.myChart.update();
-            }
-        },
-        scales: {
-            xAxes: [{
-                scaleLabel: {
-                    display: true,
-                    labelString: "時間",
-                    fontSize: 10
-                },
-                type: 'time',
-                time: {
-                    parser: timeFormat,
-                    min: "{{ graph_min }}",
-                    max: "{{ graph_max }}"
-                }
-            }],
-            yAxes: [{
-                scaleLabel: {
-                    display: true,
-                    labelString: "総取引額",
-                    fontSize: 10
-                },
-                ticks: {
-                    beginAtZero: true
-                }
-            }]
-        },
-        onClick: function(e) {
-            var activePoints = window.myChart.getElementAtEvent(e);
-            if (Object.keys(activePoints).length > 0) {
-                var valueIdx = activePoints[0]._datasetIndex;
-                var meta = config.data.datasets[valueIdx];
-                meta.backgroundColor = flipAlpha(meta.backgroundColor);
-                meta.borderColor = flipAlpha(meta.borderColor);
-
-                window.myChart.update();
-            }
-        }
-    }
-};
 
 window.onload = function() {
     let headers = {
@@ -189,10 +121,77 @@ window.onload = function() {
     const response = fetch('/contest/graph/', {headers: headers}).then((res) => res.json()).then((json) => {
         var ctx = document.getElementById('myChart').getContext('2d');
 
-        config.datasets = json.graph_datasets
-        config.options.scales.xAxes[0].time.min = json.graph_min
-        config.options.scales.xAxes[0].time.max = json.graph_max
+        console.log(json)
 
+        var config = {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: json.graph_datasets
+            },
+            options: {
+                responsiveAnimationDuration: 0,
+                animation: {
+                    duration: 0
+                },
+                tooltips: {
+                    mode: 'nearest'
+                },
+                hover: {
+                    mode: 'nearest',
+                    animationDuration: 0
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 5
+                    },
+                    onClick: function(e, legendItem) {
+                        var meta = config.data.datasets[legendItem.datasetIndex];
+                        meta.backgroundColor = flipAlpha(meta.backgroundColor);
+                        meta.borderColor = flipAlpha(meta.borderColor);
+
+                        window.myChart.update();
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "時間",
+                            fontSize: 10
+                        },
+                        type: 'time',
+                        time: {
+                            parser: timeFormat,
+                            min: json.graph_min,
+                            max: json.graph_max
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "総取引額",
+                            fontSize: 10
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                onClick: function(e) {
+                    var activePoints = window.myChart.getElementAtEvent(e);
+                    if (Object.keys(activePoints).length > 0) {
+                        var valueIdx = activePoints[0]._datasetIndex;
+                        var meta = config.data.datasets[valueIdx];
+                        meta.backgroundColor = flipAlpha(meta.backgroundColor);
+                        meta.borderColor = flipAlpha(meta.borderColor);
+
+                        window.myChart.update();
+                    }
+                }
+            }
+        };
         var myChart = new Chart(ctx, config);
         window.myChart = myChart
     }).catch((err) => {
