@@ -119,7 +119,7 @@ class ServerAddForm(forms.ModelForm):
         return cleaned_data
 
     def clean_hostname(self):
-        hostname = self.cleaned_data['hostname']
+        hostname = self.cleaned_data.get("hostname", "")
 
         if len(hostname) == 0:
             raise forms.ValidationError("ホスト名が空です")
