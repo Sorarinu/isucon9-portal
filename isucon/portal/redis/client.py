@@ -46,7 +46,6 @@ class LineChart:
             y=job.score
         ))
 
-
 class TeamGraphData:
     """あるチームのグラフデータ"""
 

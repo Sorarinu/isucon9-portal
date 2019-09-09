@@ -27,7 +27,7 @@
 
   <ul class="pagination-list">
 
-    {% for link_page in page_obj.paginator.page_range %}
+    {% for link_page in show_pages %}
         {% if link_page %}
             {% if link_page == page_obj.number %}
                 <li class="disabled">
