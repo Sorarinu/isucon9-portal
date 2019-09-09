@@ -259,7 +259,6 @@
 
   $("#icon-save").click(function(){
     iconCroppie.croppie('result', {type: 'blob', size: 'original', format: 'png', quality: 1, circle: false }).then(function(blob){
-      console.log(blob);
       var fd = new FormData();
       fd.append("icon", blob, "icon-cropped.png");
 

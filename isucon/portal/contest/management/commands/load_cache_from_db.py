@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.redis.client import RedisClient
 
 
 logger = logging.getLogger("load_cache_from_db")

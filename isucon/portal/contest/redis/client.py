@@ -8,7 +8,7 @@ import redis
 from isucon.portal import utils as portal_utils
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Job, Score
-from isucon.portal.redis.color import iter_colors
+from isucon.portal.contest.redis.color import iter_colors
 
 
 @contextmanager
@@ -18,6 +18,8 @@ def lock_with_redis(conn, lock_name, use_lock=True):
             lock = conn.lock(lock_name)
             lock.acquire(blocking=True)
             yield lock
+        except Exception as e:
+            print(e)
         finally:
             lock.release()
     else:

@@ -12,7 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 from isucon.portal.contest.models import Server, Job, Score
-from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.redis.client import RedisClient
 from isucon.portal import utils as portal_utils
 
 def get_base_context(user):
@@ -30,15 +30,16 @@ def get_participate_at(request):
         participate_at = parse_datetime(participate_at_str).date()
     except ValueError:
         participate_at = datetime.date.today()
+        participate_at_str = participate_at.strftime('%Y-%m-%d')
 
     request.session['participate_at'] = participate_at_str
 
-    return participate_at
+    return participate_at, participate_at_str
 
 @staff_member_required
 def dashboard(request):
     context = get_base_context(request.user)
-    participate_at = get_participate_at(request)
+    participate_at, participate_at_str = get_participate_at(request)
 
     try:
         top_n = int(request.GET.get("graph_teams", settings.RANKING_TOPN))
@@ -47,19 +48,10 @@ def dashboard(request):
 
     top_teams = Score.objects.passed().filter(team__participate_at=participate_at)[:30]
 
-    # topN チームID配列を用意
-    ranking = [row["team__id"] for row in
-                Score.objects.passed().filter(team__participate_at=participate_at).values("team__id")[:top_n]]
-
-    # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
-    client = RedisClient()
-    graph_datasets, graph_min, graph_max = client.get_graph_data_for_staff(participate_at, ranking)
-
     context.update({
         "top_teams": top_teams,
-        "graph_min_label": graph_min,
-        "graph_max_label": graph_max,
-        "graph_datasets": graph_datasets,
+        "graph_participate_at": participate_at_str,
+        "graph_topn": top_n
     })
 
     return render(request, "staff/dashboard.html", context)
@@ -130,3 +122,32 @@ def job_detail(request, pk):
     })
 
     return render(request, "staff/job_detail.html", context)
+
+@staff_member_required
+def graph(request):
+    if not request.is_ajax():
+        return HttpResponse("このエンドポイントはAjax専用です", status=400)
+
+    # participate_at, top_n は dashboardにより必ず何かしらの値が設定される
+    participate_at = parse_datetime(request.GET.get("participate_at")).date()
+    top_n = int(request.GET.get("top_n"))
+
+    team = request.user.team
+
+    ranking = [row["team__id"] for row in
+                    Score.objects.passed().filter(team__participate_at=team.participate_at).values("team__id")[:top_n]]
+
+    client = RedisClient()
+    graph_datasets, graph_min, graph_max = client.get_graph_data_for_staff(participate_at, ranking)
+
+    data = {
+        'graph_datasets': graph_datasets,
+        'graph_min': graph_min,
+        'graph_max': graph_max,
+    }
+
+    return JsonResponse(
+        data, status = 200
+    )
+
+

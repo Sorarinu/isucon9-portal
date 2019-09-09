@@ -50,9 +50,9 @@ class JobFactory(factory.DjangoModelFactory):
     stdout = factory.Faker('sentence')
     stderr = factory.Faker('sentence')
 
-    finished_at = factory.Sequence(lambda idx: timezone.now().replace(hour=1) + timezone.timedelta(minutes=idx%560))
+    finished_at = factory.Sequence(lambda idx: timezone.now().replace(hour=1) + timezone.timedelta(minutes=(idx*60)%560))
 
-    is_passed = factory.fuzzy.FuzzyChoice([True, False])
+    is_passed = factory.fuzzy.FuzzyChoice([True, True, True, True, False])
     status = factory.fuzzy.FuzzyChoice([models.Job.DONE])
 
     @factory.lazy_attribute

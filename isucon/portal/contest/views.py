@@ -15,7 +15,7 @@ from isucon.portal.contest.models import Server, Job, Score
 from isucon.portal.contest.exceptions import TeamScoreDoesNotExistError
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
-from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.redis.client import RedisClient
 
 
 def get_base_context(user):
