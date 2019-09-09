@@ -116,7 +116,7 @@ window.onload = function() {
     const headers = {
         'X-Requested-With': 'XMLHttpRequest'
     }
-    const response = fetch('/contest/graph/', {headers: headers})
+    fetch('/contest/graph/', {headers: headers})
         .then((res) => {
             if (res.status !== 200) {
                 throw new Error('グラフデータの取得に失敗しました')
@@ -124,11 +124,11 @@ window.onload = function() {
             return res.json()
         })
         .then((json) => {
-            var ctx = document.getElementById('myChart').getContext('2d');
+            let ctx = document.getElementById('myChart').getContext('2d');
 
             console.log(json)
 
-            var config = {
+            let config = {
                 type: 'line',
                 data: {
                     labels: [],
@@ -152,7 +152,7 @@ window.onload = function() {
                             boxWidth: 5
                         },
                         onClick: function(e, legendItem) {
-                            var meta = config.data.datasets[legendItem.datasetIndex];
+                            let meta = config.data.datasets[legendItem.datasetIndex];
                             meta.backgroundColor = flipAlpha(meta.backgroundColor);
                             meta.borderColor = flipAlpha(meta.borderColor);
 
@@ -185,10 +185,10 @@ window.onload = function() {
                         }]
                     },
                     onClick: function(e) {
-                        var activePoints = window.myChart.getElementAtEvent(e);
+                        let activePoints = window.myChart.getElementAtEvent(e);
                         if (Object.keys(activePoints).length > 0) {
-                            var valueIdx = activePoints[0]._datasetIndex;
-                            var meta = config.data.datasets[valueIdx];
+                            let valueIdx = activePoints[0]._datasetIndex;
+                            let meta = config.data.datasets[valueIdx];
                             meta.backgroundColor = flipAlpha(meta.backgroundColor);
                             meta.borderColor = flipAlpha(meta.borderColor);
 
