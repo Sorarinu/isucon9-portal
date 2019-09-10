@@ -1,4 +1,4 @@
-
+from itertools import cycle
 
 colors = [
     "rgba(244,67,54,{alpha})",
@@ -61,7 +61,5 @@ colors = [
 ]
 
 def iter_colors():
-    idx = 0
-    while True:
-        yield (colors[idx].format(alpha=0.2), colors[idx].format(alpha=1))
-        idx = (idx + 1) % len(colors)
+    for color in cycle(colors):
+        yield (color.format(alpha=0.2), color.format(alpha=1))

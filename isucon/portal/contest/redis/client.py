@@ -18,8 +18,6 @@ def lock_with_redis(conn, lock_name, use_lock=True):
             lock = conn.lock(lock_name)
             lock.acquire(blocking=True)
             yield lock
-        except Exception as e:
-            print(e)
         finally:
             lock.release()
     else:
