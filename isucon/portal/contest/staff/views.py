@@ -21,37 +21,52 @@ def get_base_context(user):
     }
 
 def get_participate_at(request):
+    """セッションに格納された日付文字列を取得する"""
+    if 'participate_at' in request.session:
+        participate_at_str = request.session.get('participate_at')
+    else:
+        return datetime.date.today()
+
+    try:
+        return parse_datetime(participate_at_str).date()
+    except ValueError:
+        return datetime.date.today()
+
+def store_graph_params(request):
+    """セッションにグラフ表示パラメータを設定する"""
+    # participate_at(グラフが認識する日付) の設定
+    # NOTE: 日時型がJSON Serializableでないので、文字列として一旦格納し、取得時に変換するようにする
     if 'participate_at' in request.GET:
         participate_at_str = request.GET.get('participate_at', '')
     else:
         participate_at_str = request.session.get('participate_at', '')
 
-    try:
-        participate_at = parse_datetime(participate_at_str).date()
-    except ValueError:
-        participate_at = datetime.date.today()
-        participate_at_str = participate_at.strftime('%Y-%m-%d')
-
     request.session['participate_at'] = participate_at_str
 
-    return participate_at, participate_at_str
+    # graph_teams(グラフに表示するチームの数) の設定
+    try:
+        if 'graph_teams' in request.GET:
+            graph_teams_str = request.GET.get("graph_teams", settings.RANKING_TOPN)
+        else:
+            graph_teams_str = request.session.get('graph_teams', '')
+        graph_teams = int(graph_teams_str)
+    except ValueError:
+        graph_teams = settings.RANKING_TOPN
+
+    request.session['graph_teams'] = graph_teams
 
 @staff_member_required
 def dashboard(request):
     context = get_base_context(request.user)
-    participate_at, participate_at_str = get_participate_at(request)
+    store_graph_params(request)
 
-    try:
-        top_n = int(request.GET.get("graph_teams", settings.RANKING_TOPN))
-    except ValueError:
-        top_n = settings.RANKING_TOPN
+    participate_at = get_participate_at(request)
+    print("participate_at: type={}, value={}".format(type(participate_at), participate_at))
 
     top_teams = Score.objects.passed().filter(team__participate_at=participate_at)[:30]
 
     context.update({
         "top_teams": top_teams,
-        "graph_participate_at": participate_at_str,
-        "graph_topn": top_n
     })
 
     return render(request, "staff/dashboard.html", context)
@@ -61,6 +76,8 @@ def dashboard(request):
 @staff_member_required
 def scores(request):
     context = get_base_context(request.user)
+    store_graph_params(request)
+
     participate_at = get_participate_at(request)
 
     context.update({
@@ -74,7 +91,6 @@ def scores(request):
 @staff_member_required
 def jobs(request):
     context = get_base_context(request.user)
-    participate_at = get_participate_at(request)
 
     def paginate_query(request, queryset, count):
         paginator = Paginator(queryset, count)
@@ -84,7 +100,7 @@ def jobs(request):
         except PageNotAnInteger:
             page_obj = paginator.page(1)
         except EmptyPage:
-            page_obj = paginatot.page(paginator.num_pages)
+            page_obj = paginator.page(paginator.num_pages)
 
         return page_obj
 
@@ -114,7 +130,6 @@ def jobs(request):
 @staff_member_required
 def job_detail(request, pk):
     context = get_base_context(request.user)
-    participate_at = get_participate_at(request)
 
     job = get_object_or_404(Job, pk=pk)
     context.update({
@@ -128,14 +143,14 @@ def graph(request):
     if not request.is_ajax():
         return HttpResponse("このエンドポイントはAjax専用です", status=400)
 
-    # participate_at, top_n は dashboardにより必ず何かしらの値が設定される
-    participate_at = parse_datetime(request.GET.get("participate_at")).date()
-    top_n = int(request.GET.get("top_n"))
+    # participate_at, graph_teams は dashboardにより必ず何かしらの値が設定される
+    participate_at = get_participate_at(request)
+    graph_teams = request.session['graph_teams']
 
     team = request.user.team
 
     ranking = [row["team__id"] for row in
-                    Score.objects.passed().filter(team__participate_at=team.participate_at).values("team__id")[:top_n]]
+                    Score.objects.passed().filter(team__participate_at=team.participate_at).values("team__id")[:graph_teams]]
 
     client = RedisClient()
     graph_datasets, graph_min, graph_max = client.get_graph_data_for_staff(participate_at, ranking)

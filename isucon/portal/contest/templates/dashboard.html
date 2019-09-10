@@ -112,15 +112,9 @@ function flipAlpha(colorString) {
 }
 
 window.onload = function() {
-    const timeFormat = "YYYY-MM-DD HH:mm:ss";
-    const headers = {
+    fetch("{{ request.path }}graph/", {headers: {
         'X-Requested-With': 'XMLHttpRequest'
-    }
-    {% if not user.is_staff %}const path = "/contest/graph/"{% else %}const params = new URLSearchParams()
-    params.set('participate_at', "{{ graph_participate_at }}")
-    params.set('top_n', {{ graph_topn }})
-    const path = "/contest/staff/graph/?" + params.toString(){% endif %}
-    fetch(path, {headers: headers})
+    }})
         .then((res) => {
             if (res.status !== 200) {
                 throw new Error('グラフデータの取得に失敗しました')
@@ -170,7 +164,7 @@ window.onload = function() {
                             },
                             type: 'time',
                             time: {
-                                parser: timeFormat,
+                                parser: "YYYY-MM-DD HH:mm:ss",
                                 min: json.graph_min,
                                 max: json.graph_max
                             }
