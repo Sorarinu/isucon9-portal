@@ -3,7 +3,7 @@ README.md
 .git/
 media/icons/*
 docs/
-kubernates/
+kubernetes/
 nginx/
 logs/
 data/

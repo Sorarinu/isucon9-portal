@@ -1,25 +1,26 @@
-all: nginx app
+all: image
 
-.PHONY: nginx app apply delete
+.PHONY: image apply delete restart
 
-nginx: nginx/Dockerfile
+image:
+	docker build -t isucon/portal-app .
 	cd nginx && docker build -t isucon/portal-nginx .
 
-app: Dockerfile
-	docker build -t isucon/portal-app .
-
 apply:
-	kubectl apply -f kubernates/00-*.yml
-	kubectl apply -f kubernates/01-*.yml
-	kubectl apply -f kubernates/02-*.yml
-	kubectl apply -f kubernates/03-*.yml
-	kubectl apply -f kubernates/04-*.yml
-	kubectl apply -f kubernates/05-*.yml
+	kubectl apply -f kubernetes/00-*.yml
+	kubectl apply -f kubernetes/01-*.yml
+	kubectl apply -f kubernetes/02-*.yml
+	kubectl apply -f kubernetes/03-*.yml
+	kubectl apply -f kubernetes/04-*.yml
+	kubectl apply -f kubernetes/05-*.yml
 
 delete:
-	kubectl delete -f kubernates/05-*.yml
-	kubectl delete -f kubernates/04-*.yml
-	kubectl delete -f kubernates/03-*.yml
-	kubectl delete -f kubernates/02-*.yml
-	kubectl delete -f kubernates/01-*.yml
-	kubectl delete -f kubernates/00-*.yml
+	kubectl delete -f kubernetes/05-*.yml
+	kubectl delete -f kubernetes/04-*.yml
+	kubectl delete -f kubernetes/03-*.yml
+	kubectl delete -f kubernetes/02-*.yml
+	kubectl delete -f kubernetes/01-*.yml
+	kubectl delete -f kubernetes/00-*.yml
+
+restart:
+	kubectl rollout restart deployment/portal-app
