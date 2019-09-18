@@ -38,7 +38,7 @@ DATABASES_POSTGRES = {
         'NAME': 'isucon',
         'USER': 'isucon',
         'PASSWORD': 'password',
-        'HOST': 'postgres',
+        'HOST': os.environ.get('POSTGRES_HOST', "postgres"),
         'PORT': '5432',
         'ATOMIC_REQUESTS': True,
     }
@@ -54,7 +54,7 @@ elif DATABASE_TYPE == "postgres":
 else:
     raise ValueError("Invalid DJANGO_DATABASE_TYPE '{}'".format(DATABASE_TYPE))
 
-REDIS_HOST = 'redis'
+REDIS_HOST = os.environ.get('REDIS_HOST', "redis")
 REDIS_RANKING_TOPN = os.getenv('REDIS_RANKING_TOPN', 30)
 
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get("GITHUB_KEY", "")
