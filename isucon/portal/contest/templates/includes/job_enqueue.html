@@ -44,7 +44,6 @@ $(function(){
       var button = this;
       button.disabled = true;
       $.post("{% url "job_enqueue" %}", {}).done(function(data) {
-        console.log(data);
         $(modalId).find(".notification").addClass("is-success");
         $(modalId).find(".notification").text("Enqueue successfully!!");
         window.setTimeout(() => {

@@ -15,7 +15,7 @@ from isucon.portal.contest.models import Server, Job, Score
 from isucon.portal.contest.exceptions import TeamScoreDoesNotExistError
 
 from isucon.portal.contest.forms import TeamForm, UserForm, ServerTargetForm, UserIconForm, ServerAddForm
-from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.redis.client import RedisClient
 
 
 def get_base_context(user):
@@ -39,25 +39,8 @@ def get_base_context(user):
 def dashboard(request):
     context = get_base_context(request.user)
 
-    participate_at = request.user.team.participate_at
-
-    # NOTE: team.participate_at の日付の、CONTEST_START_TIME-10minutes ~ CONTEST_END_TIME+10minutes にするようにmin, maxを渡す
-    graph_start_at = datetime.datetime.combine(participate_at, settings.CONTEST_START_TIME) - datetime.timedelta(minutes=10)
-    graph_start_at = graph_start_at.replace(tzinfo=portal_utils.jst)
-
-    graph_end_at = datetime.datetime.combine(participate_at, settings.CONTEST_END_TIME) + datetime.timedelta(minutes=10)
-    graph_end_at = graph_end_at.replace(tzinfo=portal_utils.jst)
-
     recent_jobs = Job.objects.of_team(team=request.user.team).order_by("-created_at")[:10]
     top_teams = Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).select_related("team")[:30]
-
-    # topN チームID配列を用意
-    ranking = [row["team__id"] for row in
-                Score.objects.passed().filter(team__participate_at=request.user.team.participate_at).values("team__id")[:settings.RANKING_TOPN]]
-
-    # キャッシュ済みグラフデータの取得 (topNのみ表示するデータ)
-    client = RedisClient()
-    graph_labels, graph_datasets = client.get_graph_data(request.user.team, ranking, is_last_spurt=context['is_last_spurt'])
 
     # チームのスコアを取得
     try:
@@ -71,11 +54,7 @@ def dashboard(request):
     context.update({
         "recent_jobs": recent_jobs,
         "top_teams": top_teams,
-        "team_score": team_score,
-        "graph_min_label": portal_utils.normalize_for_graph_label(graph_start_at),
-        "graph_max_label": portal_utils.normalize_for_graph_label(graph_end_at),
-        "graph_labels": graph_labels,
-        "graph_datasets": graph_datasets,
+        "team_score": team_score
     })
 
     return render(request, "dashboard.html", context)
@@ -271,3 +250,30 @@ def update_user_icon(request):
             {}, status = 200
         )
     return redirect("team_settings")
+
+
+@team_is_authenticated
+@team_is_now_on_contest
+def graph(request):
+    if not request.is_ajax():
+        return HttpResponse("このエンドポイントはAjax専用です", status=400)
+
+    context = get_base_context(request.user)
+    team = request.user.team
+
+    ranking = [row["team__id"] for row in
+                    Score.objects.passed().filter(team__participate_at=team.participate_at).values("team__id")[:settings.RANKING_TOPN]]
+
+    client = RedisClient()
+    graph_datasets, graph_min, graph_max = client.get_graph_data(team, ranking, is_last_spurt=context['is_last_spurt'])
+
+    data = {
+        'graph_datasets': graph_datasets,
+        'graph_min': graph_min,
+        'graph_max': graph_max,
+    }
+
+    return JsonResponse(
+        data, status = 200
+    )
+

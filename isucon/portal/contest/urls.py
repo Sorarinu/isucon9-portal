@@ -11,6 +11,7 @@ urlpatterns = [
     path('scores/', views.scores, name="scores"),
     path('servers/', views.servers, name="servers"),
     path('servers/<int:pk>/', views.delete_server, name="delete_server"),
+    path('graph/', views.graph, name="graph"),
     path('teams/', views.teams, name="teams"),
     path('settings/team/', views.team_settings, name="team_settings"),
     path('settings/icon/', views.update_user_icon, name="update_user_icon"),

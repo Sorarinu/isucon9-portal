@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 from isucon.portal.authentication.models import Team
 from isucon.portal.contest.models import Server, Job, Score
-from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.redis.client import RedisClient
 from isucon.portal.contest.notify import notify_abort
 
 __all__ = ("create_score", "update_score", "set_default_benchmark_target_server")
