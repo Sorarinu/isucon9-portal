@@ -2,3 +2,8 @@ README.md
 .gitignore
 .git/
 media/icons/*
+docs/
+kubernates/
+nginx/
+logs/
+data/
