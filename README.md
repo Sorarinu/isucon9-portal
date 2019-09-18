@@ -14,7 +14,7 @@ python manage.py runserver
 ```
 
 
-## kubernates (minikube)
+## kubernetes (minikube)
 
 ```bash
 make
