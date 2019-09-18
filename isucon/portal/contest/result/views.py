@@ -7,7 +7,7 @@ from isucon.portal.authentication.decorators import team_is_authenticated
 from isucon.portal.contest.decorators import show_result_enabled
 from isucon.portal.contest.models import Job, Score
 from isucon.portal import utils as portal_utils
-from isucon.portal.redis.client import RedisClient
+from isucon.portal.contest.redis.client import RedisClient
 
 def get_base_context(user):
     return {
