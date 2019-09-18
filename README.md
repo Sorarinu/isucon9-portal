@@ -14,6 +14,13 @@ python manage.py runserver
 ```
 
 
+## kubernates (minikube)
+
+```bash
+make
+make apply
+```
+
 ## docker-compose
 
 ```bash
