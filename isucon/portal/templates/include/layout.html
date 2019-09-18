@@ -102,6 +102,10 @@
                 <aside class="menu">
 
 
+                    {% if show_result_enabled %}
+                      {% include "include/result_menu.html" %}
+                    {% endif %}
+
                     {% if user.team %}
                       {% include "include/team_menu.html" %}
                     {% endif %}
