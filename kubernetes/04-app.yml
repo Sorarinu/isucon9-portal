@@ -19,7 +19,10 @@ spec:
     matchLabels:
       app: portal-app
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -73,6 +76,13 @@ spec:
         ports:
         - containerPort: 5000
           name: portal-app
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+            httpHeaders:
+            - name: Host
+              value: localhost
         volumeMounts:
         - name: static-volume
           mountPath: /opt/app/static

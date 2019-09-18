@@ -1,12 +1,10 @@
-all: nginx app
+all: image
 
-.PHONY: nginx app apply delete
+.PHONY: image apply delete restart
 
-nginx: nginx/Dockerfile
-	cd nginx && docker build -t isucon/portal-nginx .
-
-app: Dockerfile
+image:
 	docker build -t isucon/portal-app .
+	cd nginx && docker build -t isucon/portal-nginx .
 
 apply:
 	kubectl apply -f kubernetes/00-*.yml
@@ -23,3 +21,6 @@ delete:
 	kubectl delete -f kubernetes/02-*.yml
 	kubectl delete -f kubernetes/01-*.yml
 	kubectl delete -f kubernetes/00-*.yml
+
+restart:
+	kubectl rollout restart deployment/portal-app

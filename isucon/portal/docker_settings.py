@@ -13,7 +13,7 @@ SECRET_KEY = '^lz^(m-uy*2htu^fvolbhj!(pmu$x4*c@30s2i)70e=zt_vyai'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get('DJANGO_DEBUG', "true").lower() == "true" else False
 
-ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST', "*")]
+ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST', "*"), "localhost"]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
