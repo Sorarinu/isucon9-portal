@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  django:
+  portal-app:
     restart: always
     build: ./
     depends_on:
@@ -25,7 +25,7 @@ services:
     restart: always
     build: ./
     depends_on:
-      - django
+      - portal-app
     environment:
       - DJANGO_DATABASE_TYPE=postgres
     command: python manage.py discard_forever
@@ -42,7 +42,7 @@ services:
     restart: always
     image: nginx:latest
     depends_on:
-      - django
+      - portal-app
     ports:
       - "127.0.0.1:8000:80"
     volumes:
