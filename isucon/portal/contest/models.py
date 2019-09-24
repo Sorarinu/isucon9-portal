@@ -116,8 +116,8 @@ class JobManager(models.Manager):
             # 報告したベンチマーカの紐づいているチーム、かつWAITING状態のジョブを取得
             queryset = self.get_queryset().select_for_update().filter(status=Job.WAITING, team__benchmarker=benchmarker)
         else:
-            # ベンチマーカーがチーム気にせずベンチマークを行う場合
-            queryset = self.get_queryset().select_for_update().filter(status=Job.WAITING)
+            # ベンチマーカーが割り当てられてないチームのベンチマークを行う場合
+            queryset = self.get_queryset().select_for_update().filter(status=Job.WAITING, team__benchmarker__isnull=True)
 
         job = queryset.order_by("created_at").first()
         if job is None:
