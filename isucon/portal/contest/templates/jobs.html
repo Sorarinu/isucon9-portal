@@ -34,7 +34,7 @@
                                 <th>Lang</th>
                                 {% endif %}
                                 <th>JobId</th>
-                                <th>Total transaction [ISUCOIN]</th>
+                                <th>Total Score</th>
                                 <th>Status</th>
                                 <th>Result</th>
                                 <th>UpdatedAt</th>
@@ -53,7 +53,7 @@
                                     <td class="has-text-right">{{ job.id }}</td>
                                     <td class="has-text-right">
                                       {% if job.is_finished %}
-                                        {{ job.score|intcomma }} ｲｽｺｲﾝ
+                                        {{ job.score|intcomma }}
                                       {% endif %}
                                     </td>
                                     <td>

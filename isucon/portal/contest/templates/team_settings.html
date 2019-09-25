@@ -113,26 +113,6 @@
           </div>
           {% endif %}
 
-          {% if is_registration_available and not is_now_on_contest %}
-            {{ form.alibaba_account.as_hidden }}
-          {% else %}
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Alibaba Cloud Account ID</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  {{ form.alibaba_account|add_class:"input" }}
-                </p>
-                {% if form.alibaba_account.errors %}
-                  <p class="help is-danger">{{ form.alibaba_account.errors.0 }}</p>
-                {% endif %}
-              </div>
-
-            </div>
-          </div>
-          {% endif %}
 
           <button type="submit" class="button is-primary">保存</button>
 

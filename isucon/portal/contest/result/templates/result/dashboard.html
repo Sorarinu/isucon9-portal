@@ -32,8 +32,8 @@
                                 <th>Rank</th>
                                 <th>Id</th>
                                 <th>Name</th>
-                                <th>Latest Total transaction [ISUCOIN]</th>
-                                <th>Best Total transaction [ISUCOIN]</th>
+                                <th>Latest Score</th>
+                                <th>Best Score</th>
                                 <th>FinishTime</th>
                             </tr>
                         </thead>
@@ -43,8 +43,8 @@
                                 <td class="has-text-right">{{ forloop.counter }}</td>
                                 <td class="has-text-right">{{ score.team.id }}</td>
                                 <td>{{ score.team }}</td>
-                                <td class="has-text-right">{{ score.latest_score|intcomma }} ｲｽｺｲﾝ</td>
-                                <td class="has-text-right">{{ score.best_score|intcomma }} ｲｽｺｲﾝ</td>
+                                <td class="has-text-right">{{ score.latest_score|intcomma }}</td>
+                                <td class="has-text-right">{{ score.best_score|intcomma }}</td>
                                 <td>{{ score.latest_scored_at|date:"H:i:s" }}</td>
                             </tr>
                             {% endfor %}
