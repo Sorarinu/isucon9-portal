@@ -200,7 +200,7 @@ CONTEST_DATES = [
 
 # 時刻
 CONTEST_START_TIME = portal_utils.get_jst_time(10, 0, 0)
-CONTEST_END_TIME = portal_utils.get_jst_time(18, 0, 0)
+CONTEST_END_TIME = portal_utils.get_jst_time(23, 0, 0) # FIXME: 事前回答会
 
 # Result
 SHOW_RESULT_AFTER = portal_utils.get_jst_datetime(2019, 10, 5, 22, 0, 0)
