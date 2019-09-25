@@ -7,8 +7,6 @@ from isucon.portal.authentication.decorators import is_registration_available
 from isucon.portal.authentication.models import Team, User
 from isucon.portal.contest.models import Server
 
-alibaba_account_validator = RegexValidator(r'^\d{16}$', "Invalid Account ID Format")
-
 def global_ip_validator(value):
     try:
         address = ipaddress.ip_address(value)
@@ -31,7 +29,7 @@ def private_ip_validator(value):
 class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
-        fields = ("name", "participate_at", "alibaba_account", )
+        fields = ("name", "participate_at", )
 
     participate_at = forms.DateField(
         label="参加日選択",
@@ -39,7 +37,6 @@ class TeamForm(forms.ModelForm):
         widget=forms.Select(choices=Team.PARTICIPATE_AT_CHOICES),
         required=True,
     )
-    alibaba_account = forms.CharField(required=False, validators=[alibaba_account_validator], )
 
     def __init__(self, *args, **kwargs):
         self.is_registration_available = is_registration_available()
@@ -112,7 +109,7 @@ class ServerAddForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-    
+
         if Server.objects.filter(team=self.team).count() >= 3:
             raise forms.ValidationError("すでに3台登録されています")
 

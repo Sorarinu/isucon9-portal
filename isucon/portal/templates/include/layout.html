@@ -72,15 +72,6 @@
         </article>
         {% endfor %}
 
-
-        {% if user.team and not user.team.alibaba_account and not is_registration_available %}
-        <article class="message is-warning">
-          <div class="message-body">
-            Alibaba CloudのAccount IDが設定されていません。<a href="{% url "team_settings" %}">Team Settings</a>から設定してください。
-          </div>
-        </article>
-        {% endif %}
-
         {% if user.team and is_now_on_contest and servers.count == 0 %}
         <article class="message is-warning">
           <div class="message-body">
