@@ -2,11 +2,11 @@
 Description=ISUCON9 Portal
 Requires=portal.service
 [Service]
-EnvironmentFile=-/opt/portal/.env
-WorkingDirectory=/opt/portal
+EnvironmentFile=-/opt/isucon9-portal/.env
+WorkingDirectory=/opt/isucon9-portal
 Type=simple
-ExecStart=/usr/bin/docker-compose up --abort-on-container-exit
-ExecStop=/usr/bin/docker-compose stop
+ExecStart=/usr/local/bin/docker-compose up --abort-on-container-exit
+ExecStop=/usr/local/bin/docker-compose stop
 TimeoutStartSec=10min
 Restart=always
 RestartSec=10s

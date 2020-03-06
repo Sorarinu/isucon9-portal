@@ -188,22 +188,21 @@ LOGGING = {
 
 
 # 登録期間
-REGISTRATION_START_AT = portal_utils.get_jst_datetime(2019, 7, 1, 9, 0, 0)
-REGISTRATION_END_AT = portal_utils.get_jst_datetime(2019, 8, 25, 9, 0, 0)
+REGISTRATION_START_AT = portal_utils.get_jst_datetime(2020, 2, 25, 9, 0, 0)
+REGISTRATION_END_AT = portal_utils.get_jst_datetime(2020, 3, 4, 19, 0, 0)
 
 # コンテスト開催期間
 # 日付
 CONTEST_DATES = [
-    datetime.date(2019, 9, 25),
-    datetime.date(2019, 10, 5)
+    datetime.date(2020, 3, 5)
 ]
 
 # 時刻
 CONTEST_START_TIME = portal_utils.get_jst_time(10, 0, 0)
-CONTEST_END_TIME = portal_utils.get_jst_time(18, 0, 0)
+CONTEST_END_TIME = portal_utils.get_jst_time(18, 00, 0)
 
 # Result
-SHOW_RESULT_AFTER = portal_utils.get_jst_datetime(2019, 10, 5, 22, 0, 0)
+SHOW_RESULT_AFTER = portal_utils.get_jst_datetime(2020, 3, 5, 18, 10, 0)
 
 # Github認証に使うトークン
 # TODO: 入れ替える
